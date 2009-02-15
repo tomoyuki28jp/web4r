@@ -1,0 +1,15 @@
+(with-shtml-file ("common/template.shtml")
+  :title (title/ "Show " cname)
+  :body (body/
+         (aif ins
+              (progn
+                (table/
+                 (loop for s in slots do
+                       (tr/ (th/ (slot-label s))
+                            (td/ (slot-display-value it s :nl->br t)))))
+                (p/ (a/ :href (w/p (page-uri "edit" oid)) "Edit")
+                    (safe "&nbsp;|&nbsp;")
+                    (a/ :href (w/p (host-uri)) "Back")))
+              (progn
+                (p/ "That page doesn't exist!")
+                (p/ (a/ :href (w/p (host-uri)) "Back"))))))

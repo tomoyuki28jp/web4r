@@ -1,0 +1,37 @@
+Goal
+====================
+Enables users to develop web applications with the shortest codes in the world
+
+Note
+====================
+I started to learn Common Lisp in July 2008, and this is my first project on Lisp.
+That means I am still new to Common Lisp and might do odd things.
+Therefore, any comment, advice or suggestion will be appreciated.
+
+Special thanks
+====================
+Special thanks to the people in #lisp@freenode. They are kind and very helpful. 
+(I don't understand why some people claim the Lisp community is harsh on beginners.)
+
+Supported platforms
+====================
+Only tested with GNU/Linux x86-64 32bit SBCL 1.0.18 - 1.0.19
+
+Library dependencies
+====================
+cl-ppcre - http://www.weitz.de/cl-ppcre/
+usocket - http://common-lisp.net/project/usocket/
+bordeaux-threads - http://common-lisp.net/project/bordeaux-threads/
+cl-fad - http://www.weitz.de/cl-fad/
+clsql - http://clsql.b9.com/
+elephant - http://common-lisp.net/project/elephant/
+trivial-shell - http://common-lisp.net/project/trivial-shell/ 
+flexi-streams - http://www.weitz.de/flexi-streams/
+rfc2388-binary - http://common-lisp.net/project/ucw/repos/rfc2388-binary/
+cl-gd - http://weitz.de/cl-gd/
+
+Configuration
+====================
+Before you can load the web4r packages into your running lisp, you need to setup 
+the configuration file. Open /path/to/web4r/src/config.lisp and replace the path 
+of *web4r-dir* with your actual download path to the web4r directory.
