@@ -153,6 +153,14 @@
 ; --- Shtml -----------------------------------------------------
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  (defvar *web4r-dir*
+    (awhen (load-time-value #.*compile-file-pathname*)
+      (merge-pathnames "../" it))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defvar *shtml-dir* (merge-pathnames "shtml/" *web4r-dir*)))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *shtml* (make-hash-table)))
 
 (defmacro define-shtml (name shtml)

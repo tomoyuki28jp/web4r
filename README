@@ -29,9 +29,3 @@ trivial-shell - http://common-lisp.net/project/trivial-shell/
 flexi-streams - http://www.weitz.de/flexi-streams/
 rfc2388-binary - http://common-lisp.net/project/ucw/repos/rfc2388-binary/
 cl-gd - http://weitz.de/cl-gd/
-
-Configuration
-====================
-Before you can load the web4r packages into your running lisp, you need to setup 
-the configuration file. Open /path/to/web4r/src/config.lisp and replace the path 
-of *web4r-dir* with your actual download path to the web4r directory.

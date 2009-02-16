@@ -2,10 +2,7 @@
 
 (defpackage :web4r
   (:use :cl :usocket :cl-fad :elephant :flexi-streams)
-  (:export ; --- config.lisp ---
-           :*web4r-dir*
-           :*shtml-dir*
-           ; --- util.lisp ---
+  (:export ; --- util.lisp ---
            :*crlf*
            :*nl*
            :pm
@@ -80,6 +77,8 @@
            :deftags
            :br
            :br/
+           :*web4r-dir*
+           :*shtml-dir*
            :*shtml*
            :define-shtml
            :get-shtml

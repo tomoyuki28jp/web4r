@@ -15,7 +15,6 @@
   :components  ((:module :src
                          :components
                          ((:file "package")
-                          (:file "config")
                           (:file "util")
                           (:file "shtml")
                           (:file "validations")
