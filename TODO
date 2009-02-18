@@ -5,7 +5,6 @@
 - Write documents
 - Performance testing
 - Error checking and exception handling
-- Write web4r-mode for emacs
 - Support more lisp implementations
 
 * Pending issues

@@ -29,3 +29,8 @@ trivial-shell - http://common-lisp.net/project/trivial-shell/
 flexi-streams - http://www.weitz.de/flexi-streams/
 rfc2388-binary - http://common-lisp.net/project/ucw/repos/rfc2388-binary/
 cl-gd - http://weitz.de/cl-gd/
+
+Emacs Lisp
+====================
+web4r.el is elisp for editing web4r code in emacs
+git clone git://github.com/tomoyuki28jp/web4r-el.git 
