@@ -9,8 +9,8 @@
 
 * Pending issues
 - Dynamically assigning shtml path for load-shtml macro
-(It's gonna be much simpler if we just use a function or macro. I am doing complex 
- things to expand shtml codes, written in a separated file, with lexical binding.)
+(I am doing complex things to expand shtml codes, written in a separated file, 
+ with lexical binding. It's gonna be much simpler if we just use a function or macro.)
 
 * Ideas (low priority, might be implemented)
 - Rewrite the http server with iolib (non-blocking I/O) and make it as a comet server
