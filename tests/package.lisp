@@ -1,5 +1,3 @@
-; test package
-
 (in-package :cl-user)
 
 (defpackage :web4r-tests
