@@ -5,6 +5,7 @@
 (in-package :web4r-tests-asd)
 
 (defsystem :web4r-tests
+ :serial  t
  :name    "web4r-tests"
  :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
  :licence "BSD"
