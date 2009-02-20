@@ -1,8 +1,8 @@
 (in-package :cl-user)
 
-(defpackage :web4r-tests.system (:use :cl :asdf))
+(defpackage :web4r-tests-asd (:use :cl :asdf))
 
-(in-package :web4r-tests.system)
+(in-package :web4r-tests-asd)
 
 (defsystem :web4r-tests
  :name    "web4r-tests"
@@ -13,7 +13,7 @@
  :depends-on  (:fiveam :web4r :trivial-shell)
  :components  ((:module :tests
                 :components
-                ((:file "packages")
+                ((:file "package")
                  (:file "util")
                  (:file "validations")
                  (:file "pager")))))
