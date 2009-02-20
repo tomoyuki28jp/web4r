@@ -1,0 +1,12 @@
+Version 0.0.3
+2009-02-21
+Added ":serial t" in *.asd
+Added CHANGELOG
+
+Version 0.0.2
+2009-02-16
+Fixed to specify the source path automatically
+
+Version 0.0.1
+2009-02-15
+Initial public release
