@@ -134,8 +134,14 @@
   (is (eq (make-keyword :k3)  :k3)))
 
 (test ->list
-  (is (equal (->list 1) '(1))
-      (equal (->list '(1)) '(1))))
+  (is (equal (->list 1) '(1)))
+  (is (equal (->list '(1)) '(1))))
+
+(test ->int
+  (is (eq (->int "5") 5))
+  (is (eq (->int  5 ) 5))
+  (is (eq (->int "c") nil))
+  (is (eq (->int nil) nil)))
 
 (test with-struct
   (defstruct str

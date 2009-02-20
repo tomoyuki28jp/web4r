@@ -95,7 +95,9 @@
         (list x))))
 
 (defun ->int (x)
-  (ignore-errors (parse-integer x)))
+  (if (integerp x)
+    x
+    (ignore-errors (parse-integer x))))
 
 (defmacro with-struct ((name . fields) struct &body body)
   (let ((gs (gensym)))
