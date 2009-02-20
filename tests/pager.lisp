@@ -1,6 +1,17 @@
 (in-package :web4r-tests)
 (in-suite web4r-tests)
 
+(test total-pages
+  (let ((i (make-instance
+            'pager :total-items 100 :items-per-page 10)))
+    (is (eq 10 (total-pages i))))
+  (let ((i (make-instance
+            'pager :total-items 80  :items-per-page 10)))
+    (is (eq  8 (total-pages i))))
+  (let ((i (make-instance
+            'pager :total-items 81  :items-per-page 10)))
+    (is (eq  9 (total-pages i)))))
+
 (test item-start
   (let ((i (make-instance
             'pager :total-items 12 :items-per-page 10 :current-page 1)))
@@ -16,17 +27,6 @@
   (let ((i (make-instance
             'pager :total-items 12 :items-per-page 10 :current-page 2)))
     (is (eq 12 (slot-value i 'web4r::item-end)))))
-
-(test total-pages
-  (let ((i (make-instance
-            'pager :total-items 100 :items-per-page 10)))
-    (is (eq 10 (total-pages i))))
-  (let ((i (make-instance
-            'pager :total-items 80  :items-per-page 10)))
-    (is (eq  8 (total-pages i))))
-  (let ((i (make-instance
-            'pager :total-items 81  :items-per-page 10)))
-    (is (eq  9 (total-pages i)))))
 
 (test link-start
   (let ((i (make-instance
