@@ -5,15 +5,16 @@
 (in-package :web4r-tests-asd)
 
 (defsystem :web4r-tests
- :serial  t
- :name    "web4r-tests"
- :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
- :licence "BSD"
- :description "Tests for web4r"
- :depends-on  (:fiveam :web4r :trivial-shell)
- :components  ((:module :tests
-                :components
-                ((:file "package")
-                 (:file "util")
-                 (:file "validations")
-                 (:file "pager")))))
+  :serial  t
+  :name    "web4r-tests"
+  :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
+  :licence "BSD"
+  :description "web4r tests"
+  :depends-on  (:web4r :fiveam)
+  :components  ((:module :tests
+                         :components
+                         ((:file "package")
+                          (:file "util")
+                          (:file "shtml")
+                          (:file "validations")
+                          (:file "pager")))))
