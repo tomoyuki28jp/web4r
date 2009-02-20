@@ -7,7 +7,6 @@
 (defsystem :web4r
   :name    "web4r"
   :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
-  :version "0.0.1"
   :licence "BSD"
   :description "Common Lisp web application framework"
   :depends-on  (:cl-ppcre :usocket :bordeaux-threads :cl-fad :clsql :elephant
