@@ -1,6 +1,6 @@
 Version 0.0.3
 2009-02-21
-Added ":serial t" in *.asd
+Fixed a bug on library dependencies
 Added CHANGELOG
 
 Version 0.0.2
