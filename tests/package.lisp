@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
 (defpackage :web4r-tests
-  (:use :cl :5am :web4r)
+  (:use :cl :web4r :5am)
   (:shadowing-import-from :web4r :pass))
 
 (in-package :web4r-tests)
