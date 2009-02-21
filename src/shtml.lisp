@@ -155,7 +155,7 @@ http://www.w3.org/TR/html4/frameset.dtd\">")
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *web4r-dir*
     (awhen (load-time-value #.*compile-file-pathname*)
-      (merge-pathnames "../" it))))
+      (truename (merge-pathnames "../" (directory-namestring it))))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *shtml-dir* (merge-pathnames "shtml/" *web4r-dir*)))
