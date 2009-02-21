@@ -3,20 +3,13 @@
 * TODO
 - Write more tests
 - Write documents
-- Performance testing
+- Performance testing (declare types for better performance)
 - Error checking and exception handling
 - Support more lisp implementations
-
-* Pending issues
-- Dynamically assigning shtml path for load-shtml macro
-(I am doing complex things to expand shtml codes, written in a separated file, 
- with lexical binding. It's gonna be much simpler if we just use a function or macro.)
 
 * Ideas (low priority, might be implemented)
 - Rewrite the http server with iolib (non-blocking I/O) and make it as a comet server
 - Javascript realtime error checking
 - Ajax support
 - Better design with CSS
-- Implement cache system (use cl-memcached?)
 - Implement pluralize and singularize functions for pclass name like rails (Do we want this?)
-- declare types for better performance
