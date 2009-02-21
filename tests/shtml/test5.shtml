@@ -1,0 +1,2 @@
+(with-shtml-file ("../tests/shtml/template1.shtml")
+  :title (title/ "New title"))
