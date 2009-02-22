@@ -840,7 +840,7 @@ there is no way to check if the function is already added"
              (directory-exists-p file))
          (status-page 404))
         ((not (is-readable file))
-         (status-page 401))
+         (status-page 403))
         (t (setf (response-content-type *response*) (content-type file))
            (setf (response-charset *response*) nil)
            (with-open-file (in file :element-type '(unsigned-byte 8))
