@@ -471,12 +471,15 @@
     :title (title/ "Default index page")
     :body  (body/  (p/ "Default index page"))))
 
-(defun status-page (status-code)
-  (setf (response-status-code *response*) status-code)
+(defun %status-page (status-code)
   (let ((reason (reason-phrase status-code)))
     (with-shtml (:basic)
       :title (title/ status-code " " reason)
       :body  (body/  status-code " " reason))))
+
+(defun status-page (status-code)
+  (setf (response-status-code *response*) status-code)
+  (%status-page status-code))
 
 (defun default-page (&rest args)
   (aif (get-page 'default)
