@@ -1,5 +1,5 @@
 (in-package :web4r-tests)
-(in-suite web4r-tests)
+(in-suite web4r)
 
 (defvar *label* "label")
 

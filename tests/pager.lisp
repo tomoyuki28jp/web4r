@@ -1,5 +1,5 @@
 (in-package :web4r-tests)
-(in-suite web4r-tests)
+(in-suite web4r)
 
 (test total-pages
   (let ((i (make-instance

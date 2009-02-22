@@ -6,7 +6,8 @@
 (in-package :web4r-tests)
 
 ; run each test
-;(5am:run! 'length)
+;(5am:run! 'server)
 
 ; run all tests
-;(5am:run! 'web4r-tests)
+;(5am:run! 'web4r)
+

@@ -1,6 +1,6 @@
 ; -*- Coding: utf-8 -*-
 (in-package :web4r-tests)
-(in-suite web4r-tests)
+(in-suite web4r)
 
 (test slots
   (is (equal (progn

@@ -9,7 +9,7 @@
   :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
   :licence "BSD"
   :description "web4r tests"
-  :depends-on  (:web4r :fiveam)
+  :depends-on  (:web4r :fiveam :drakma)
   :components  ((:module "tests"
                          :serial  t
                          :components
@@ -17,4 +17,5 @@
                           (:file "util")
                           (:file "shtml")
                           (:file "validations")
+                          (:file "server")
                           (:file "pager")))))

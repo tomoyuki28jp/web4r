@@ -1,5 +1,15 @@
 (in-package :web4r-tests)
-(in-suite web4r-tests)
+(in-suite web4r)
+
+(defun string=* (str1 str2)
+  (string= (replace-str *nl* "" str1)
+           (replace-str *nl* "" str2)))
+
+(defmacro shtml= (shtml html)
+  `(let ((*http-char-stream* (make-string-output-stream)))
+     ,shtml
+     (string=* (get-output-stream-string *http-char-stream*)
+               ,html)))
 
 (test doctype
   (let ((*doctype* *doctype-strict*))
@@ -25,40 +35,30 @@ http://www.w3.org/TR/html4/frameset.dtd\">")))))
   (is (string= (escape (safe "&amp;&lt;&gt;&#039;&quot;")) "&amp;&lt;&gt;&#039;&quot;"))
   (is (string= (escape (safe (safe "&amp;&lt;&gt;&#039;&quot;"))) "&amp;&lt;&gt;&#039;&quot;")))
 
-(defun string=* (str1 str2)
-  (string= (replace-str *nl* "" str1)
-           (replace-str *nl* "" str2)))
-
-(defmacro shtml= (shtml html)
-  `(let ((*http-char-stream* (make-string-output-stream)))
-     ,shtml
-     (is (string=* (get-output-stream-string *http-char-stream*)
-                   ,html))))
-
 (test tags
-  (shtml= (p/ "ok") "<P>ok</P>")
-  (shtml= (p/ :id "p-id" "ok") "<P ID=\"p-id\">ok</P>")
-  (shtml= (body/ (p/ "ok")) "<BODY><P>ok</P></BODY>")
+  (is-true (shtml= (p/ "ok") "<P>ok</P>"))
+  (is-true (shtml= (p/ :id "p-id" "ok") "<P ID=\"p-id\">ok</P>"))
+  (is-true (shtml= (body/ (p/ "ok")) "<BODY><P>ok</P></BODY>"))
   (let ((*doctype* *doctype-transitional*))
-    (shtml= (html/ (body/ "ok"))
-            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
-http://www.w3.org/TR/html4/loose.dtd\"><HTML><BODY>ok</BODY></HTML>"))
-  (shtml= (a/ :href "http://localhost:8080/" "link")
-          "<A HREF=\"http://localhost:8080/\">link</A>")
-  (shtml= (img/ :src "http://localhost:8080/img.png")
-          "<IMG SRC=\"http://localhost:8080/img.png\">")
-  (shtml= (form/ :name "form-name" :method "post" :action ""
-                 (input/ :type "text" :name "text-name")
-                 (input/ :type "submit" :value "submit-button"))
-          "<FORM NAME=\"form-name\" METHOD=\"post\" ACTION=\"\">
+    (is-true (shtml= (html/ (body/ "ok"))
+                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+http://www.w3.org/TR/html4/loose.dtd\"><HTML><BODY>ok</BODY></HTML>")))
+  (is-true (shtml= (a/ :href "http://localhost:8080/" "link")
+                   "<A HREF=\"http://localhost:8080/\">link</A>"))
+  (is-true (shtml= (img/ :src "http://localhost:8080/img.png")
+                   "<IMG SRC=\"http://localhost:8080/img.png\">"))
+  (is-true (shtml= (form/ :name "form-name" :method "post" :action ""
+                          (input/ :type "text" :name "text-name")
+                          (input/ :type "submit" :value "submit-button"))
+                   "<FORM NAME=\"form-name\" METHOD=\"post\" ACTION=\"\">
 <INPUT TYPE=\"text\" NAME=\"text-name\">
 <INPUT TYPE=\"submit\" VALUE=\"submit-button\">
-</FORM>")
-  (shtml= (table/
-           (loop for i in '(1 2 3)
-                 do (th/ (td/ i))))
-          "<TABLE><TH><TD>1</TD></TH><TH><TD>2</TD></TH><TH><TD>3</TD></TH></TABLE>")
-  (shtml= (p/ "1" "2" "3" "4" "5") "<P>12345</P>"))
+</FORM>"))
+  (is-true (shtml= (table/
+                    (loop for i in '(1 2 3)
+                          do (th/ (td/ i))))
+                   "<TABLE><TH><TD>1</TD></TH><TH><TD>2</TD></TH><TH><TD>3</TD></TH></TABLE>"))
+  (is-true (shtml= (p/ "1" "2" "3" "4" "5") "<P>12345</P>")))
 
 (define-shtml :test
     (html/ :lang "ja"
@@ -67,114 +67,114 @@ http://www.w3.org/TR/html4/loose.dtd\"><HTML><BODY>ok</BODY></HTML>"))
 
 (test shtml
   (let ((*doctype* *doctype-transitional*))
-    (shtml= (with-shtml (:test))
-            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+    (is-true (shtml= (with-shtml (:test))
+                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>Default title</TITLE></HEAD>
 <BODY><P>Default body</P></BODY>
-</HTML>")
-    (shtml= (with-shtml (:test)
-              :title (title/ "New title"))
-            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+</HTML>"))
+    (is-true (shtml= (with-shtml (:test)
+                       :title (title/ "New title"))
+                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>New title</TITLE></HEAD>
 <BODY><P>Default body</P></BODY>
-</HTML>")
-    (shtml= (with-shtml (:test)
-              :body (body/ (p/ "New body")))
-            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+</HTML>"))
+    (is-true (shtml= (with-shtml (:test)
+                       :body (body/ (p/ "New body")))
+                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>Default title</TITLE></HEAD>
 <BODY><P>New body</P></BODY>
-</HTML>")))
+</HTML>"))))
 
 (test shtml-file
   (let ((x "x"))
-    (shtml= (with-shtml-file ("../tests/shtml/test1.shtml"))
-            "<P>x</P>"))
+    (is-true (shtml= (with-shtml-file ("../tests/shtml/test1.shtml"))
+                     "<P>x</P>")))
   (let ((lst '(1 2 3)))
-    (shtml= (with-shtml-file ("../tests/shtml/test2.shtml"))
-            "<UL><LI>1</LI><LI>2</LI><LI>3</LI></UL>"))
-  (shtml= (with-shtml-file ("../tests/shtml/template1.shtml"))
-          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+    (is-true (shtml= (with-shtml-file ("../tests/shtml/test2.shtml"))
+                     "<UL><LI>1</LI><LI>2</LI><LI>3</LI></UL>")))
+  (is-true (shtml= (with-shtml-file ("../tests/shtml/template1.shtml"))
+                   "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>Default title</TITLE></HEAD>
-<BODY><P>Default body</P></BODY></HTML>")
-    (shtml= (with-shtml-file ("../tests/shtml/template1.shtml")
-              :title (title/ "New title"))
-          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+<BODY><P>Default body</P></BODY></HTML>"))
+  (is-true (shtml= (with-shtml-file ("../tests/shtml/template1.shtml")
+                     :title (title/ "New title"))
+                   "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>New title</TITLE></HEAD>
-<BODY><P>Default body</P></BODY></HTML>")
-    (shtml= (with-shtml-file ("../tests/shtml/template1.shtml")
-              :body (body/ (p/ "New body")))
-          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+<BODY><P>Default body</P></BODY></HTML>"))
+  (is-true (shtml= (with-shtml-file ("../tests/shtml/template1.shtml")
+                     :body (body/ (p/ "New body")))
+                   "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>Default title</TITLE></HEAD>
-<BODY><P>New body</P></BODY></HTML>"))
+<BODY><P>New body</P></BODY></HTML>")))
 
 (test load-shtml
-    (let ((x "x"))
-      (shtml= (load-shtml "../tests/shtml/test3.shtml")
-              "<P>x</P>"))
-    (let ((lst '(1 2 3)))
-      (shtml= (load-shtml "../tests/shtml/test4.shtml")
-              "<UL><LI>1</LI><LI>2</LI><LI>3</LI></UL>"))
-    (shtml= (load-shtml "../tests/shtml/test5.shtml")
-          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+  (let ((x "x"))
+    (is-true (shtml= (load-shtml "../tests/shtml/test3.shtml")
+                     "<P>x</P>")))
+  (let ((lst '(1 2 3)))
+    (is-true (shtml= (load-shtml "../tests/shtml/test4.shtml")
+                     "<UL><LI>1</LI><LI>2</LI><LI>3</LI></UL>")))
+  (is-true (shtml= (load-shtml "../tests/shtml/test5.shtml")
+                   "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>New title</TITLE></HEAD>
-<BODY><P>Default body</P></BODY></HTML>")
-    (shtml= (load-shtml "../tests/shtml/test6.shtml")
-          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
+<BODY><P>Default body</P></BODY></HTML>"))
+  (is-true (shtml= (load-shtml "../tests/shtml/test6.shtml")
+                   "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>Default title</TITLE></HEAD>
-<BODY><P>New body</P></BODY></HTML>"))
+<BODY><P>New body</P></BODY></HTML>")))
 
 (test input-text/
-  (shtml= (input-text/ "foo")
-          "<INPUT TYPE=\"text\" NAME=\"foo\">")
-  (shtml= (input-text/ "foo" :value "v1")
-          "<INPUT TYPE=\"text\" NAME=\"foo\" VALUE=\"v1\">"))
+  (is-true (shtml= (input-text/ "foo")
+                   "<INPUT TYPE=\"text\" NAME=\"foo\">"))
+  (is-true (shtml= (input-text/ "foo" :value "v1")
+                   "<INPUT TYPE=\"text\" NAME=\"foo\" VALUE=\"v1\">")))
 
 (test input-checked/
-  (shtml= (input-checked/ "checkbox" "val")
-          "<INPUT TYPE=\"checkbox\">")
-  (shtml= (input-checked/ "checkbox" "val" :value "val")
-          "<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"val\">")
-  (shtml= (input-checked/ "radio" "val" :name "name1" :value "val")
-          "<INPUT TYPE=\"radio\" CHECKED=\"checked\" NAME=\"name1\" VALUE=\"val\">"))
+  (is-true (shtml= (input-checked/ "checkbox" "val")
+                   "<INPUT TYPE=\"checkbox\">"))
+  (is-true (shtml= (input-checked/ "checkbox" "val" :value "val")
+                   "<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"val\">"))
+  (is-true (shtml= (input-checked/ "radio" "val" :name "name1" :value "val")
+                   "<INPUT TYPE=\"radio\" CHECKED=\"checked\" NAME=\"name1\" VALUE=\"val\">")))
 
 (test submit/
-  (shtml= (submit/) "<INPUT TYPE=\"submit\">")
-  (shtml= (submit/ :name "name1" :value "value1")
-          "<INPUT TYPE=\"submit\" NAME=\"name1\" VALUE=\"value1\">"))
+  (is-true (shtml= (submit/) "<INPUT TYPE=\"submit\">"))
+  (is-true (shtml= (submit/ :name "name1" :value "value1")
+                   "<INPUT TYPE=\"submit\" NAME=\"name1\" VALUE=\"value1\">")))
 
 (test select-form/
-  (shtml= (select-form/ "name1" '(1 2 3))
-          "<SELECT NAME=\"name1\" ID=\"name1\">
+  (is-true (shtml= (select-form/ "name1" '(1 2 3))
+                   "<SELECT NAME=\"name1\" ID=\"name1\">
 <OPTION VALUE=\"1\">1</OPTION>
 <OPTION VALUE=\"2\">2</OPTION>
 <OPTION VALUE=\"3\">3</OPTION>
-</SELECT>")
-  (shtml= (select-form/ "name1" '(1 2 3) 2)
-          "<SELECT NAME=\"name1\" ID=\"name1\">
+</SELECT>"))
+  (is-true (shtml= (select-form/ "name1" '(1 2 3) 2)
+                   "<SELECT NAME=\"name1\" ID=\"name1\">
 <OPTION VALUE=\"1\">1</OPTION>
 <OPTION VALUE=\"2\" SELECTED=\"selected\">2</OPTION>
 <OPTION VALUE=\"3\">3</OPTION>
-</SELECT>"))
+</SELECT>")))
 
 (test select-date/
-  (shtml= (select-date/ "name1" :y-start 2000 :y-end 2002 :y 2001 :m 5 :d 10)
-          "<SELECT NAME=\"name1-Y\" ID=\"name1-Y\">
+  (is-true (shtml= (select-date/ "name1" :y-start 2000 :y-end 2002 :y 2001 :m 5 :d 10)
+                   "<SELECT NAME=\"name1-Y\" ID=\"name1-Y\">
 <OPTION VALUE=\"2000\">2000</OPTION>
 <OPTION VALUE=\"2001\" SELECTED=\"selected\">2001</OPTION>
 <OPTION VALUE=\"2002\">2002</OPTION>
@@ -225,5 +225,4 @@ http://www.w3.org/TR/html4/loose.dtd\">
 <OPTION VALUE=\"29\">29</OPTION>
 <OPTION VALUE=\"30\">30</OPTION>
 <OPTION VALUE=\"31\">31</OPTION>
-</SELECT>"))
-
+</SELECT>")))
