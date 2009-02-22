@@ -25,8 +25,9 @@
 
 ; Sample rewrite rule (You can also use add-route function):
 ;(defun sample-rewrite-rule (uri)
-;  (unless (preg-match "\.(js|ico|gif|jpeg|jpg|png|css|html|txt)$" uri)
-;    "/index.html"))
+;  (when (aand (preg-match "(\.ico|\.gif|\.jpeg|\.jpg|\.png|)$" uri)
+;              (not (string= it "")))
+;    "/test.html"))
 
 (defun rewrote-uri ()
   (let ((script (request-script-name *request*)))
