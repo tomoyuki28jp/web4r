@@ -132,6 +132,7 @@
       (bordeaux-threads:destroy-thread (server-thread server))
       (error "server is not running"))
   t)
+
 ; --- Logging ---------------------------------------------------
 
 (defun write-log (file content)
@@ -237,7 +238,7 @@
       (print data out))))
 
 (defun session-file (sid)
-  (merge-pathnames (server-session-save-dir *server*) sid))
+  (merge-pathnames sid (server-session-save-dir *server*)))
 
 (defun session-name ()
   (server-session-name *server*))
