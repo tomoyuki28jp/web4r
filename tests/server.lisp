@@ -33,6 +33,11 @@
               (not (string= it "")))
     "/test.html"))
 
+(defun matched-page ()
+  (html/
+   (body/
+    (p/ "matched"))))
+
 (test server
   (let ((s (start-server
             (make-server :public-dir *public-dir* :port 8080 :timeout-sec 3))))
@@ -87,4 +92,24 @@
            (is (file-content= "test.js"))
            (is (file-content= "test.css"))
            (setf (web4r::server-rewrite-rule s) nil))
+           ; static route
+           (add-route s :static "/nopage" 'matched-page)
+           (is-true (shtml= (matched-page)
+                            (http-request "http://localhost:8080/nopage")))
+           (rem-route s :static "/nopage")
+           (is-true (shtml= (web4r::%status-page 404)
+                            (http-request "http://localhost:8080/nopage")))
+           ; regex route
+           (is-true (shtml= (web4r::%status-page 404)
+                            (http-request "http://localhost:8080/matched1")))
+           (add-route s :regex "^/matched" 'matched-page)
+           (is-true (shtml= (matched-page)
+                            (http-request "http://localhost:8080/matched1")))
+           (is-true (shtml= (web4r::%status-page 404)
+                            (http-request "http://localhost:8080/no/matched1")))
+           (is-true (shtml= (matched-page)
+                            (http-request "http://localhost:8080/matched2")))
+           (rem-route s :regex "^/matched")
+           (is-true (shtml= (web4r::%status-page 404)
+                            (http-request "http://localhost:8080/matched1")))
       (stop-server s))))
