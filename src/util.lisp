@@ -184,13 +184,13 @@
     (when (member (type-of float) types)
       float)))
 
-(defmacro preg-match (regexp str)
-  `(cl-ppcre:scan-to-strings
-    (cl-ppcre:create-scanner ,regexp) ,str))
+(defun preg-match (regexp str)
+  (cl-ppcre:scan-to-strings
+   (cl-ppcre:create-scanner regexp) str))
 
-(defmacro preg-match-all (regexp str)
-  `(cl-ppcre:all-matches-as-strings
-    (cl-ppcre:create-scanner ,regexp) ,str))
+(defun preg-match-all (regexp str)
+  (cl-ppcre:all-matches-as-strings
+   (cl-ppcre:create-scanner regexp) str))
 
 (defun is-readable (file)
   (let ((file (namestring file)))
