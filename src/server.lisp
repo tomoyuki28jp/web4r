@@ -23,7 +23,7 @@
 
 ; --- URI rewrite rule ------------------------------------------
 
-; Sample rewrite rule. (You can also use add-route function.)
+; Sample rewrite rule (You can also use add-route function):
 ;(defun sample-rewrite-rule (uri)
 ;  (unless (preg-match "\.(js|ico|gif|jpeg|jpg|png|css|html|txt)$" uri)
 ;    "/index.html"))
