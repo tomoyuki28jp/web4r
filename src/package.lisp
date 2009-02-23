@@ -152,6 +152,7 @@
            :add-hook
            :get-page
            :set-page
+           :serve-file
            :public-file-p
            :image-type
            :host-uri
