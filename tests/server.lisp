@@ -112,4 +112,22 @@
            (rem-route s :regex "^/matched")
            (is-true (shtml= (web4r::%status-page 404)
                             (http-request "http://localhost:8080/matched1")))
+           ; cookie
+           (let ((r (random-hex-string 10)))
+             (defpage cookie-set-test () (set-cookie "cookie-set-test1" r))
+             (defpage cookie-get-test () (p/ (get-cookie "cookie-set-test1")))
+             (let ((cookie (make-instance 'cookie-jar)))
+               (http-request "http://localhost:8080/cookie-set-test" :cookie-jar cookie)
+               (is-true (shtml= (p/ r)
+                                (http-request "http://localhost:8080/cookie-get-test"
+                                              :cookie-jar cookie)))))
+           ; session
+           (let ((r (random-hex-string 10)))
+             (defpage session-set-test () (set-session "session-set-test1" r))
+             (defpage session-get-test () (p/ (get-session "session-set-test1")))
+             (let ((cookie (make-instance 'cookie-jar)))
+               (http-request "http://localhost:8080/session-set-test" :cookie-jar cookie)
+               (is-true (shtml= (p/ r)
+                                (http-request "http://localhost:8080/session-get-test"
+                                              :cookie-jar cookie)))))
       (stop-server s))))
