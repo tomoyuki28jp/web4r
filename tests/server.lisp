@@ -1,10 +1,6 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
-#| todo
-multipart-form
-|#
-
 (defparameter *public-dir*
   (namestring (merge-pathnames "tests/public/" *web4r-dir*)))
 
@@ -17,6 +13,15 @@ multipart-form
              (array  (make-array length :element-type e)))
         (read-sequence array in)
         (equalp array content)))))
+
+(defun upload-file= (file)
+  (file-content= file
+                 (http-request "http://localhost:8080/upload-test"
+                               :method :post
+                               :content-length t
+                               :parameters
+                               (list (list "foo" (merge-pathnames
+                                                  file *public-dir*))))))
 
 (defun status-code= (uri status-code)
   (multiple-value-bind (body status-code* headers uri stream close reason-phrase)
@@ -48,7 +53,7 @@ multipart-form
     (p/ "defpage-test1"))))
 
 ; Drakma has a bug which drakma don't send cookies when uri is root directory
-; even if cookie path is set to "/". This function is to avoid the bug.
+; even when cookie path is set to "/". This function is to avoid the bug.
 (defun http-request* (uri &rest args)
   (apply #'http-request
          (append (list (replace-str "http://localhost:8080/"
@@ -75,6 +80,21 @@ multipart-form
                             (http-request "http://localhost:8080/../../../../../../etc/passwd")))
            (is-true (shtml= (web4r::%status-page 404)
                             (http-request "http://localhost:8080/nopage")))
+           ; file upload
+           (defpage upload-test ()
+             (awhen (post-param "foo")
+               (awhen (assoc-ref "tmp-name" it :test #'equal)
+                 (serve-file it :public-file-only nil))))
+           (is (upload-file= "test"))
+           (is (upload-file= "test.css"))
+           (is (upload-file= "test.gif"))
+           (is (upload-file= "test.html"))
+           (is (upload-file= "test.ico"))
+           (is (upload-file= "test.jpeg"))
+           (is (upload-file= "test.js"))
+           (is (upload-file= "test.png"))
+           (is (upload-file= "test.txt"))
+           (is (upload-file= "test.zip"))
            ; get-params
            (defpage get-params-test () (p/ (get-params)))
            (is-true (shtml= (p/ '(("k1" . "v1")("k2" . "v2")("k3" . "v3")))
@@ -90,14 +110,14 @@ multipart-form
            (is-true (shtml= (p/ '(("k1" . "v1")("k2" . "v2")))
                             (http-request
                              "http://localhost:8080/post-params-test"
-                             :method :post
+                             :method :post :form-data t
                              :parameters '(("k1" . "v1") ("k2" . "v2")))))
            ; post-param
            (defpage post-param-test () (p/ (post-param "k1")))
            (is-true (shtml= (p/ "v1")
                             (http-request
                              "http://localhost:8080/post-param-test"
-                             :method :post :parameters '(("k1" . "v1")))))
+                             :method :post :form-data t :parameters '(("k1" . "v1")))))
            ; defpage
            (defpage defpage-test1 () (defpage-test1))
            (is-true (shtml= (defpage-test1)
@@ -113,7 +133,8 @@ multipart-form
            (is-true (shtml= (p/ "pv1" "pv2")
                             (http-request
                              "http://localhost:8080/defpage-test4"
-                             :method :post :parameters '(("p1" . "pv1") ("p2" . "pv2")))))
+                             :method :post :form-data t
+                             :parameters '(("p1" . "pv1") ("p2" . "pv2")))))
            ; page-lambda
            (defpage page-lambda-test1 ()
              (form/cont/ (page-lambda (:post foo) (p/ foo))
@@ -126,11 +147,16 @@ multipart-form
                               :cookie-jar c))
                (is-true (shtml= (p/ "ok")
                                 (http-request  "http://localhost:8080//"
-                                               :method :post
+                                               :method :post :form-data t
                                                :parameters
                                                (list (cons "cid" (elt regs 0))
                                                      (cons "foo" "ok"))
                                                :cookie-jar c)))))
+           ; page
+           (defpage page-test1 () (matched-page))
+           (defpage page-test2 () (page 'page-test1))
+           (is-true (shtml= (matched-page)
+                            (http-request "http://localhost:8080/page-test2")))
            ; default-page
            (is-true (shtml= (default-page)
                             (http-request "http://localhost:8080/")))
@@ -237,7 +263,7 @@ multipart-form
                               :cookie-jar c))
                (is-true (shtml= (p/ "ok")
                                 (http-request  "http://localhost:8080//"
-                                               :method :post
+                                               :method :post :form-data t
                                                :parameters
                                                (list (cons "cid" (elt regs 0)))
                                                :cookie-jar c)))))
