@@ -518,8 +518,7 @@
 (defvar *hooks* (make-hash-table))
 
 (defun add-hook (hook fn)
-  "Note: better passing a named function otherwise 
-there is no way to check if the function is already added"
+  "Add function to hook"
   (let ((hooks (gethash hook *hooks*)))
     (unless (member fn hooks)
       (sethash hook *hooks* (append hooks (list fn))))))
