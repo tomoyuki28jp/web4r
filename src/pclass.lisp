@@ -76,7 +76,7 @@
                 :documentation "int max or list '(min max) for length validation")
       (hide     :accessor slot-hide     :initarg :hide     :initform nil
                 :documentation "treats the slot as excluded slots")
-      (options  :accessor slot-options  :initarg :options  :initform '()
+      (options  :accessor slot-options  :initarg :options  :initform '() :type list
                 :documentation "form input options (also used for validation)")
       (input    :accessor slot-input    :initarg :input    :initform nil
                 :documentation "form input type - :text, :textarea, :radio, 
