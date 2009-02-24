@@ -342,14 +342,65 @@
                                       :method :post :content-length t :cookie-jar c
                                       :parameters (list (list "foo" (merge-pathnames
                                                                      "test.js" *public-dir*)))))))
+           ; host-uri
+           (defpage host-uri-test () (p (host-uri)))
+           (is (equal "http://localhost:8080/"
+                      (http-request "http://localhost:8080/host-uri-test")))
+           ; header-field
+           (defpage header-field-test () (p (header-field "Host")))
+           (is (equal "localhost:8080"
+                      (http-request "http://localhost:8080/header-field-test")))
+           ; redirect
+           (defpage redirect-test1 ()
+             (redirect (page-uri 'redirect-test2)))
+           (defpage redirect-test2 () (p "ok"))
+           (is (equal "ok" (http-request "http://localhost:8080/redirect-test2")))
+           ; rem-last-post
+           (defpage rem-last-post-test1 ()
+             (set-last-post)
+             (rem-last-post)
+             (p (last-posts)))
+           (defpage rem-last-post-test2 ()
+             (set-last-post)
+             (rem-last-post :name "k1")
+             (p (last-post "k1")))
+           (defpage rem-last-post-test3 ()
+             (set-last-post)
+             (rem-last-post :name "k1")
+             (p (last-post "k2")))
+           (is (eq nil
+                   (http-request "http://localhost:8080/rem-last-post-test1"
+                                 :method :post :content-length t
+                                 :parameters '(("k1" . "v1") ("k2" . "v2")))))
+           (is (eq nil
+                   (http-request "http://localhost:8080/rem-last-post-test2"
+                                 :method :post :content-length t
+                                 :parameters '(("k1" . "v1") ("k2" . "v2")))))
+           (is (equal "v2"
+                      (http-request "http://localhost:8080/rem-last-post-test3"
+                                    :method :post :content-length t
+                                    :parameters '(("k1" . "v1") ("k2" . "v2")))))
+           ; file data
+           (defpage file-data-test1 ()
+             (set-last-post)
+             (p (mkstr (file-name "foo") "-"
+                       (file-type "foo") "-"
+                       (file-size "foo"))))
+           (is (equal "test.gif-image/gif-1841"
+                      (http-request "http://localhost:8080/file-data-test1"
+                                    :method :post :content-length t
+                                    :parameters
+                                    (list (list "foo"
+                                                (merge-pathnames "test.gif" *public-dir*)
+                                                :content-type "image/gif"
+                                                :filename "test.gif")))))
+           (is (equal "test.png-image/gif-2497"
+                      (http-request "http://localhost:8080/file-data-test1"
+                                    :method :post :content-length t
+                                    :parameters
+                                    (list (list "foo"
+                                                (merge-pathnames "test.png" *public-dir*)
+                                                :content-type "image/gif"
+                                                :filename "test.png")))))
            )
       (stop-server s))))
-
-;(defparameter *srv* (start-server (make-server)))
-;(stop-server *srv*)
-;
-;  (let ((s (start-server (make-server))))
-;    (unwind-protect
-;         (progn
-;           )
-;      (stop-server s)))
