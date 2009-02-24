@@ -283,6 +283,59 @@
                                   "http://localhost:8080/msg-test1"
                                   :cookie-jar c))
                          :cookie-jar c))))
+           ; last-post
+           (defpage last-post-test1 ()
+             (set-last-post)
+             (p (last-post "foo")))
+           (let ((c (make-instance 'cookie-jar)))
+             (is (equal "v1"
+                        (http-request
+                         "http://localhost:8080/last-post-test1"
+                         :method :post :form-data t :cookie-jar c
+                         :parameters '(("foo" . "v1")))))
+             (is (equal "v1"
+                        (http-request
+                         "http://localhost:8080/last-post-test1"
+                         :cookie-jar c)))
+             (is (equal nil
+                        (http-request
+                         "http://localhost:8080/last-post-test1"
+                         :method :post :form-data t :cookie-jar c
+                         :parameters '(("foo" . "")))))
+             (is (equal "v2"
+                        (http-request
+                         "http://localhost:8080/last-post-test1"
+                         :method :post :form-data t :cookie-jar c
+                         :parameters '(("foo" . "v2"))))))
+           (defpage last-post-test2 ()
+             (set-last-post)
+             (awhen (last-post "foo")
+               (p (mkstr (assoc-ref "name" it :test #'equal) "-"
+                         (assoc-ref "test" it :test #'equal)))))
+           (defpage last-post-test3 ()
+             (set-last-post)
+             (set-last-post :name "foo" :value
+                            (append (list (cons "test" "ok"))
+                                    (last-post "foo")))
+             (awhen (last-post "foo")
+               (p (mkstr (assoc-ref "name" it :test #'equal) "-"
+                         (assoc-ref "test" it :test #'equal)))))
+           (let ((c (make-instance 'cookie-jar)))
+             (is (equal "test.txt-"
+                        (http-request "http://localhost:8080/last-post-test2"
+                                      :method :post :content-length t :cookie-jar c
+                                      :parameters (list (list "foo" (merge-pathnames
+                                                                     "test.txt" *public-dir*))))))
+             (is (equal "test.css-ok"
+                        (http-request "http://localhost:8080/last-post-test3"
+                                      :method :post :content-length t :cookie-jar c
+                                      :parameters (list (list "foo" (merge-pathnames
+                                                                     "test.css" *public-dir*))))))
+             (is (equal "test.js-ok"
+                        (http-request "http://localhost:8080/last-post-test2"
+                                      :method :post :content-length t :cookie-jar c
+                                      :parameters (list (list "foo" (merge-pathnames
+                                                                     "test.js" *public-dir*)))))))
            )
       (stop-server s))))
 
