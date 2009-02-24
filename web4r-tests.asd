@@ -18,4 +18,6 @@
                           (:file "shtml")
                           (:file "validations")
                           (:file "server")
-                          (:file "pager")))))
+                          (:file "pager")
+                          (:file "pclass")
+                          ))))
