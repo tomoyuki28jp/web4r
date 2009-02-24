@@ -15,6 +15,20 @@
    (note         :length 3000 :rows 5 :cols 30)
    (image        :input :file :type :image :length (1000 500000) :nullable t)))
 
+(test get-slots
+  (let ((sl '(name password email sex marriage hobbies birth-date
+              nickname phone-number zip-code note image)))
+    (is (eq (length sl) (length (get-slots 'testdb1))))
+    (loop for s in (get-excluded-slots 'testdb1)
+          do (is (member (web4r::slot-symbol s) sl)))))
+
+(test get-excluded-slots
+  (let ((sl '(name email sex marriage hobbies birth-date
+              nickname phone-number zip-code note image)))
+    (is (eq (length sl) (length (get-excluded-slots 'testdb1))))
+    (loop for s in (get-excluded-slots 'testdb1)
+          do (is (member (web4r::slot-symbol s) sl)))))
+
 (test slot-symbol
   (loop for s in '(name password email sex marriage hobbies birth-date
                    nickname phone-number zip-code note image)
