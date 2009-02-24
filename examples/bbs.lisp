@@ -1,5 +1,5 @@
 ; To run:
-; 1. Replace the parameter of open-store
+; 1. replace the parameter of open-store
 ;    http://common-lisp.net/project/elephant/doc/elephant.html#Getting-Started
 ; 2. compile and load this file
 ; 3. go to http://localhost:8080/
