@@ -112,6 +112,12 @@
                              "http://localhost:8080/post-params-test"
                              :method :post :form-data t
                              :parameters '(("k1" . "v1") ("k2" . "v2")))))
+           ; post-params (multipart/form-data)
+           (is-true (shtml= (p/ '(("k1" . "v1")("k2" . "v2")))
+                            (http-request
+                             "http://localhost:8080/post-params-test"
+                             :method :post
+                             :parameters '(("k1" . "v1") ("k2" . "v2")))))
            ; post-param
            (defpage post-param-test () (p/ (post-param "k1")))
            (is-true (shtml= (p/ "v1")
