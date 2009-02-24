@@ -205,3 +205,46 @@
   (is (eq :integer (web4r::slot-type (get-slot 'testdb1 'zip-code))))
   (is (eq nil      (web4r::slot-type (get-slot 'testdb1 'note))))
   (is (eq :image   (web4r::slot-type (get-slot 'testdb1 'image)))))
+
+(defun safe= (html safe)
+  (equal html
+         (replace-str *nl* "" (slot-value safe 'web4r::content))))
+
+(test slot-display-value
+  (let ((i (make-instance 'testdb1
+             :name         "Tomoyuki Matsumoto"
+             :password     "password"
+             :email        "tomo@example.com"
+             :sex          "Male"
+             :marriage     "single"
+             :hobbies      '("sports" "reading")
+             :birth-date   "1983-09-28"
+             :nickname     "tomo"
+             :phone-number "408-644-6198"
+             :zip-code     "95129"
+             :note         (concat "Hello" *nl* "World")
+             :image        "test.gif")))
+    (print (equal "Tomoyuki Matsumoto"
+                  (slot-display-value i (get-slot 'testdb1 'name))))
+    (print (equal "password"
+                  (slot-display-value i (get-slot 'testdb1 'password))))
+    (print (equal "tomo@example.com"
+                  (slot-display-value i (get-slot 'testdb1 'email))))
+    (print (equal "Male"
+                  (slot-display-value i (get-slot 'testdb1 'sex))))
+    (print (equal "single"
+                  (slot-display-value i (get-slot 'testdb1 'marriage))))
+    (print (equal "sports, reading"
+                  (slot-display-value i (get-slot 'testdb1 'hobbies))))
+    (print (equal "1983-09-28"
+                  (slot-display-value i (get-slot 'testdb1 'birth-date))))
+    (print (equal "tomo"
+                  (slot-display-value i (get-slot 'testdb1 'nickname))))
+    (print (equal "408-644-6198"
+                  (slot-display-value i (get-slot 'testdb1 'phone-number))))
+    (print (equal "95129"
+                  (slot-display-value i (get-slot 'testdb1 'zip-code))))
+    (print (equal (concat "Hello" *nl* "World")
+                  (slot-display-value i (get-slot 'testdb1 'note))))
+    (print (safe= "Hello<br>World"
+                  (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))))
