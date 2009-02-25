@@ -304,6 +304,9 @@
                     (subseq (sort ins #'> :key index) item-start item-end)))))
     (values items pager)))
 
+(defun drop-class-instances (class)
+  (drop-instances (get-instances-by-class class)))
+
 ; --- Scaffold  -------------------------------------------------
 
 (defun scaffold (class &key (index 'updated-at))
