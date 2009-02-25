@@ -224,27 +224,27 @@
              :zip-code     "95129"
              :note         (concat "Hello" *nl* "World")
              :image        "test.gif")))
-    (print (equal "Tomoyuki Matsumoto"
-                  (slot-display-value i (get-slot 'testdb1 'name))))
-    (print (equal "password"
-                  (slot-display-value i (get-slot 'testdb1 'password))))
-    (print (equal "tomo@example.com"
-                  (slot-display-value i (get-slot 'testdb1 'email))))
-    (print (equal "Male"
-                  (slot-display-value i (get-slot 'testdb1 'sex))))
-    (print (equal "single"
-                  (slot-display-value i (get-slot 'testdb1 'marriage))))
-    (print (equal "sports, reading"
-                  (slot-display-value i (get-slot 'testdb1 'hobbies))))
-    (print (equal "1983-09-28"
-                  (slot-display-value i (get-slot 'testdb1 'birth-date))))
-    (print (equal "tomo"
-                  (slot-display-value i (get-slot 'testdb1 'nickname))))
-    (print (equal "408-644-6198"
-                  (slot-display-value i (get-slot 'testdb1 'phone-number))))
-    (print (equal "95129"
-                  (slot-display-value i (get-slot 'testdb1 'zip-code))))
-    (print (equal (concat "Hello" *nl* "World")
-                  (slot-display-value i (get-slot 'testdb1 'note))))
-    (print (safe= "Hello<br>World"
-                  (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))))
+    (is (equal "Tomoyuki Matsumoto"
+               (slot-display-value i (get-slot 'testdb1 'name))))
+    (is (equal "password"
+               (slot-display-value i (get-slot 'testdb1 'password))))
+    (is (equal "tomo@example.com"
+               (slot-display-value i (get-slot 'testdb1 'email))))
+    (is (equal "Male"
+               (slot-display-value i (get-slot 'testdb1 'sex))))
+    (is (equal "single"
+               (slot-display-value i (get-slot 'testdb1 'marriage))))
+    (is (equal "sports, reading"
+               (slot-display-value i (get-slot 'testdb1 'hobbies))))
+    (is (equal "1983-09-28"
+               (slot-display-value i (get-slot 'testdb1 'birth-date))))
+    (is (equal "tomo"
+               (slot-display-value i (get-slot 'testdb1 'nickname))))
+    (is (equal "408-644-6198"
+               (slot-display-value i (get-slot 'testdb1 'phone-number))))
+    (is (equal "95129"
+               (slot-display-value i (get-slot 'testdb1 'zip-code))))
+    (is (equal (concat "Hello" *nl* "World")
+               (slot-display-value i (get-slot 'testdb1 'note))))
+    (is (safe= "Hello<br>World"
+               (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))))
