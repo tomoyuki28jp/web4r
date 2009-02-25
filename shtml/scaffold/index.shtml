@@ -1,4 +1,4 @@
-(with-shtml-file ("common/template.shtml")
+(with-shtml-file (shtml-path "common/template.shtml")
   :title (title/ "Listing " cname)
   :body (body/
          (msgs/)

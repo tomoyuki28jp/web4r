@@ -1,6 +1,18 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defparameter *test-dir*
+    (namestring (merge-pathnames "tests/" *web4r-dir*))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defparameter *test-shtml-dir*
+    (namestring (merge-pathnames "shtml/" *test-dir*))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun test-shtml-path (file)
+    (namestring (merge-pathnames file *test-shtml-dir*))))
+
 (defun string=* (str1 str2)
   (string= (replace-str *nl* "" str1)
            (replace-str *nl* "" str2)))
@@ -93,25 +105,25 @@ http://www.w3.org/TR/html4/loose.dtd\">
 
 (test shtml-file
   (let ((x "x"))
-    (is-true (shtml= (with-shtml-file ("../tests/shtml/test1.shtml"))
+    (is-true (shtml= (with-shtml-file (test-shtml-path "test1.shtml"))
                      "<P>x</P>")))
   (let ((lst '(1 2 3)))
-    (is-true (shtml= (with-shtml-file ("../tests/shtml/test2.shtml"))
+    (is-true (shtml= (with-shtml-file (test-shtml-path "test2.shtml"))
                      "<UL><LI>1</LI><LI>2</LI><LI>3</LI></UL>")))
-  (is-true (shtml= (with-shtml-file ("../tests/shtml/template1.shtml"))
+  (is-true (shtml= (with-shtml-file (test-shtml-path "template1.shtml"))
                    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>Default title</TITLE></HEAD>
 <BODY><P>Default body</P></BODY></HTML>"))
-  (is-true (shtml= (with-shtml-file ("../tests/shtml/template1.shtml")
+  (is-true (shtml= (with-shtml-file (test-shtml-path "template1.shtml")
                      :title (title/ "New title"))
                    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>New title</TITLE></HEAD>
 <BODY><P>Default body</P></BODY></HTML>"))
-  (is-true (shtml= (with-shtml-file ("../tests/shtml/template1.shtml")
+  (is-true (shtml= (with-shtml-file (test-shtml-path "template1.shtml")
                      :body (body/ (p/ "New body")))
                    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">

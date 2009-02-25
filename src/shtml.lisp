@@ -210,8 +210,8 @@ http://www.w3.org/TR/html4/frameset.dtd\">")
 (defmacro with-shtml ((name) &rest body)
   `(%with-shtml ,(get-shtml name) ,@body))
 
-(defmacro with-shtml-file ((file) &rest body)
-  `(%with-shtml ,(read-shtml (shtml-path file) *package*) ,@body))
+(defmacro with-shtml-file (file-path &rest body)
+  `(%with-shtml ,(read-shtml (eval file-path) *package*) ,@body))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (define-shtml :basic

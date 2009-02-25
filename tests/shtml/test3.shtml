@@ -1,1 +1,1 @@
-(with-shtml-file ("../tests/shtml/test1.shtml"))
+(with-shtml-file (test-shtml-path "test1.shtml"))

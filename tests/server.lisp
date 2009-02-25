@@ -1,14 +1,14 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
-(defparameter *public-dir*
-  (namestring (merge-pathnames "tests/public/" *web4r-dir*)))
+(defparameter *test-public-dir*
+  (namestring (merge-pathnames "public/" *test-dir*)))
 
 (defun file-content= (file &optional content)
   (unless content
     (setf content (http-request (concat "http://localhost:8080/" file))))
   (let ((e (if (stringp content) 'base-char '(unsigned-byte 8))))
-    (with-open-file (in (merge-pathnames file *public-dir*) :element-type e)
+    (with-open-file (in (merge-pathnames file *test-public-dir*) :element-type e)
       (let* ((length (file-length in))
              (array  (make-array length :element-type e)))
         (read-sequence array in)
@@ -21,7 +21,7 @@
                                :content-length t
                                :parameters
                                (list (list "foo" (merge-pathnames
-                                                  file *public-dir*))))))
+                                                  file *test-public-dir*))))))
 
 (defun status-code= (uri status-code)
   (multiple-value-bind (body status-code* headers uri stream close reason-phrase)
@@ -62,7 +62,7 @@
 
 (test server
   (let ((s (start-server
-            (make-server :public-dir *public-dir* :port 8080 :timeout-sec 3))))
+            (make-server :public-dir *test-public-dir* :port 8080 :timeout-sec 3))))
     (unwind-protect
          (progn
            ; static file content
@@ -331,17 +331,17 @@
                         (http-request "http://localhost:8080/last-post-test2"
                                       :method :post :content-length t :cookie-jar c
                                       :parameters (list (list "foo" (merge-pathnames
-                                                                     "test.txt" *public-dir*))))))
+                                                                     "test.txt" *test-public-dir*))))))
              (is (equal "test.css-ok"
                         (http-request "http://localhost:8080/last-post-test3"
                                       :method :post :content-length t :cookie-jar c
                                       :parameters (list (list "foo" (merge-pathnames
-                                                                     "test.css" *public-dir*))))))
+                                                                     "test.css" *test-public-dir*))))))
              (is (equal "test.js-ok"
                         (http-request "http://localhost:8080/last-post-test2"
                                       :method :post :content-length t :cookie-jar c
                                       :parameters (list (list "foo" (merge-pathnames
-                                                                     "test.js" *public-dir*)))))))
+                                                                     "test.js" *test-public-dir*)))))))
            ; host-uri
            (defpage host-uri-test () (p (host-uri)))
            (is (equal "http://localhost:8080/"
@@ -391,7 +391,7 @@
                                     :method :post :content-length t
                                     :parameters
                                     (list (list "foo"
-                                                (merge-pathnames "test.gif" *public-dir*)
+                                                (merge-pathnames "test.gif" *test-public-dir*)
                                                 :content-type "image/gif"
                                                 :filename "test.gif")))))
            (is (equal "test.png-image/gif-2497"
@@ -399,7 +399,7 @@
                                     :method :post :content-length t
                                     :parameters
                                     (list (list "foo"
-                                                (merge-pathnames "test.png" *public-dir*)
+                                                (merge-pathnames "test.png" *test-public-dir*)
                                                 :content-type "image/gif"
                                                 :filename "test.png")))))
            )
