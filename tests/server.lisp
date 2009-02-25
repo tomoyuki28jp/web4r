@@ -428,4 +428,3 @@
                                                         *test-public-dir*)
                                        :content-type "image/gif"
                                        :filename "test.png"))))))
-
