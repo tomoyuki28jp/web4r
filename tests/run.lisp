@@ -10,17 +10,18 @@
 (in-package :web4r-tests)
 
 (defmacro run-test (test)
-  (let ((s (make-server
-            :public-dir *test-public-dir* :port 8080 :timeout-sec 3)))
-    `(progn
-       (setf *srv* (start-server ,s))
-       (ele:open-store
-        '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
-       (unwind-protect
-            (5am:run! ,test)
-         (progn
-           (ele:close-store)
-           (stop-server *srv*))))))
+  `(progn
+     (setf *srv* (start-server (make-server :public-dir *test-public-dir*
+                                            :port 8080 :timeout-sec 3)))
+     (ele:open-store
+      '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
+     (when (= 0 (hash-table-count *slots*))
+       (def-test-pclass))
+     (unwind-protect
+          (5am:run! ,test)
+       (progn
+         (ele:close-store)
+         (stop-server *srv*)))))
 
 ; run each test
 ;(run-test 'get-params)
