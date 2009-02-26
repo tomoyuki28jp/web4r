@@ -1,6 +1,10 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
+(defvar *test-slots*
+  '(name password email sex marriage hobbies birth-date
+    nickname phone-number zip-code note image))
+
 (defmacro def-test-pclass ()
   `(defpclass testdb1 ()
      ((name         :length 50 :label "Full Name" :size 30)
@@ -17,15 +21,26 @@
       (image        :input :file :type :image :length (1000 500000) :nullable t))))
 
 (test get-slots
-  (let ((sl '(name password email sex marriage hobbies birth-date
-              nickname phone-number zip-code note image)))
-    (is (eq (length sl) (length (get-slots 'testdb1))))
-    (loop for s in (get-excluded-slots 'testdb1)
-          do (is (member (web4r::slot-symbol s) sl)))))
+  (is (eq (length *test-slots*) (length (get-slots 'testdb1))))
+  (loop for s in (get-slots 'testdb1)
+        do (is (member (web4r::slot-symbol s) *test-slots*))))
 
 (test get-excluded-slots
-  (let ((sl '(name email sex marriage hobbies birth-date
-              nickname phone-number zip-code note image)))
+  (let ((sl (remove 'password *test-slots*)))
+    (is (eq (length sl) (length (get-excluded-slots 'testdb1))))
+    (loop for s in (get-excluded-slots 'testdb1)
+          do (is (member (web4r::slot-symbol s) sl))))
+  (let ((*with-slots* :all))
+    (is (eq (length *test-slots*) (length (get-excluded-slots 'testdb1))))
+    (loop for s in (get-excluded-slots 'testdb1)
+          do (is (member (web4r::slot-symbol s) *test-slots*))))
+  (let ((*without-slots* '(email))
+        (sl (remove 'email (remove 'password *test-slots*))))
+    (is (eq (length sl) (length (get-excluded-slots 'testdb1))))
+    (loop for s in (get-excluded-slots 'testdb1)
+          do (is (member (web4r::slot-symbol s) sl))))
+  (let ((*with-slots* '(name password email))
+        (sl '(name email)))
     (is (eq (length sl) (length (get-excluded-slots 'testdb1))))
     (loop for s in (get-excluded-slots 'testdb1)
           do (is (member (web4r::slot-symbol s) sl)))))
@@ -292,3 +307,6 @@ World")))))
     (is (equal "Hello
 World"         (slot-save-value (get-slot 'testdb1 'note))))
     ))
+
+;(test form-input
+;  )
