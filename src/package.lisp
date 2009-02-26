@@ -218,6 +218,7 @@
            :class-validation-errors
            :form-input
            :form-label
+           :must?
            :scaffold
            :delete/cont
            :edit/cont

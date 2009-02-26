@@ -277,7 +277,7 @@ http://www.w3.org/TR/html4/frameset.dtd\">")
      (table/
        (loop for s in (get-excluded-slots ,class)
              do (progn
-                  (tr/ (td/ (form-label s)))
+                  (tr/ (td/ (form-label s) (must? s)))
                   (tr/ (td/ (form-input s ,instance)))))
        (tr/ (td/ (submit/ :value ,submit))))))
 

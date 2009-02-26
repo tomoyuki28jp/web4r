@@ -195,12 +195,15 @@
 (defgeneric form-label (slot))
 (defmethod form-label ((slot slot-options))
   (with-slots (type label id nullable) slot
-    (flet ((must? () (unless nullable
-                       (font/ :color "red" "*"))))
-      (cond ((eq type :date)
-             (label/ :for (mkstr id "-Y") label) (must?))
-            (t (when (and label id)
-                 (label/ :for id label) (must?)))))))
+    (cond ((eq type :date)
+           (label/ :for (mkstr id "-Y") label))
+      (t (when (and label id)
+           (label/ :for id label))))))
+
+(defgeneric must? (slot))
+(defmethod must? ((slot slot-options))
+  (unless (slot-nullable slot)
+    (font/ :color "red" "*")))
 
 (defun slot-validation-errors (class slot)
   (with-slots
