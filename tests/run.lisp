@@ -9,6 +9,20 @@
 
 (in-package :web4r-tests)
 
+(defpclass testdb1 ()
+    ((name         :length 50 :label "Full Name" :size 30)
+     (password     :input :password :length (8 12) :hide t)
+     (email        :type :email :unique t)
+     (sex          :input :radio :options ("Male" "Female"))
+     (marriage     :input :select :options ("single" "married" "divorced"))
+     (hobbies      :input :checkbox :options ("sports" "music" "reading"))
+     (birth-date   :type :date)
+     (nickname     :length 50 :nullable t)
+     (phone-number :type (:regex "^\\d{3}-\\d{3}-\\d{4}$"))
+     (zip-code     :type :integer :length 5)
+     (note         :length 3000 :rows 5 :cols 30)
+     (image        :input :file :type :image :length (1000 500000) :nullable t)))
+
 (defmacro run-test (test)
   `(progn
      (setf *srv* (start-server (make-server :public-dir *test-public-dir*
