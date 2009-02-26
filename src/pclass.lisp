@@ -117,7 +117,7 @@
              (safe (nl->br (escape val))))
             ((eq type :image)
              (a/ :href (upload-file-uri val)
-                 (img/ :src (upload-file-thumbnail-uri val) :alt (slot-id slot))))
+                 (img/ :src (safe (upload-file-thumbnail-uri val)) :alt (slot-id slot))))
             ((eq input :checkbox)
              (awhen val
                (join ", " val)))
