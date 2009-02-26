@@ -18,10 +18,7 @@
            (replace-str *nl* "" str2)))
 
 (defmacro shtml= (shtml html)
-  `(let ((*http-char-stream* (make-string-output-stream)))
-     ,shtml
-     (string=* (get-output-stream-string *http-char-stream*)
-               ,html)))
+  `(string=* (shtml->html ,shtml) ,html))
 
 (test doctype
   (let ((*doctype* *doctype-strict*))
