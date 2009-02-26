@@ -290,7 +290,7 @@ World")
             ("IMAGE" ("name" . "test.gif")
                      ("type" . "image/gif")
                      ("tmp-name" . "/tmp/web4r/tmp/579198166B")
-                     ("size" . "1841"))))))
+                     ("size" . 1841))))))
     (is (equal "Tomoyuki Matsumoto"
                (slot-save-value (get-slot 'testdb1 'name))))
     (is (equal "password"
@@ -351,4 +351,65 @@ World"         (slot-save-value (get-slot 'testdb1 'note))))
   (is-true (shtml= (form-input (get-slot 'testdb1 'note))
                    "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\"></TEXTAREA>"))
   (is-true (shtml= (form-input (get-slot 'testdb1 'image))
-                   "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">")))
+                   "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">"))
+
+  (let ((*request*
+         (web4r::make-request
+          :post-params
+          '(("NAME" . "Tomoyuki Matsumoto")
+            ("PASSWORD" . "password")
+            ("EMAIL" . "tomo@tomo.com")
+            ("SEX" . "Male")
+            ("MARRIAGE" . "single")
+            ("HOBBIES-sports" . "sports")
+            ("HOBBIES-reading" . "reading")
+            ("BIRTH-DATE-Y" . "1983")
+            ("BIRTH-DATE-M" . "9")
+            ("BIRTH-DATE-D" . "28")
+            ("NICKNAME" . "tomo")
+            ("PHONE-NUMBER" . "408-644-6198")
+            ("ZIP-CODE" . "95129")
+            ("NOTE" . "Hello
+World")
+            ("IMAGE" ("name" . "test.gif")
+                     ("type" . "image/gif")
+                     ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+                     ("size" . 1841))))))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'name))
+                   "<INPUT TYPE=\"text\" NAME=\"NAME\" VALUE=\"Tomoyuki Matsumoto\" ID=\"NAME\" SIZE=\"30\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'password))
+                   "<INPUT TYPE=\"password\" NAME=\"PASSWORD\" VALUE=\"password\" ID=\"PASSWORD\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'email))
+                   "<INPUT TYPE=\"text\" NAME=\"EMAIL\" VALUE=\"tomo@tomo.com\" ID=\"EMAIL\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'sex))
+                   "<INPUT TYPE=\"radio\" CHECKED=\"checked\" VALUE=\"Male\" ID=\"Male\" NAME=\"SEX\">
+<LABEL FOR=\"Male\">Male</LABEL>
+<INPUT TYPE=\"radio\" VALUE=\"Female\" ID=\"Female\" NAME=\"SEX\">
+<LABEL FOR=\"Female\">Female</LABEL>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'marriage))
+                   "<SELECT NAME=\"MARRIAGE\" ID=\"MARRIAGE\">
+<OPTION VALUE=\"single\" SELECTED=\"selected\">single</OPTION>
+<OPTION VALUE=\"married\">married</OPTION>
+<OPTION VALUE=\"divorced\">divorced</OPTION>
+</SELECT>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'hobbies))
+                   "<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"sports\" ID=\"HOBBIES-sports\" NAME=\"HOBBIES-sports\">
+<LABEL FOR=\"sports\">sports</LABEL>
+<INPUT TYPE=\"checkbox\" VALUE=\"music\" ID=\"HOBBIES-music\" NAME=\"HOBBIES-music\">
+<LABEL FOR=\"music\">music</LABEL>
+<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"reading\" ID=\"HOBBIES-reading\" NAME=\"HOBBIES-reading\">
+<LABEL FOR=\"reading\">reading</LABEL>"))
+  (is-true (equalp (shtml->html (select-date/ "BIRTH-DATE" :y 1983 :m 9 :d 28))
+                   (shtml->html (form-input (get-slot 'testdb1 'birth-date)))))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'nickname))
+                   "<INPUT TYPE=\"text\" NAME=\"NICKNAME\" VALUE=\"tomo\" ID=\"NICKNAME\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'phone-number))
+                   "<INPUT TYPE=\"text\" NAME=\"PHONE-NUMBER\" VALUE=\"408-644-6198\" ID=\"PHONE-NUMBER\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'zip-code))
+                   "<INPUT TYPE=\"text\" NAME=\"ZIP-CODE\" VALUE=\"95129\" ID=\"ZIP-CODE\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'note))
+                   "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\">Hello
+World</TEXTAREA>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'image))
+                   "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">")
+                   )))
