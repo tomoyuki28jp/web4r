@@ -152,10 +152,12 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun replace-str (search replace str)
-    (let ((s (split search str)))
-      (if (plusp (length s))
+    (if (null search)
+      str
+      (let ((s (split search str)))
+        (if (plusp (length s))
           (join replace s)
-          str))))
+          str)))))
 
 (defun assoc-ref (item alist &rest args)
   (awhen (apply #'assoc item alist args)
