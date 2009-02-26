@@ -488,3 +488,29 @@ World</TEXTAREA>"))
                 (shtml->html (form-label (get-slot 'testdb1 'note)))))
   (is (string=* "<LABEL FOR=\"IMAGE\">Image</LABEL>"
                 (shtml->html (form-label (get-slot 'testdb1 'image))))))
+
+(test must?
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'name)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'password)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'email)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'sex)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'marriage)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'hobbies)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'birth-date)))))
+  (is (eq nil
+          (must? (get-slot 'testdb1 'nickname))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'phone-number)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'zip-code)))))
+  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
+                (shtml->html (must? (get-slot 'testdb1 'note)))))
+  (is (eq nil
+          (must? (get-slot 'testdb1 'image)))))
