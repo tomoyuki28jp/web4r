@@ -3,7 +3,7 @@
 ; --- No image --------------------------------------------------
 
 (defun noimage ()
-  (serve-file (concat *web4r-dir* "images/noimage.gif")
+  (serve-file (merge-pathnames "images/noimage.gif" *web4r-dir*)
               :public-file-only nil))
 
 (set-page 'noimage (lambda () (noimage)))
