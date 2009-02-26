@@ -88,6 +88,7 @@
            :load-shtml
            :with-shtml
            :with-shtml-file
+           :shtml->html
            :input-text/
            :input-checked/
            :submit/

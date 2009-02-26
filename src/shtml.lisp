@@ -223,6 +223,11 @@ http://www.w3.org/TR/html4/frameset.dtd\">")
              (body/
               (p/ "Default template body")))))
 
+(defmacro shtml->html (&rest shtml)
+  `(let ((*http-char-stream* (make-string-output-stream)))
+     ,@shtml
+     (get-output-stream-string *http-char-stream*)))
+
 ; --- Form ------------------------------------------------------
 
 (defmacro input-text/ (name &rest args)
