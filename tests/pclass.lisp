@@ -312,8 +312,7 @@ World")
     (is (equal "95129"
                (slot-save-value (get-slot 'testdb1 'zip-code))))
     (is (equal "Hello
-World"         (slot-save-value (get-slot 'testdb1 'note))))
-    ))
+World"         (slot-save-value (get-slot 'testdb1 'note))))))
 
 (test form-input
   (is-true (shtml= (form-input (get-slot 'testdb1 'name))
@@ -412,4 +411,54 @@ World")
 World</TEXTAREA>"))
   (is-true (shtml= (form-input (get-slot 'testdb1 'image))
                    "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">")
-                   )))
+                   ))
+  (let ((i (make-instance 'testdb1
+             :name         "Tomoyuki Matsumoto"
+             :password     "password"
+             :email        "tomo@tomo.com"
+             :sex          "Male"
+             :marriage     "single"
+             :hobbies      '("sports" "reading")
+             :birth-date   "1983-09-28"
+             :nickname     "tomo"
+             :phone-number "408-644-6198"
+             :zip-code     "95129"
+             :note         (concat "Hello" *nl* "World")
+             :image        "test.gif")))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'name) i)
+                   "<INPUT TYPE=\"text\" NAME=\"NAME\" VALUE=\"Tomoyuki Matsumoto\" ID=\"NAME\" SIZE=\"30\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'password) i)
+                   "<INPUT TYPE=\"password\" NAME=\"PASSWORD\" VALUE=\"password\" ID=\"PASSWORD\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'email) i)
+                   "<INPUT TYPE=\"text\" NAME=\"EMAIL\" VALUE=\"tomo@tomo.com\" ID=\"EMAIL\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'sex) i)
+                   "<INPUT TYPE=\"radio\" CHECKED=\"checked\" VALUE=\"Male\" ID=\"Male\" NAME=\"SEX\">
+<LABEL FOR=\"Male\">Male</LABEL>
+<INPUT TYPE=\"radio\" VALUE=\"Female\" ID=\"Female\" NAME=\"SEX\">
+<LABEL FOR=\"Female\">Female</LABEL>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'marriage) i)
+                   "<SELECT NAME=\"MARRIAGE\" ID=\"MARRIAGE\">
+<OPTION VALUE=\"single\" SELECTED=\"selected\">single</OPTION>
+<OPTION VALUE=\"married\">married</OPTION>
+<OPTION VALUE=\"divorced\">divorced</OPTION>
+</SELECT>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'hobbies) i)
+                   "<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"sports\" ID=\"HOBBIES-sports\" NAME=\"HOBBIES-sports\">
+<LABEL FOR=\"sports\">sports</LABEL>
+<INPUT TYPE=\"checkbox\" VALUE=\"music\" ID=\"HOBBIES-music\" NAME=\"HOBBIES-music\">
+<LABEL FOR=\"music\">music</LABEL>
+<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"reading\" ID=\"HOBBIES-reading\" NAME=\"HOBBIES-reading\">
+<LABEL FOR=\"reading\">reading</LABEL>"))
+  (is-true (equalp (shtml->html (select-date/ "BIRTH-DATE" :y 1983 :m 9 :d 28))
+                   (shtml->html (form-input (get-slot 'testdb1 'birth-date) i))))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'nickname) i)
+                   "<INPUT TYPE=\"text\" NAME=\"NICKNAME\" VALUE=\"tomo\" ID=\"NICKNAME\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'phone-number) i)
+                   "<INPUT TYPE=\"text\" NAME=\"PHONE-NUMBER\" VALUE=\"408-644-6198\" ID=\"PHONE-NUMBER\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'zip-code) i)
+                   "<INPUT TYPE=\"text\" NAME=\"ZIP-CODE\" VALUE=\"95129\" ID=\"ZIP-CODE\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'note) i)
+                   "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\">Hello
+World</TEXTAREA>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'image) i)
+                   "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">"))))
