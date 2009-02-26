@@ -202,14 +202,15 @@
    (mkstr "touch -m " (session-file sid))))
 
 (defun get-session (&optional name)
-  (let ((file (session-file *sid*)))
-    (when (probe-file file)
-      (let ((s (with-open-file (in file)
-                 (with-standard-io-syntax
-                   (read in nil nil)))))
-        (if name
+  (awhen (aand *sid* (session-file it))
+    (let ((file it))
+      (when (probe-file file)
+        (let ((s (with-open-file (in file)
+                   (with-standard-io-syntax
+                       (read in nil nil)))))
+          (if name
             (assoc-ref name s :test #'equalp)
-            s)))))
+            s))))))
 
 (defun rem-session (name)
   (let ((session (get-session)))
@@ -239,7 +240,8 @@
       (print data out))))
 
 (defun session-file (sid)
-  (merge-pathnames sid (server-session-save-dir *server*)))
+  (awhen (aand sid *server*)
+    (merge-pathnames sid (server-session-save-dir it))))
 
 (defun session-name ()
   (server-session-name *server*))
