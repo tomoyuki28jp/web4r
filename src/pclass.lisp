@@ -177,7 +177,8 @@
                (aif (or (file-save-name id)
                         (and (listp value)
                              (awhen (assoc-ref "size" value :test #'equalp)
-                               (> it 0))))
+                               (when (> it 0)
+                                 (assoc-ref "save-name" value :test #'equalp)))))
                     (progn 
                       (when (and ins (null (post-params)) value
                         (input/ :type "hidden" :name id :value value)))
@@ -432,25 +433,26 @@ your server public directory")
   (loop for s in (file-slots class)
      as id = (slot-id s)
      do (progn
-          (let ((ch (concat id "-change")))
-            (when (aand (get-file-data ch "size" #'post-param)
-                        (not (eq it 0)))
+          (let* ((ch  (concat id "-change"))
+                 (ch? (aand (get-file-data ch "size" #'post-param)
+                            (not (eq it 0)))))
+            (when ch?
               (setf (request-post-params *request*)
                     (append (remove-if #'(lambda (x) (equal (car x) id))
                                        (post-params))
                             (list (cons id (post-param ch)))))
-              (set-last-post)))
-          (cond ((equal "delete" (post-param (concat id "-delete")))
-                 (delete-uploading-file s))
-                ((and (aand (file-size id) (not (eq it 0)))
-                      (not (file-save-name id)))
-                 (awhen (uniq-file-name *upload-save-dir*)
-                   (rename-file (file-tmp-name id) it)
-                   (set-tmp-file (pathname-name it))
-                   (set-last-post :name id :value
-                                  (append (list (cons "save-name"
-                                                      (pathname-name it)))
-                                          (last-post id)))))))))
+              (set-last-post))
+            (cond ((equal "delete" (post-param (concat id "-delete")))
+                   (delete-uploading-file s))
+              ((and (aand (file-size id) (not (eq it 0)))
+                    (or ch? (not (file-save-name id))))
+               (awhen (uniq-file-name *upload-save-dir*)
+                 (rename-file (file-tmp-name id) it)
+                 (set-tmp-file (pathname-name it))
+                 (set-last-post :name id :value
+                                (append (list (cons "save-name"
+                                                    (pathname-name it)))
+                                        (last-post id))))))))))
 
 (defun delete-uploading-file (slot)
   (let ((id (slot-id slot)))
