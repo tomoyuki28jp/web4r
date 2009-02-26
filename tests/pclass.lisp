@@ -308,5 +308,39 @@ World")))))
 World"         (slot-save-value (get-slot 'testdb1 'note))))
     ))
 
-;(test form-input
-;  )
+(test form-input
+  (is-true (shtml= (form-input (get-slot 'testdb1 'name))
+                   "<INPUT TYPE=\"text\" NAME=\"NAME\" ID=\"NAME\" SIZE=\"30\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'password))
+                   "<INPUT TYPE=\"password\" NAME=\"PASSWORD\" ID=\"PASSWORD\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'email))
+                   "<INPUT TYPE=\"text\" NAME=\"EMAIL\" ID=\"EMAIL\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'sex))
+                   "<INPUT TYPE=\"radio\" VALUE=\"Male\" ID=\"Male\" NAME=\"SEX\">
+<LABEL FOR=\"Male\">Male</LABEL>
+<INPUT TYPE=\"radio\" VALUE=\"Female\" ID=\"Female\" NAME=\"SEX\">
+<LABEL FOR=\"Female\">Female</LABEL>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'marriage))
+                   "<SELECT NAME=\"MARRIAGE\" ID=\"MARRIAGE\">
+<OPTION VALUE=\"single\">single</OPTION>
+<OPTION VALUE=\"married\">married</OPTION>
+<OPTION VALUE=\"divorced\">divorced</OPTION>
+</SELECT>"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'hobbies))
+                   "<INPUT TYPE=\"checkbox\" VALUE=\"sports\" ID=\"HOBBIES-sports\" NAME=\"HOBBIES-sports\">
+<LABEL FOR=\"sports\">sports</LABEL>
+<INPUT TYPE=\"checkbox\" VALUE=\"music\" ID=\"HOBBIES-music\" NAME=\"HOBBIES-music\">
+<LABEL FOR=\"music\">music</LABEL>
+<INPUT TYPE=\"checkbox\" VALUE=\"reading\" ID=\"HOBBIES-reading\" NAME=\"HOBBIES-reading\">
+<LABEL FOR=\"reading\">reading</LABEL>"))
+  (is-true (equalp (shtml->html (select-date/ "BIRTH-DATE"))
+                   (shtml->html (form-input (get-slot 'testdb1 'birth-date)))))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'nickname))
+                   "<INPUT TYPE=\"text\" NAME=\"NICKNAME\" ID=\"NICKNAME\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'phone-number))
+                   "<INPUT TYPE=\"text\" NAME=\"PHONE-NUMBER\" ID=\"PHONE-NUMBER\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'zip-code))
+                   "<INPUT TYPE=\"text\" NAME=\"ZIP-CODE\" ID=\"ZIP-CODE\">"))
+  (is-true (shtml= (form-input (get-slot 'testdb1 'note))
+                   "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\"></TEXTAREA>"))
+  )
