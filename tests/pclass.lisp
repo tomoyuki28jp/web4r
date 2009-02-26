@@ -462,3 +462,29 @@ World</TEXTAREA>"))
 World</TEXTAREA>"))
   (is-true (shtml= (form-input (get-slot 'testdb1 'image) i)
                    "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">"))))
+
+(test form-label
+  (is (string=* "<LABEL FOR=\"NAME\">Full Name</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'name)))))
+  (is (string=* "<LABEL FOR=\"PASSWORD\">Password</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'password)))))
+  (is (string=* "<LABEL FOR=\"EMAIL\">Email</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'email)))))
+  (is (string=* "<LABEL FOR=\"SEX\">Sex</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'sex)))))
+  (is (string=* "<LABEL FOR=\"MARRIAGE\">Marriage</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'marriage)))))
+  (is (string=* "<LABEL FOR=\"HOBBIES\">Hobbies</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'hobbies)))))
+  (is (string=* "<LABEL FOR=\"BIRTH-DATE-Y\">Birth Date</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'birth-date)))))
+  (is (string=* "<LABEL FOR=\"NICKNAME\">Nickname</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'nickname)))))
+  (is (string=* "<LABEL FOR=\"PHONE-NUMBER\">Phone Number</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'phone-number)))))
+  (is (string=* "<LABEL FOR=\"ZIP-CODE\">Zip Code</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'zip-code)))))
+  (is (string=* "<LABEL FOR=\"NOTE\">Note</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'note)))))
+  (is (string=* "<LABEL FOR=\"IMAGE\">Image</LABEL>"
+                (shtml->html (form-label (get-slot 'testdb1 'image))))))
