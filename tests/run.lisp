@@ -15,8 +15,6 @@
                                             :port 8080 :timeout-sec 3)))
      (ele:open-store
       '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
-     (when (= 0 (hash-table-count *slots*))
-       (def-test-pclass))
      (unwind-protect
           (5am:run! ,test)
        (progn
