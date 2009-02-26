@@ -249,3 +249,46 @@
                (slot-display-value i (get-slot 'testdb1 'note))))
     (is (safe= "Hello<br>World"
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))))
+
+(test slot-save-value
+  (let ((*request*
+         (web4r::make-request
+          :post-params
+          '(("NAME" . "Tomoyuki Matsumoto")
+            ("PASSWORD" . "password")
+            ("EMAIL" . "tomo@tomo.com")
+            ("SEX" . "Male")
+            ("MARRIAGE" . "single")
+            ("HOBBIES-sports" . "sports")
+            ("HOBBIES-reading" . "reading")
+            ("BIRTH-DATE-Y" . "1983")
+            ("BIRTH-DATE-M" . "9")
+            ("BIRTH-DATE-D" . "28")
+            ("NICKNAME" . "tomo")
+            ("PHONE-NUMBER" . "408-644-6198")
+            ("ZIP-CODE" . "95129")
+            ("NOTE" . "Hello
+World")))))
+    (is (equal "Tomoyuki Matsumoto"
+               (slot-save-value (get-slot 'testdb1 'name))))
+    (is (equal "password"
+               (slot-save-value (get-slot 'testdb1 'password))))
+    (is (equal "tomo@tomo.com"
+               (slot-save-value (get-slot 'testdb1 'email))))
+    (is (equal "Male"
+               (slot-save-value (get-slot 'testdb1 'sex))))
+    (is (equal "single"
+               (slot-save-value (get-slot 'testdb1 'marriage))))
+    (is (equal '("sports" "reading")
+               (slot-save-value (get-slot 'testdb1 'hobbies))))
+    (is (equal "1983-9-28"
+               (slot-save-value (get-slot 'testdb1 'birth-date))))
+    (is (equal "tomo"
+               (slot-save-value (get-slot 'testdb1 'nickname))))
+    (is (equal "408-644-6198"
+               (slot-save-value (get-slot 'testdb1 'phone-number))))
+    (is (equal "95129"
+               (slot-save-value (get-slot 'testdb1 'zip-code))))
+    (is (equal "Hello
+World"         (slot-save-value (get-slot 'testdb1 'note))))
+    ))
