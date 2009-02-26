@@ -139,7 +139,7 @@
                  (file-save-name id)))
             ((eq input :checkbox)
              (loop for o in options
-                   as v = (post-param o)
+                   as v = (post-param (mkstr id "-" o))
                    when v collect o))
             (t value)))))
 
@@ -154,10 +154,11 @@
              (if (eq input :select)
                  (select-form/ id options value)
                  (loop for o in options
+                       as oid = (mkstr id "-" o)
                        do (progn
                             (if (eq input :checkbox)
-                                (input-checked/ "checkbox" (or (post-param o) value)
-                                                :value o :id o :name o)
+                                (input-checked/ "checkbox" (or (post-param oid) value)
+                                                :value o :id oid :name oid)
                                 (input-checked/ "radio" value :value o
                                                 :id o :name id))
                             (label/ :for o o)))))
@@ -215,7 +216,7 @@
             (last-post id))
            ((eq input :checkbox)
             (loop for o in options
-                  when (post-param o)
+                  when (post-param (mkstr id "-" o))
                   collect o))
            (t (post-param id)))
      (list :nullable nullable :length length :type type
