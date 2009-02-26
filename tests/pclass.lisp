@@ -263,7 +263,10 @@
     (is (equal (concat "Hello" *nl* "World")
                (slot-display-value i (get-slot 'testdb1 'note))))
     (is (safe= "Hello<br>World"
-               (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))))
+               (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
+    (let ((*upload-save-dir* "/tmp/"))
+      (is (string=* "<A HREF=\"http:///noimage\"><IMG SRC=\"http:///thumbnail/?file=/tmp/test.gif&width=100&height=100\" ALT=\"IMAGE\"></A>"
+                    (shtml->html (slot-display-value i (get-slot 'testdb1 'image))))))))
 
 (test slot-save-value
   (let ((*request*
@@ -283,7 +286,11 @@
             ("PHONE-NUMBER" . "408-644-6198")
             ("ZIP-CODE" . "95129")
             ("NOTE" . "Hello
-World")))))
+World")
+            ("IMAGE" ("name" . "test.gif")
+                     ("type" . "image/gif")
+                     ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+                     ("size" . "1841"))))))
     (is (equal "Tomoyuki Matsumoto"
                (slot-save-value (get-slot 'testdb1 'name))))
     (is (equal "password"
@@ -343,4 +350,5 @@ World"         (slot-save-value (get-slot 'testdb1 'note))))
                    "<INPUT TYPE=\"text\" NAME=\"ZIP-CODE\" ID=\"ZIP-CODE\">"))
   (is-true (shtml= (form-input (get-slot 'testdb1 'note))
                    "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\"></TEXTAREA>"))
-  )
+  (is-true (shtml= (form-input (get-slot 'testdb1 'image))
+                   "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">")))
