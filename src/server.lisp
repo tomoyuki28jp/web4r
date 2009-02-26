@@ -909,7 +909,8 @@
       (funcall it)))
 
 (defun public-dir ()
-  (server-public-dir *server*))
+  (awhen *server*
+    (server-public-dir it)))
 
 (defun req-uri ()
   (request-uri *request*))
