@@ -18,11 +18,12 @@
      (unwind-protect
           (5am:run! ,test)
        (progn
+         (web4r::drop-class-instances 'testdb1)
          (ele:close-store)
          (stop-server *srv*)))))
 
 ; run each test
-;(run-test 'get-params)
+;(run-test 'form-input)
 
 ; run all tests
 ;(run-test 'web4r)
