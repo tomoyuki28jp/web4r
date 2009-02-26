@@ -54,9 +54,10 @@
    (body/
     (p/ "defpage-test1"))))
 
-; Drakma has a bug which drakma don't send cookies when uri is root directory
-; even when cookie path is set to "/". This function is to avoid the bug.
-; It's been fixed in dev repo on 2009/02/25. http://bknr.net/trac/changeset/4322
+; Drakma has a bug which drakma don't send cookies when a request uri is 
+; root directory even when cookie path is set to "/". This function is 
+; to avoid the bug. The bug been fixed in dev repo on 2009/02/25.
+; http://bknr.net/trac/changeset/4322
 (defun http-request* (uri &rest args)
   (apply #'http-request
          (append (list (replace-str "http://localhost:8080/"
