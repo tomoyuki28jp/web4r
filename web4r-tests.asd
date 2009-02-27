@@ -20,4 +20,5 @@
                           (:file "server")
                           (:file "pager")
                           (:file "pclass")
+                          (:file "image")
                           ))))
