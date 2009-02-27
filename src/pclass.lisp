@@ -293,13 +293,13 @@
       (when (typep it class)
         it))))
 
-(defun per-page (ins &key (index 'updated-at))
+(defun per-page (ins &key (index 'updated-at) (sort #'>))
   (let* ((total (length ins))
          (pager (make-instance 'pager :total-items total))
          (items (with-slots (total-pages current-page item-start item-end
                                          items-per-page) pager
                   (when (<= current-page total-pages)
-                    (subseq (sort ins #'> :key index) item-start item-end)))))
+                    (subseq (sort ins sort :key index) item-start item-end)))))
     (values items pager)))
 
 (defun drop-class-instances (class)
