@@ -236,6 +236,8 @@
            ; --- image.lisp ---
            :noimage
            :noimage-uri
+           :*thumbnail-width*
+           :*thumbnail-height*
            :image-file-p
            :thumbnail
            :thumbnail-uri
