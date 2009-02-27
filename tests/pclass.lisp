@@ -641,3 +641,37 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
                      ("size" . 1841))))))
     (is (list= (class-validation-errors 'testdb1)
                (list (web4r::get-error-msg :not-unique (web4r::slot-label (get-slot 'testdb1 'email))))))))
+
+(test file-slots
+  (is (equal (web4r::file-slots 'testdb1)
+             (list (get-slot 'testdb1 'image)))))
+
+(test multipart-form-p
+  (is-true (web4r::multipart-form-p 'testdb1))
+  (let ((*without-slots* '(image)))
+    (is-false (web4r::multipart-form-p 'testdb1))))
+
+(test oid
+  (loop for i in '(1 2 3)
+        as oid = (make-instance 'testdb1 :name i)
+        do (is (eq i (slot-value (get-instance-by-oid 'testdb1 (oid oid)) 'name)))))
+
+(test per-page
+  (web4r::drop-class-instances 'testdb1)
+  (loop for n from 1 to 26
+        as i = (make-instance 'testdb1 :name n :updated-at n)
+        do (setf (slot-value i 'updated-at) n))
+  (let ((*request* (web4r::make-request :get-params '(("page" . "1")))))
+    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
+          for n from 1 to 10
+          do (print (eq n (slot-value i 'name)))))
+  (let ((*request* (web4r::make-request :get-params '(("page" . "2")))))
+    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
+          for n from 11 to 20
+          do (is (eq n (slot-value i 'name)))))
+  (let ((*request* (web4r::make-request :get-params '(("page" . "3")))))
+    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
+          for n from 21 to 26
+          do (is (eq n (slot-value i 'name)))))
+  (let ((*request* (web4r::make-request :get-params '(("page" . "4")))))
+    (is-false (per-page (ele:get-instances-by-class 'testdb1)))))
