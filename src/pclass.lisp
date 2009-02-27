@@ -239,7 +239,7 @@
                          (car e))))
 
 (defun file-slots (class)
-  (loop for s in (get-slots class)
+  (loop for s in (get-excluded-slots class)
         when (eq (slot-input s) :file)
         collect s))
 
