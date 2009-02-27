@@ -130,18 +130,18 @@ http://www.w3.org/TR/html4/loose.dtd\">
 
 (test load-shtml
   (let ((x "x"))
-    (is-true (shtml= (load-shtml "../tests/shtml/test3.shtml")
+    (is-true (shtml= (load-shtml (test-shtml-path "test3.shtml"))
                      "<P>x</P>")))
   (let ((lst '(1 2 3)))
-    (is-true (shtml= (load-shtml "../tests/shtml/test4.shtml")
+    (is-true (shtml= (load-shtml (test-shtml-path "test4.shtml"))
                      "<UL><LI>1</LI><LI>2</LI><LI>3</LI></UL>")))
-  (is-true (shtml= (load-shtml "../tests/shtml/test5.shtml")
+  (is-true (shtml= (load-shtml (test-shtml-path "test5.shtml"))
                    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
 <HEAD><TITLE>New title</TITLE></HEAD>
 <BODY><P>Default body</P></BODY></HTML>"))
-  (is-true (shtml= (load-shtml "../tests/shtml/test6.shtml")
+  (is-true (shtml= (load-shtml (test-shtml-path "test6.shtml"))
                    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN
 http://www.w3.org/TR/html4/loose.dtd\">
 <HTML LANG=\"ja\">
