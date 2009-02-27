@@ -664,7 +664,7 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
   (let ((*request* (web4r::make-request :get-params '(("page" . "1")))))
     (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
           for n from 1 to 10
-          do (print (eq n (slot-value i 'name)))))
+          do (is (eq n (slot-value i 'name)))))
   (let ((*request* (web4r::make-request :get-params '(("page" . "2")))))
     (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
           for n from 11 to 20
@@ -675,3 +675,106 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
           do (is (eq n (slot-value i 'name)))))
   (let ((*request* (web4r::make-request :get-params '(("page" . "4")))))
     (is-false (per-page (ele:get-instances-by-class 'testdb1)))))
+
+(test make-pinstance
+  (web4r::drop-class-instances 'testdb1)
+  (let* ((*request*
+          (web4r::make-request
+           :post-params '(("NAME" . "Tomoyuki Matsumoto")
+                          ("EMAIL" . "tomo@tomo.com")
+                          ("SEX" . "Male")
+                          ("MARRIAGE" . "single")
+                          ("HOBBIES-sports" . "sports")
+                          ("HOBBIES-reading" . "reading")
+                          ("BIRTH-DATE-Y" . "1983")
+                          ("BIRTH-DATE-M" . "9")
+                          ("BIRTH-DATE-D" . "28")
+                          ("NICKNAME" . "tomo")
+                          ("PHONE-NUMBER" . "408-644-6198")
+                          ("ZIP-CODE" . "95129")
+                          ("NOTE" . "Hello
+World"))))
+         (i (progn
+              (make-pinstance 'testdb1 '((password "password")))
+              (car (ele:get-instances-by-class 'testdb1)))))
+    (is (equal "Tomoyuki Matsumoto"
+               (slot-display-value i (get-slot 'testdb1 'name))))
+    (is (equal "password"
+               (slot-display-value i (get-slot 'testdb1 'password))))
+    (is (equal "tomo@tomo.com"
+               (slot-display-value i (get-slot 'testdb1 'email))))
+    (is (equal "Male"
+               (slot-display-value i (get-slot 'testdb1 'sex))))
+    (is (equal "single"
+               (slot-display-value i (get-slot 'testdb1 'marriage))))
+    (is (equal "sports, reading"
+               (slot-display-value i (get-slot 'testdb1 'hobbies))))
+    (is (equal "1983-9-28"
+               (slot-display-value i (get-slot 'testdb1 'birth-date))))
+    (is (equal "tomo"
+               (slot-display-value i (get-slot 'testdb1 'nickname))))
+    (is (equal "408-644-6198"
+               (slot-display-value i (get-slot 'testdb1 'phone-number))))
+    (is (equal "95129"
+               (slot-display-value i (get-slot 'testdb1 'zip-code))))
+    (is (equal (concat "Hello" *nl* "World")
+               (slot-display-value i (get-slot 'testdb1 'note))))
+    (is (safe= "Hello<br>World"
+               (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))))
+
+(test update-pinstance
+  (web4r::drop-class-instances 'testdb1)
+  (let* ((*request*
+          (web4r::make-request
+           :post-params '(("NAME" . "Tomoyuki Matsumoto")
+                          ("EMAIL" . "tomo@tomo.com")
+                          ("SEX" . "Male")
+                          ("MARRIAGE" . "single")
+                          ("BIRTH-DATE-Y" . "1983")
+                          ("BIRTH-DATE-M" . "9")
+                          ("BIRTH-DATE-D" . "28")
+                          ("NICKNAME" . "tomo")
+                          ("PHONE-NUMBER" . "408-644-6198")
+                          ("ZIP-CODE" . "95129")
+                          ("NOTE" . "Hello
+World"))))
+         (i (progn
+              (make-pinstance 'testdb1 '((password "password")))
+              (car (ele:get-instances-by-class 'testdb1)))))
+    (let* ((*request*
+            (web4r::make-request
+             :post-params '(("NAME" . "Tomoyuki Matsumoto2")
+                            ("EMAIL" . "tomo@tomo.com2")
+                            ("SEX" . "Male2")
+                            ("MARRIAGE" . "single2")
+                            ("BIRTH-DATE-Y" . "1982")
+                            ("BIRTH-DATE-M" . "8")
+                            ("BIRTH-DATE-D" . "27")
+                            ("NICKNAME" . "tomo2")
+                            ("PHONE-NUMBER" . "408-644-6197")
+                            ("ZIP-CODE" . "95128")
+                            ("NOTE" . "Hello
+World2")))))
+      (update-pinstance 'testdb1 i '((password "password2"))))
+    (is (equal "Tomoyuki Matsumoto2"
+               (slot-display-value i (get-slot 'testdb1 'name))))
+    (is (equal "password2"
+               (slot-display-value i (get-slot 'testdb1 'password))))
+    (is (equal "tomo@tomo.com2"
+               (slot-display-value i (get-slot 'testdb1 'email))))
+    (is (equal "Male2"
+               (slot-display-value i (get-slot 'testdb1 'sex))))
+    (is (equal "single2"
+               (slot-display-value i (get-slot 'testdb1 'marriage))))
+    (is (equal "1982-8-27"
+               (slot-display-value i (get-slot 'testdb1 'birth-date))))
+    (is (equal "tomo2"
+               (slot-display-value i (get-slot 'testdb1 'nickname))))
+    (is (equal "408-644-6197"
+               (slot-display-value i (get-slot 'testdb1 'phone-number))))
+    (is (equal "95128"
+               (slot-display-value i (get-slot 'testdb1 'zip-code))))
+    (is (equal (concat "Hello" *nl* "World2")
+               (slot-display-value i (get-slot 'testdb1 'note))))
+    (is (safe= "Hello<br>World2"
+               (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))))
