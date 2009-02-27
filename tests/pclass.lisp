@@ -12,7 +12,7 @@
      (nickname     :length 50 :nullable t)
      (phone-number :type (:regex "^\\d{3}-\\d{3}-\\d{4}$"))
      (zip-code     :type :integer :length 5)
-     (note         :length 3000 :rows 5 :cols 30)
+     (note         :length 300 :rows 5 :cols 30)
      (image        :input :file :type :image :length (1000 500000) :nullable t)))
 
 (defvar *test-slots*
@@ -158,7 +158,7 @@
   (is (eq 50                (web4r::slot-length (get-slot 'testdb1 'nickname))))
   (is (eq nil               (web4r::slot-length (get-slot 'testdb1 'phone-number))))
   (is (eq 5                 (web4r::slot-length (get-slot 'testdb1 'zip-code))))
-  (is (eq 3000              (web4r::slot-length (get-slot 'testdb1 'note))))
+  (is (eq 300               (web4r::slot-length (get-slot 'testdb1 'note))))
   (is (equal '(1000 500000) (web4r::slot-length (get-slot 'testdb1 'image)))))
 
 (test slot-hide
@@ -513,3 +513,131 @@ World</TEXTAREA>"))
                 (shtml->html (must? (get-slot 'testdb1 'note)))))
   (is (eq nil
           (must? (get-slot 'testdb1 'image)))))
+
+
+(defun list= (x y)
+  (and (null (set-difference x y :test #'equal))
+       (null (set-difference y x :test #'equal))))
+
+(test class-validation-errors
+  (web4r::drop-class-instances 'testdb1)
+  (let ((*request*
+         (web4r::make-request
+          :post-params
+          '(("NAME" . "Tomoyuki Matsumoto")
+            ("PASSWORD" . "password")
+            ("EMAIL" . "tomo@tomo.com")
+            ("SEX" . "Male")
+            ("MARRIAGE" . "single")
+            ("HOBBIES-sports" . "sports")
+            ("HOBBIES-reading" . "reading")
+            ("BIRTH-DATE-Y" . "1983")
+            ("BIRTH-DATE-M" . "9")
+            ("BIRTH-DATE-D" . "28")
+            ("NICKNAME" . "tomo")
+            ("PHONE-NUMBER" . "408-644-6198")
+            ("ZIP-CODE" . "95129")
+            ("NOTE" . "Hello World")
+            ("IMAGE" ("name" . "test.gif")
+                     ("type" . "image/gif")
+                     ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+                     ("size" . 1841))))))
+    (is-false (class-validation-errors 'testdb1)))
+  ; nullable
+  (is (list= (class-validation-errors 'testdb1)
+             (list
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'name)))
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'email)))
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'sex)))
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'marriage)))
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'hobbies)))
+              (web4r::get-error-msg :invalid (web4r::slot-label (get-slot 'testdb1 'birth-date)))
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'phone-number)))
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'zip-code)))
+              (web4r::get-error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'note))))))
+  ; length
+  (let ((*with-slots* :all)
+        (*request*
+         (web4r::make-request
+          :post-params
+          '(("NAME" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+            ("PASSWORD" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+            ("EMAIL" . "tomo@tomo.com")
+            ("SEX" . "Male")
+            ("MARRIAGE" . "single")
+            ("HOBBIES-sports" . "sports")
+            ("HOBBIES-reading" . "reading")
+            ("BIRTH-DATE-Y" . "1983")
+            ("BIRTH-DATE-M" . "9")
+            ("BIRTH-DATE-D" . "28")
+            ("NICKNAME" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+            ("PHONE-NUMBER" . "408-644-6198")
+            ("ZIP-CODE" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+            ("NOTE" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+            ("IMAGE" ("name" . "test.gif")
+                     ("type" . "image/gif")
+                     ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+                     ("size" . 1234))))))
+    (is (list= (class-validation-errors 'testdb1)
+               (list
+                (web4r::get-error-msg :too-long (web4r::slot-label (get-slot 'testdb1 'name)) 50)
+                (web4r::get-error-msg :too-long (web4r::slot-label (get-slot 'testdb1 'password)) 12)
+                (web4r::get-error-msg :too-long (web4r::slot-label (get-slot 'testdb1 'nickname)) 50)
+                (web4r::get-error-msg :too-long (web4r::slot-label (get-slot 'testdb1 'zip-code)) 5)
+                (web4r::get-error-msg :too-long (web4r::slot-label (get-slot 'testdb1 'note)) 300)))))
+  ; type
+  (let ((*request*
+         (web4r::make-request
+          :post-params
+          '(("NAME" . "Tomoyuki Matsumoto")
+            ("PASSWORD" . "password")
+            ("EMAIL" . "invalid")
+            ("SEX" . "Male")
+            ("MARRIAGE" . "single")
+            ("HOBBIES-sports" . "sports")
+            ("HOBBIES-reading" . "reading")
+            ("BIRTH-DATE-Y" . "1983")
+            ("BIRTH-DATE-M" . "19")
+            ("BIRTH-DATE-D" . "28")
+            ("NICKNAME" . "tomo")
+            ("PHONE-NUMBER" . "408-644-61980")
+            ("ZIP-CODE" . "inval")
+            ("NOTE" . "Hello World")
+            ("IMAGE" ("name" . "test.txt")
+                     ("type" . nil)
+                     ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+                     ("size" . 1841))))))
+    (is (list= (class-validation-errors 'testdb1)
+               (list
+                (web4r::get-error-msg :invalid (web4r::slot-label (get-slot 'testdb1 'email)))
+                (web4r::get-error-msg :invalid (web4r::slot-label (get-slot 'testdb1 'birth-date)))
+                (web4r::get-error-msg :invalid (web4r::slot-label (get-slot 'testdb1 'phone-number)))
+                (web4r::get-error-msg :not-a-number (web4r::slot-label (get-slot 'testdb1 'zip-code)))))))
+  ; unique
+  (make-instance 'testdb1 :email "uniquetest@uniquetest.com")
+  (let ((*request*
+         (web4r::make-request
+          :post-params
+          '(("NAME" . "Tomoyuki Matsumoto")
+            ("PASSWORD" . "password")
+            ("EMAIL" . "uniquetest@uniquetest.com")
+            ("SEX" . "Male")
+            ("MARRIAGE" . "single")
+            ("HOBBIES-sports" . "sports")
+            ("HOBBIES-reading" . "reading")
+            ("BIRTH-DATE-Y" . "1983")
+            ("BIRTH-DATE-M" . "9")
+            ("BIRTH-DATE-D" . "28")
+            ("NICKNAME" . "tomo")
+            ("PHONE-NUMBER" . "408-644-6198")
+            ("ZIP-CODE" . "95129")
+            ("NOTE" . "Hello World")
+            ("IMAGE" ("name" . "test.gif")
+                     ("type" . "image/gif")
+                     ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+                     ("size" . 1841))))))
+    (is (list= (class-validation-errors 'testdb1)
+               (list (web4r::get-error-msg :not-unique (web4r::slot-label (get-slot 'testdb1 'email))))))))
