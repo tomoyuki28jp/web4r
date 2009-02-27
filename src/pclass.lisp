@@ -283,12 +283,6 @@
       (ele::oid instance)
     (error () nil)))
 
-(defun slot-values= (instance slot-values)
-  (loop for s in slot-values
-        unless (equal (slot-value instance (car s)) (nth 1 s))
-        do (return-from slot-values= nil)
-        finally (return t)))
-
 (defun drop-instance (instance)
   (drop-instances (list instance)))
 
