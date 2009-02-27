@@ -249,35 +249,34 @@
 ; --- Wrapper functions -----------------------------------------
 
 (defmacro defpclass (name parent slot-defs &rest class-opts)
-  (sethash `,name *slots*
-           (append (when (listp parent)
-                     (gethash `,(car parent) *slots*))
-                   (gethash '`,parent *slots*)
-                   `,(mapcar #'(lambda (s)
-                                 (apply #'make-instance
-                                        'slot-options (parse-slot s)))
-                             `,slot-defs)))
-  `(progn
-     ,(when (and (listp parent) (eq (car parent) 'user))
-        `(setf *user* (make-instance 'user-class :class ',name)))
-     (ele:defpclass ,name ,parent
-       ,(append
-         (loop for slot in slot-defs
-               as  s = (->list slot) collect
-              `(,(car s)
-                 :accessor ,(aif (member :accessor s) (nth 1 it) (car s))
-                 :initarg  ,(aif (member :initarg s)
-                                 (nth 1 it) (make-keyword (car s)))
-                 ,@(awhen (member :allocation s) `(:allocation ,(nth 1 it)))
-                 ,@(awhen (member :documentation s) `(:documentation ,(nth 1 it)))
-                 ,@(awhen (member :initform s) `(:initform ,(nth 1 it)))
-                 ,@(when (or (aand (member :index  s) (nth 1 it))
-                             (aand (member :unique s) (nth 1 it)))
-                                 '(:index t))))
-         '((created-at :accessor created-at :initform (get-universal-time))
-           (updated-at :accessor updated-at :initform (get-universal-time)
-            :index t)))
-       ,@class-opts)))
+  (let ((parent* (when (listp parent) (car parent))))
+    `(progn
+       (sethash ',name *slots*
+                (append (gethash ',parent* *slots*)
+                        (mapcar #'(lambda (s)
+                                    (apply #'make-instance
+                                             'slot-options (parse-slot s)))
+                                ',slot-defs)))
+       ,(when (eq parent* 'user)
+          `(setf *user* (make-instance 'user-class :class ',name)))
+       (ele:defpclass ,name ,parent
+         ,(append
+           (loop for slot in slot-defs
+                 as  s = (->list slot) collect
+                 `(,(car s)
+                         :accessor ,(aif (member :accessor s) (nth 1 it) (car s))
+                         :initarg  ,(aif (member :initarg s)
+                                        (nth 1 it) (make-keyword (car s)))
+                         ,@(awhen (member :allocation s) `(:allocation ,(nth 1 it)))
+                         ,@(awhen (member :documentation s) `(:documentation ,(nth 1 it)))
+                         ,@(awhen (member :initform s) `(:initform ,(nth 1 it)))
+                         ,@(when (or (aand (member :index  s) (nth 1 it))
+                                     (aand (member :unique s) (nth 1 it)))
+                             '(:index t))))
+           '((created-at :accessor created-at :initform (get-universal-time))
+             (updated-at :accessor updated-at :initform (get-universal-time)
+              :index t)))
+         ,@class-opts))))
 
 (defun oid (instance)
   (handler-case
