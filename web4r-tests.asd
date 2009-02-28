@@ -21,4 +21,4 @@
                           (:file "pager")
                           (:file "pclass")
                           (:file "image")
-                          ))))
+                          (:file "user")))))
