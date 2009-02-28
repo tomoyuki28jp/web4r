@@ -303,7 +303,8 @@
     (values items pager)))
 
 (defun drop-class-instances (class)
-  (drop-instances (get-instances-by-class class)))
+  (when (find-class class nil)
+    (drop-instances (get-instances-by-class class))))
 
 ; --- Scaffold  -------------------------------------------------
 
