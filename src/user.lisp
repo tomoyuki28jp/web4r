@@ -26,10 +26,9 @@
 
 (defvar *user* (make-instance 'user-class))
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defpclass user ()
-      ((id    :type :alnum  :length (4 12) :unique t)
-       (pass  :type :alnum  :length (4 12) :input :password))))
+(defpclass user ()
+    ((id    :type :alnum  :length (4 12) :unique t)
+     (pass  :type :alnum  :length (4 12) :input :password)))
 
 (defun user-class ()      (slot-value *user* 'class))
 (defun user-id-slot ()    (slot-value *user* 'id-slot))
