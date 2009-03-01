@@ -76,10 +76,13 @@
   (is (file-content= "test.txt"))
   (is (file-content= "test.zip")))
 
+(defvar *test-tmp-files* nil)
 (test file-upload
+  (setf *test-tmp-files* nil)
   (defpage upload-test ()
     (awhen (post-param "foo")
       (awhen (assoc-ref "tmp-name" it :test #'equal)
+        (push it *test-tmp-files*)
         (serve-file it :public-file-only nil))))
   (is (upload-file= "test"))
   (is (upload-file= "test.css"))
@@ -90,7 +93,9 @@
   (is (upload-file= "test.js"))
   (is (upload-file= "test.png"))
   (is (upload-file= "test.txt"))
-  (is (upload-file= "test.zip")))
+  (is (upload-file= "test.zip"))
+  (loop for f in *test-tmp-files*
+        do (is-false (probe-file f))))
 
 (test get-params
   (defpage get-params-test () (p/ (get-params)))
