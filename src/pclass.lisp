@@ -215,7 +215,7 @@
     (unless (equal it "")
       (font/ :color "grey" "(" it ")"))))
 
-(defun slot-validation-errors (class slot)
+(defun slot-validation-errors (class slot &optional ins)
   (with-slots
         (symbol id label type nullable length unique options input) slot
     (when (and options (null type))
@@ -234,15 +234,15 @@
                   collect o))
            (t (post-param id)))
      (list :nullable nullable :length length :type type
-           :unique (when unique (list class symbol))))))
+           :unique (when unique (list class symbol ins))))))
 
-(defun class-validation-errors (class)
+(defun class-validation-errors (class &optional ins)
   "returns validation error messages if there is any"
   (loop for s in (get-excluded-slots class)
         as input = (slot-input s)
         as e = (unless (and (eq input :file)
                             (atom (last-post (slot-id s))))
-                 (slot-validation-errors class s))
+                 (slot-validation-errors class s ins))
         when e collect (progn
                          (when (eq input :file)
                            (delete-uploading-file s))
@@ -359,7 +359,7 @@
   (let ((*with-slots* (or with-slots *with-slots*))
         (*without-slots* (or without-slots *without-slots*)))
     (save-upload-file class)
-    (aif (class-validation-errors class)
+    (aif (class-validation-errors class ins)
          (apply #'page/error-msgs
                 (append (list (uri-path 1) it)
                         (when ins (list (oid ins)))))

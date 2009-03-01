@@ -114,10 +114,12 @@
 
 (set-validator :unique
      (lambda (label val arg)
-       (when (and (listp arg) (= 2 (length arg)))
-         (destructuring-bind (class slot) arg
-           (when (get-instances-by-value class slot val)
-             (get-error-msg :not-unique label))))))
+       (when (and (listp arg) (= 3 (length arg)))
+         (destructuring-bind (class slot ins) arg
+           (awhen (get-instances-by-value class slot val)
+             (when (or (> (length it) 1)
+                       (not (eq (car it) ins)))
+               (get-error-msg :not-unique label)))))))
 
 ; --- Validations -----------------------------------------------
 

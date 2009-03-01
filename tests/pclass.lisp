@@ -474,7 +474,10 @@ World</TEXTAREA>"))
                    "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\">Hello
 World</TEXTAREA>"))
   (is-true (shtml= (form-input (get-slot 'testdb1 'image) i)
-                   "<INPUT TYPE=\"FILE\" NAME=\"IMAGE\" ID=\"IMAGE\">"))))
+                   "<INPUT TYPE=\"hidden\" NAME=\"IMAGE\" VALUE=\"test.gif\"><P>
+delete: <INPUT TYPE=\"checkbox\" VALUE=\"delete\" NAME=\"IMAGE-delete\" ID=\"IMAGE\"></P>
+<P>change: <INPUT TYPE=\"FILE\" NAME=\"IMAGE-change\" ID=\"IMAGE\"></P>
+<IMG SRC=\"http:///thumbnail/?file=/tmp/web4r/public/upload/test.gif&amp;width=100&amp;height=100\" ALT=\"IMAGE\">"))))
 
 (test form-label
   (is (string=* "<LABEL FOR=\"NAME\">Full Name</LABEL>"
@@ -631,30 +634,31 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
                 (web4r::get-error-msg :invalid (web4r::slot-label (get-slot 'testdb1 'phone-number)))
                 (web4r::get-error-msg :not-a-number (web4r::slot-label (get-slot 'testdb1 'zip-code)))))))
   ; unique
-  (make-instance 'testdb1 :email "uniquetest@uniquetest.com")
-  (let ((*request*
-         (web4r::make-request
-          :post-params
-          '(("NAME" . "Tomoyuki Matsumoto")
-            ("PASSWORD" . "password")
-            ("EMAIL" . "uniquetest@uniquetest.com")
-            ("SEX" . "Male")
-            ("MARRIAGE" . "single")
-            ("HOBBIES-sports" . "sports")
-            ("HOBBIES-reading" . "reading")
-            ("BIRTH-DATE-Y" . "1983")
-            ("BIRTH-DATE-M" . "9")
-            ("BIRTH-DATE-D" . "28")
-            ("NICKNAME" . "tomo")
-            ("PHONE-NUMBER" . "408-644-6198")
-            ("ZIP-CODE" . "95129")
-            ("NOTE" . "Hello World")
-            ("IMAGE" ("name" . "test.gif")
-                     ("type" . "image/gif")
-                     ("tmp-name" . "/tmp/web4r/tmp/579198166B")
-                     ("size" . 1841))))))
+  (let* ((i (make-instance 'testdb1 :email "uniquetest@uniquetest.com"))
+         (*request*
+          (web4r::make-request
+           :post-params
+           '(("NAME" . "Tomoyuki Matsumoto")
+             ("PASSWORD" . "password")
+             ("EMAIL" . "uniquetest@uniquetest.com")
+             ("SEX" . "Male")
+             ("MARRIAGE" . "single")
+             ("HOBBIES-sports" . "sports")
+             ("HOBBIES-reading" . "reading")
+             ("BIRTH-DATE-Y" . "1983")
+             ("BIRTH-DATE-M" . "9")
+             ("BIRTH-DATE-D" . "28")
+             ("NICKNAME" . "tomo")
+             ("PHONE-NUMBER" . "408-644-6198")
+             ("ZIP-CODE" . "95129")
+             ("NOTE" . "Hello World")
+             ("IMAGE" ("name" . "test.gif")
+              ("type" . "image/gif")
+              ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+              ("size" . 1841))))))
     (is (list= (class-validation-errors 'testdb1)
-               (list (web4r::get-error-msg :not-unique (web4r::slot-label (get-slot 'testdb1 'email))))))))
+               (list (web4r::get-error-msg :not-unique (web4r::slot-label (get-slot 'testdb1 'email))))))
+    (is-false (class-validation-errors 'testdb1 i))))
 
 (test file-slots
   (is (equal (web4r::file-slots 'testdb1)
