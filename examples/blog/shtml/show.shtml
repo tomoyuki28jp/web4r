@@ -8,7 +8,6 @@
                 (p/ (time-format "~y/~m/~d" (updated-at it)))
                 (h3/ (title it))
                 (p/ (safe (nl->br (escape (body it)))))
-                (p/ (a/ :href back "Back"))
                 ; comment list
                 (hr/)
                 (h3/ "Comments")
@@ -22,8 +21,7 @@
                 ; comment form
                 (h3/ "Leave your comment")
                 (form-for/cont/ (save-comment oid)
-                 :class 'comment :submit "Post")
-                (p/ (a/ :href back "Back")))
+                 :class 'comment :submit "Post"))
               (progn
                 (p/ "That page doesn't exist!")
                 (p/ (a/ :href (host-uri) "Top"))))))

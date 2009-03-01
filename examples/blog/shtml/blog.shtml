@@ -19,7 +19,7 @@
                             (td/ (substrlen (slot-display-value x s) 20))
                           finally
                             (progn
-                              (td/ (a/ :href (w/p (page-uri "show" (oid x))) "Show"))
+                              (td/ (a/ :href (page-uri "show" (oid x)) "Show"))
                               (when owner-p
                                 (td/ (a/ :href (w/p (page-uri "edit" (oid x))) "Edit"))
                                 (td/ (a/cont/ (delete/cont x "Blog post" uri) "Delete")))))))
