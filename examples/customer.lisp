@@ -16,15 +16,15 @@
 
 (defpclass customer ()
   ((name         :length 50 :label "Full Name" :size 30)
-   (password     :input :password :length (8 12) :hide t)
+   (password     :input :password :length (8 12) :hide t :comment "8-12 characters")
    (email        :type :email :unique t)
    (sex          :input :radio :options ("Male" "Female"))
    (marriage     :input :select :options ("single" "married" "divorced"))
    (hobbies      :input :checkbox :options ("sports" "music" "reading"))
    (birth-date   :type :date)
    (nickname     :length 50 :nullable t)
-   (phone-number :type (:regex "^\\d{3}-\\d{3}-\\d{4}$"))
-   (zip-code     :type :integer :length 5)
+   (phone-number :type (:regex "^\\d{3}-\\d{3}-\\d{4}$") :comment "xxx-xxx-xxxx")
+   (zip-code     :type :integer :length (5 5) :comment "5 digit")
    (note         :length 3000 :rows 5 :cols 30)
    (image        :input :file :type :image :length (1000 500000) :nullable t)))
 

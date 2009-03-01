@@ -218,6 +218,7 @@
            :form-input
            :form-label
            :must?
+           :form-comment
            :scaffold
            :delete/cont
            :edit/cont

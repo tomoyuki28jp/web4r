@@ -78,6 +78,8 @@
                 :documentation "treats the slot as excluded slots")
       (options  :accessor slot-options  :initarg :options  :initform '() :type list
                 :documentation "form input options (also used for validation)")
+      (comment  :accessor slot-comment  :initarg :comment  :initform ""  :type string
+                :documentation "comment to display")
       (input    :accessor slot-input    :initarg :input    :initform nil
                 :documentation "form input type - :text, :textarea, :radio, 
 :checkbox, :select, :password, :file or :member")
@@ -104,7 +106,8 @@
                                        (equal it '(ele:make-pset)))
                              t))))
        (let ((fn (lambda (x) (awhen (opt x) (list x it))))
-             (op '(:unique :nullable :length :type :size :rows :cols :options)))
+             (op '(:unique :nullable :length :type :size :rows :cols
+                   :options :comment)))
          (apply #'append (remove nil (mapcar fn op))))))))
 
 (defgeneric slot-display-value (instance slot &key nl->br))
@@ -204,6 +207,12 @@
 (defmethod must? ((slot slot-options))
   (unless (slot-nullable slot)
     (font/ :color "red" "*")))
+
+(defgeneric form-comment (slot))
+(defmethod form-comment ((slot slot-options))
+  (awhen (slot-comment slot)
+    (unless (equal it "")
+      (font/ :color "grey" "(" it ")"))))
 
 (defun slot-validation-errors (class slot)
   (with-slots
