@@ -31,7 +31,6 @@
            :hash
            :sethash
            :hash-list
-           :parse-float
            :preg-match
            :preg-match-all
            :is-readable

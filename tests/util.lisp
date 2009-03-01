@@ -232,12 +232,6 @@
   (let ((h (hash :k1 "v1" :k2 nil)))
     (equal (hash-list h) '((:k1 . "v1") (:k2 . nil)))))
 
-(test parse-float
-  (is (= (parse-float "1.1") 1.1))
-  (is (= (parse-float "1.0") 1.0))
-  (is (eq (parse-float "1") nil))
-  (is (= (parse-float "3.14159") 3.14159)))
-
 (test preg-match
   (let ((n "12345"))
     (is (string= (preg-match "[0-9]" n) "1")))

@@ -179,13 +179,6 @@
      using (hash-value value)
      collect (cons key value)))
 
-(defun parse-float (string)
-  (let ((*read-eval* nil)
-        (float (ignore-errors (read-from-string string)))
-        (types '(short-float single-float double-float long-float)))
-    (when (member (type-of float) types)
-      float)))
-
 (defun preg-match (regexp str)
   (cl-ppcre:scan-to-strings
    (cl-ppcre:create-scanner regexp) str))
