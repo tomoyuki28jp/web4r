@@ -177,11 +177,12 @@
             ((eq input :file)
              (flet ((upload-form (name)
                       (input/ :type :file :name name :id id :size (slot-size slot))))
-               (aif (or (file-save-name id)
-                        (and (listp value)
-                             (awhen (assoc-ref "size" value :test #'equalp)
-                               (when (> it 0)
-                                 (assoc-ref "save-name" value :test #'equalp)))))
+               (aif (cond ((file-save-name id) (file-save-name id))
+                          ((atom value) value)
+                          ((listp value)
+                           (awhen (assoc-ref "size" value :test #'equalp)
+                             (when (> it 0)
+                               (assoc-ref "save-name" value :test #'equalp)))))
                     (progn 
                       (when (and ins (null (post-params)) value
                         (input/ :type "hidden" :name id :value value)))
