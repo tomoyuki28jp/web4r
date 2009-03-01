@@ -1,11 +1,11 @@
 -*- Mode: Outline -*-
 
 * TODO
-- Write more tests
-- Write documents
-- Performance testing (declare types for better performance)
-- Error checking and exception handling
+- Integration testing
 - Support more lisp implementations
+- Performance testing (declare types for better performance)
+- Write documents
+- Error checking and exception handling
 
 * Ideas (low priority, might be implemented)
 - Rewrite the http server with iolib (non-blocking I/O) and make it as a comet server
