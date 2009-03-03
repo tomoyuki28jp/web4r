@@ -114,8 +114,8 @@
 
 (set-validator :unique
      (lambda (label val arg)
-       (when (and (listp arg) (= 3 (length arg)))
-         (destructuring-bind (class slot ins) arg
+       (when (and (listp arg) (< 2 (length arg)))
+         (destructuring-bind (class slot &optional ins) arg
            (awhen (get-instances-by-value class slot val)
              (when (or (> (length it) 1)
                        (not (eq (car it) ins)))
