@@ -9,7 +9,7 @@
   :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
   :licence "BSD"
   :description "Common Lisp web application framework"
-  :depends-on  (:cl-ppcre :usocket :bordeaux-threads :cl-fad :clsql :elephant
+  :depends-on  (:cl-ppcre :usocket :bordeaux-threads :cl-fad :elephant
                           :trivial-shell :flexi-streams :rfc2388-binary :cl-gd)
   :components  ((:module "src"
                          :serial  t

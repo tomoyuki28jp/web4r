@@ -23,7 +23,6 @@ cl-ppcre - http://www.weitz.de/cl-ppcre/
 usocket - http://common-lisp.net/project/usocket/
 bordeaux-threads - http://common-lisp.net/project/bordeaux-threads/
 cl-fad - http://www.weitz.de/cl-fad/
-clsql - http://clsql.b9.com/
 elephant - http://common-lisp.net/project/elephant/
 trivial-shell - http://common-lisp.net/project/trivial-shell/ 
 flexi-streams - http://www.weitz.de/flexi-streams/
