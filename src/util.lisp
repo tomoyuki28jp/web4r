@@ -345,3 +345,17 @@
                                     (assoc-ref k new :test #'equal))))
              new))
         (t new)))
+
+(defun leap-year-p (year)
+  (check-type year integer)
+  (and (plusp year)
+       (zerop (mod year 4))
+       (or (plusp (mod year 100))
+           (zerop (mod year 400)))))
+
+(defun days-of (year month)
+  (case month
+    (2 (if (leap-year-p year) 29 28))
+    ((4 6 9 11) 30)
+    (t (when (>= 12 month)
+         31))))

@@ -406,3 +406,14 @@
           '(("k1" . "v1") ("k2" . (("k2-1" . "v2-1") ("k2-2" . "v2-2"))) ("k3" . "v3"))
           '(("k2" . (("k2-1" . "v2-1") ("k2-2" . "changed")))))
          '(("k1" . "v1") ("k2" . (("k2-1" . "v2-1") ("k2-2" . "changed"))) ("k3" . "v3"))))))
+
+(test leap-year-p
+  (loop for y from 2000 to 2008
+        for a in '(t nil nil nil t nil nil nil t)
+        collect (is (eq (leap-year-p y) a))))
+
+(test days-of
+  (loop for m from 1 to 12
+        as a in '(31 28 31 30 31 30 31 31 30 31 30 31)
+        collect (is (eq (days-of 2009 m) a))
+        finally (is (eq 29 (days-of 2008 2)))))

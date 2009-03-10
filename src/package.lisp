@@ -53,6 +53,8 @@
            :rem-get-param
            :uniq-file-name
            :merge-cons-tree
+           :leap-year-p
+           :days-of
            ; --- shtml.lisp ---
            :*http-char-stream*
            :*doctype-strict*
