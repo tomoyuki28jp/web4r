@@ -78,7 +78,6 @@
               (loop for v in (->list val)
                     unless (member v (nth 1 arg) :test #'equal)
                     return (get-error-msg :invalid label)))
-             ; todo: better error checking on the date
              (:date
               (block date
                 (flet ((validate-date (regex n)
@@ -87,7 +86,10 @@
                              (get-error-msg :invalid label)))))
                   (validate-date "^\\d{4}$" 0)
                   (validate-date "^([1-9]|10|11|12)$" 1)
-                  (validate-date "^([1-9]|[1|2][0-9]|30|31)$" 2))))
+                  (validate-date "^([1-9]|[1|2][0-9]|30|31)$" 2))
+                (unless (>= (days-of (->int (nth 0 val)) (->int (nth 1 val)))
+                            (->int (nth 2 val)))
+                  (get-error-msg :invalid label))))
              (:alpha   (regex-validation "^[a-zA-Z]+$"    :not-alpha))
              (:alnum   (regex-validation "^[a-zA-Z0-9]+$" :not-alnum))
              (:integer (regex-validation "^\\d*$"         :not-a-number))
