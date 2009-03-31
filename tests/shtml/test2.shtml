@@ -1,2 +1,0 @@
-(ul/ (loop for i in lst
-           do (li/ i)))

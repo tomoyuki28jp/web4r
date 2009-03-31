@@ -1,2 +1,0 @@
-(with-shtml-file (test-shtml-path "template1.shtml")
-  :body (body/ (p/ "New body")))
