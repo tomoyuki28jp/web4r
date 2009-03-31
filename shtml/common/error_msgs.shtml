@@ -1,0 +1,3 @@
+(ul/ :style "color: red"
+     (loop for error-msg in error-msgs
+           do (li/ error-msg)))

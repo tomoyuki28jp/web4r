@@ -1,0 +1,38 @@
+Goal
+====================
+Enables users to develop web applications with the shortest codes in the world
+
+Note
+====================
+I started to learn Common Lisp in July 2008, and this is my first project in Lisp.
+That means I am still new to Common Lisp and might do odd things.
+Therefore, any comment, advice or suggestion will be appreciated.
+
+Special thanks
+====================
+- Special thanks to the people in #lisp@freenode. They are kind and very helpful.
+(I don't understand why some people claim the Lisp community is harsh on beginners.)
+- This project is adopted by the Exploratory IT Human Resources Project (MITOH Program
+  Youth division) in 2008.
+
+Supported platforms
+====================
+Only tested with GNU/Linux x86-64 32bit SBCL 1.0.18 - 1.0.19
+
+Library dependencies
+====================
+anaphora - http://common-lisp.net/project/anaphora/
+cl-ppcre - http://www.weitz.de/cl-ppcre/
+shtml - http://github.com/tomoyuki28jp/shtml/tree/master
+hunchentoot (1.0.0 or higher) - http://www.weitz.de/hunchentoot/
+bordeaux-threads - http://common-lisp.net/project/bordeaux-threads/
+elephant - http://common-lisp.net/project/elephant/
+trivial-shell - http://common-lisp.net/project/trivial-shell/ 
+cl-gd - http://weitz.de/cl-gd/
+flexi-streams - http://www.weitz.de/flexi-streams/
+trivial-backtrace - http://common-lisp.net/project/trivial-backtrace/
+
+For Emacs users
+====================
+web4r.el is elisp for editing web4r code in emacs
+http://github.com/tomoyuki28jp/web4r-el/tree/master
