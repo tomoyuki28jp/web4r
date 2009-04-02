@@ -27,8 +27,8 @@
   (sid            0 :type integer)
   (generated-time 0 :type integer))
 
-(defun sid ()
-  (hunchentoot::session-id *session*))
+(defun sid (&optional (session *session*))
+  (hunchentoot::session-id session))
 
 (defun cid ()
   (parameter "cid"))
@@ -99,6 +99,15 @@
 (defun destroy-conts (start end)
   (loop for i from start to (1- end)
         do (destroy-cont (elt *cid-generated-order* i) i)))
+
+(setf *session-removal-hook*
+      #'(lambda (session)
+          (let* ((sid  (sid session))
+                 (cids (gethash sid *sid->cid*)))
+            (when cids
+              (remhash sid *sid->cid*)
+              (loop for cid in cids
+                    do (destroy-cont cid))))))
 
 ; --- Cont sessions ---------------------------------------------
 

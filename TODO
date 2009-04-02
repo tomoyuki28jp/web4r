@@ -1,7 +1,6 @@
 -*- Mode: Outline -*-
 
 * TODO
-- Implement session removal hook to destroy related continuations
 - Write tests for GC
 - Integration testing
 - Support more lisp implementations
