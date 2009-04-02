@@ -1,6 +1,7 @@
 (in-package :drakma)
 
-; To avoid this bug: http://bknr.net/trac/changeset/4322
+; To avoid this bug: 
+; http://common-lisp.net/pipermail/drakma-devel/2009-February/000750.html
 (defun send-cookie-p (cookie uri force-ssl)
   (declare (ignore cookie uri force-ssl))
   t)
