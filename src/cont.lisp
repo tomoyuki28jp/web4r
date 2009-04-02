@@ -18,7 +18,7 @@
   "probability to start a gc process")
 
 (defvar *cont-sessions* (make-hash-table :test 'equal)
-  "Continuations based session data")
+  "continuations based session data")
 
 ; --- Continuations ---------------------------------------------
 
