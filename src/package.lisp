@@ -165,9 +165,6 @@
                    :*thumbnail-height*
                    :thumbnail
                    :thumbnail-uri
-                   ; --- anaphora ---
-                   ,@(loop for s being the external-symbol
-                           in :anaphora collect s)
                    ; --- shtml ---
                    ,@(loop for s being the external-symbol
                            in :shtml collect s)
