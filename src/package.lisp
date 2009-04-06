@@ -21,8 +21,6 @@
                    ; --- debug ---
                    :*debug-log-file*
                    :*debug-mode*
-                   :pm
-                   :pm1
                    :ps
                    :with-post-parameters
                    :with-get-parameters

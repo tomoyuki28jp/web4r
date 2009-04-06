@@ -6,14 +6,6 @@
 
 ; --- Util ------------------------------------------------------
 
-(defmacro pm  (expr)
- "pretty print macroexpand"
-  `(pprint (macroexpand   ',expr)))
-
-(defmacro pm1 (expr)
- "pretty print macroexpand-1"
-  `(pprint (macroexpand-1 ',expr)))
-
 (defun ps (instance)
  "print each slot's name and value"
   (loop for slot in (ele::class-slots (class-of instance))
