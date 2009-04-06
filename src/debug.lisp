@@ -15,12 +15,6 @@
                                (slot-value instance name))
                              :unbound)))))
 
-(defun hash->list (hash)
-  (declare (hash-table hash))
-  (loop for key being the hash-key of hash
-     using (hash-value value)
-     collect (cons key value)))
-
 (defmacro with-post-parameters (parameters &rest body)
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
