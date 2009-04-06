@@ -159,9 +159,9 @@
                    ; --- my-util ---
                    ,@(loop for s being the external-symbol
                            in :my-util collect s)
-                   ; --- shtml ---
+                   ; --- sml ---
                    ,@(loop for s being the external-symbol
-                           in :shtml collect s)
+                           in :sml collect s)
                    ; --- hunchentoot ---
                    ,@(loop for s being the external-symbol
                            in :hunchentoot collect s)

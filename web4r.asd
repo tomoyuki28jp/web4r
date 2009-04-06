@@ -10,7 +10,7 @@
   :licence "BSD"
   :description "Common Lisp web application framework"
   :depends-on  (:my-util
-                :shtml
+                :sml
                 :hunchentoot
                 :bordeaux-threads
                 :elephant
