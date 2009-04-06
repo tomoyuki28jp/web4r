@@ -3,11 +3,11 @@
 
 (test page-uri
   (is (string= (page-uri "page")
-               (join "" *host-uri* "page/")))
+               (concat *host-uri* "page/")))
   (is (string= (page-uri "page" 1)
-               (join "" *host-uri* "page/1/")))
+               (concat *host-uri* "page/1/")))
   (is (string= (page-uri "page" 1 2)
-               (join "" *host-uri* "page/1/2/"))))
+               (concat *host-uri* "page/1/2/"))))
 
 (test page
   (defpage test (path1 path2)

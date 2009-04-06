@@ -9,8 +9,7 @@
   :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
   :licence "BSD"
   :description "Common Lisp web application framework"
-  :depends-on  (:anaphora
-                :cl-ppcre
+  :depends-on  (:my-util
                 :shtml
                 :hunchentoot
                 :bordeaux-threads

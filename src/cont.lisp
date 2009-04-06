@@ -161,7 +161,7 @@
 (defmacro a/cont/ (cont &rest body)
   (let ((cid (gensym)))
     `(let ((,cid (set-cont (cont/lambda ,cont))))
-       (a/ :href (join "" (host-uri) "?cid=" ,cid) ,@body))))
+       (a/ :href (concat (host-uri) "?cid=" ,cid) ,@body))))
 
 (defmacro %form/cont/ (multipart-p cont &rest body)
   (let ((cid (gensym)))

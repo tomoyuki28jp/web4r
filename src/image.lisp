@@ -17,7 +17,7 @@
 
 (defun mime-type (file)
   (let* ((file  (namestring file))
-         (type  (trivial-shell:shell-command (->string "file " file)))
+         (type  (trivial-shell:shell-command (concat "file " file)))
          (s (split #\Space (string-trim '(#\Newline) type))))
     (cond ((equalp "image" (nth 2 s))
            (cond ((equalp "PNG"  (nth 1 s)) "image/png")

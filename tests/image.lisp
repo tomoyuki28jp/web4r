@@ -88,9 +88,9 @@
   (is (dest-size= 30  100 80  80     24  80)))
 
 (test thumbnail-uri
-  (is (equal (->string (page-uri "thumbnail")
-                       "?file=test.gif&type=&width=250&height=200")
+  (is (equal (concat (page-uri "thumbnail")
+                     "?file=test.gif&type=&width=250&height=200")
              (thumbnail-uri "test.gif" :width 250 :height 200)))
-  (is (equal (->string (page-uri "thumbnail")
-                       "?file=test.png&type=&width=200&height=250")
+  (is (equal (concat (page-uri "thumbnail")
+                     "?file=test.png&type=&width=200&height=250")
              (thumbnail-uri "test.png" :width 200 :height 250))))

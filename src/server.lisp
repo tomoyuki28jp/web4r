@@ -19,10 +19,10 @@
        (split #\/ (car (split #\? (request-uri* request))))))
 
 (defun host-uri ()
-  (join "" "http://" (host) "/"))
+  (concat "http://" (host) "/"))
 
 (defun page-uri (&rest args)
-  (join "" (host-uri) (apply #'join "/" args) "/"))
+  (concat (host-uri) (apply #'join "/" args) "/"))
 
 (defun file-data (name n)
   (aand (post-parameter name) (listp it) (nth n it)))

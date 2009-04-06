@@ -128,12 +128,12 @@
                (save-file it *upload-save-dir*)))
             ((eq input :checkbox)
              (loop for o in options
-                   as v = (post-parameter (->string id "-" o))
+                   as v = (post-parameter (concat id "-" o))
                    when v collect o))
             (t value)))))
 
 (defun posted-date (id)
-  (flet ((date (x) (post-parameter (->string id "-" x))))
+  (flet ((date (x) (post-parameter (concat id "-" x))))
     (values (date "Y") (date "M") (date "D"))))
 
 (defun file-slots (class)
@@ -150,7 +150,7 @@
       (cond ((eq input :select)
              (select-form/ id options value))
             (options
-             (loop for o in options as oid = (->string id "-" o)
+             (loop for o in options as oid = (concat id "-" o)
                    do (if (eq input :checkbox)
                           (input-checked/ "checkbox"
                                           (or (post-parameter oid)
@@ -170,7 +170,7 @@
              (aif (aand (or (cont-session slot) saved) (probe-file it))
                  (progn (p/ "change: " (input-file/ id :id id))
                         (p/ "delete: " (input-checked/ "checkbox" nil
-                                        :value "t" :name (join "" id "-delete") :id id)
+                                        :value "t" :name (concat id "-delete") :id id)
                             (img/ :src (thumbnail-uri it) :alt id)))
                (input-file/ id :id id)))
             (t (input/ :type (if (eq input :password) "password" "text")
@@ -180,7 +180,7 @@
 (defmethod form-label ((slot slot-options))
   (with-slots (type label id nullable) slot
     (if (eq type :date)
-        (label/ :for (->string id "-Y") label)
+        (label/ :for (concat id "-Y") label)
         (and label id (label/ :for id label)))))
 
 (defgeneric must-mark (slot))
@@ -206,9 +206,9 @@
       (decode-universal-time (get-universal-time))
     (declare (ignore sec min hour))
     (flet ((lst (from to) (loop for i from from to to collect i)))
-      (select-form/ (->string name "-Y") (lst y-start y-end) (or (->int y) year))
-      (select-form/ (->string name "-M") (lst 1 12) (or (->int m) month))
-      (select-form/ (->string name "-D") (lst 1 31) (or (->int d) date)))))
+      (select-form/ (concat name "-Y") (lst y-start y-end) (or (->int y) year))
+      (select-form/ (concat name "-M") (lst 1 12) (or (->int m) month))
+      (select-form/ (concat name "-D") (lst 1 31) (or (->int d) date)))))
 
 ; --- Validations -----------------------------------------------
 
@@ -221,7 +221,7 @@
               (list y m d)))
            ((eq input :checkbox)
             (loop for o in options
-                  collect (post-parameter (->string id "-" o))))
+                  collect (post-parameter (concat id "-" o))))
            ((eq input :file) (cont-session slot))
            (t (post-parameter id)))
      (append (list :nullable nullable :length length :type type)
@@ -316,7 +316,7 @@
         as new-file = (file-path (slot-id s))
         as tmp-file = (cont-session s)
         as saved-file = (aand ins (ignore-errors (slot-value it (slot-symbol s))))
-        do (if (equal (post-parameter (join "" (slot-id s) "-delete")) "t")
+        do (if (equal (post-parameter (concat (slot-id s) "-delete")) "t")
                (progn (awhen tmp-file   (delete-tmp-file it))
                       (awhen saved-file (delete-saved-file it))
                       (rem-cont-session s))

@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
 (defpackage :web4r-tests
-  (:use :cl :web4r :5am :drakma :cl-ppcre)
+  (:use :cl :web4r :5am :drakma)
   (:import-from :web4r :set-page :get-page)
   (:shadowing-import-from
    :hunchentoot :*header-stream* :cookie-path :cookie-expires
@@ -22,4 +22,3 @@
 
 (defun test-file (file)
   (merge-pathnames file *test-file-dir*))
-

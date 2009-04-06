@@ -3,19 +3,12 @@
 (macrolet
     ((define-web4r-package ()
        `(defpackage :web4r
-          (:use :cl :anaphora :cl-ppcre :shtml :hunchentoot :elephant)
+          (:use :cl :my-util :shtml :hunchentoot :elephant)
           (:export ; --- util ---
                    :*web4r-dir*
                    :*shtml-dir*
                    :web4r-file-path
                    :shtml-file-path
-                   :when-let
-                   :->string
-                   :->string-down
-                   :->list
-                   :->int
-                   :->keyword
-                   :join
                    :nl->br
                    :assoc*
                    :replace-assoc*
@@ -165,6 +158,9 @@
                    :*thumbnail-height*
                    :thumbnail
                    :thumbnail-uri
+                   ; --- my-util ---
+                   ,@(loop for s being the external-symbol
+                           in :my-util collect s)
                    ; --- shtml ---
                    ,@(loop for s being the external-symbol
                            in :shtml collect s)

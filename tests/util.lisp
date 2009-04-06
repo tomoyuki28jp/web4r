@@ -1,27 +1,6 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
-(test ->string
-  (is (string= (->string "1" "2" "3") "123"))
-  (is (string= (->string nil "1" nil "2" nil "3" nil) "123"))
-  (is (string= (->string nil 1 nil 2 nil 3 nil) "123")))
-
-(test ->list
-  (is (equal '(1) (->list 1)))
-  (is (equal '(1) (->list '(1)))))
-
-(test ->keyword
-  (is (eq :keyword (->keyword "keyword")))
-  (is (eq :keyword (->keyword "KEYWORD")))
-  (is (eq :keyword (->keyword 'keyword)))
-  (is (eq :keyword (->keyword :keyword))))
-
-(test join
-  (is (string= (join "," 1 2 3) "1,2,3"))
-  (is (string= (join "," nil 1 nil 2 nil 3 nil) "1,2,3"))
-  (is (string= (join "," "1" "2" "3") "1,2,3"))
-  (is (string= (join "," nil "1" nil "2" nil "3"nil) "1,2,3")))
-
 (test assoc*
   (is (eq    (assoc* '(1 2 3)   '((1 (2 (3 . 123))))) 123))
   (is (eq    (assoc* '(1 2 3 4) '((1 (2 (3 . 123))))) nil))

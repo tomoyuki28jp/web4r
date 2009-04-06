@@ -19,42 +19,6 @@
   (defun shtml-file-path (file)
     (merge-pathnames file *shtml-dir*)))
 
-(defmacro when-let ((var form) &body body)
-  `(let ((,var ,form))
-     (when ,var ,@body)))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun ->string (&rest args)
-    (with-output-to-string (s)
-      (dolist (a args)
-        (princ (or a "") s)))))
-
-(defun ->string-down (x)
-  (string-downcase (->string x)))
-
-(defun ->list (x)
-  (if (listp x)
-      x
-      (list x)))
-
-(defun ->int (x)
-  (if (integerp x)
-    x
-    (ignore-errors (parse-integer x))))
-
-(defun ->keyword (x)
-  (if (keywordp x)
-      x
-      (let ((str (if (stringp x) x (->string x))))
-        (intern (string-upcase str) :keyword))))
-
-(defun ->symbol (x)
-  (intern (->string x)))
-
-(defun join (joiner &rest args)
-  (format nil (->string "~{~A~^" joiner "~}")
-          (remove nil args)))
-
 (defun nl->br (x)
   (regex-replace-all #\Newline x (format nil "<br>~%")))
 
@@ -80,17 +44,17 @@
         alist)))
 
 (defun add-parameter (link key value)
-  (let ((param (join "" key "=" value)))
+  (let ((param (concat key "=" value)))
     (multiple-value-bind (replaced matchp)
-        (regex-replace (join "" "(" key  "=[^&]+)") link param)
+        (regex-replace (concat "(" key  "=[^&]+)") link param)
       (if matchp
           replaced
           (progn
             (unless (position #\? link)
-              (setf link (join "" link "?")))
+              (setf link (concat link "?")))
             (if (string= (subseq link (1- (length link))) "?")
-                (join "" link param)
-                (join "" link "&" param)))))))
+                (concat link param)
+                (concat link "&" param)))))))
 
 (defun add-parameters (link &rest parameters)
   (loop for (k v) on parameters by #'cddr
@@ -98,7 +62,7 @@
         finally (return l)))
 
 (defun rem-parameter (link key)
-  (let* ((new (regex-replace (join "" "(" key  "=[^&]+&?)") link ""))
+  (let* ((new (regex-replace (concat "(" key  "=[^&]+&?)") link ""))
          (len (length new)))
     (if (member (subseq new (1- len)) '("?" "&") :test #'equal)
         (subseq link 0 (1- len))
@@ -108,7 +72,7 @@
   (let ((str (->string obj)))
     (if (<= (length str) max)
         str
-        (join "" (subseq str 0 max) omark))))
+        (concat (subseq str 0 max) omark))))
 
 (defun file-length* (file)
   (with-open-file (s file :if-does-not-exist nil)

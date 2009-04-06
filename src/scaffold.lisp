@@ -43,7 +43,7 @@
 (defun delete/cont (ins cname redirect-uri)
   (drop-instance ins)
   (redirect/msgs (rem-parameter redirect-uri "page")
-                 (->string cname " was successfully deleted")))
+                 (concat cname " was successfully deleted")))
 
 (defun edit/cont (class ins page &key with-slots without-slots slot-values)
   (let ((*with-slots* (or with-slots *with-slots*))
@@ -56,8 +56,8 @@
            (if ins
                (update-pinstance class ins slot-values)
                (make-pinstance class slot-values))
-           (let ((msg (join "" (->string-down class) " was successfully "
-                            (if ins "updated" "created"))))
+           (let ((msg (concat (->string-down class) " was successfully "
+                              (if ins "updated" "created"))))
              (if (functionp page)
                  (funcall page msg)
                  (redirect/msgs page msg)))))))
