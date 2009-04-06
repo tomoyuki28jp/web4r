@@ -21,8 +21,7 @@ Only tested with GNU/Linux x86-64 32bit SBCL 1.0.18 - 1.0.19
 
 Library dependencies
 ====================
-anaphora - http://common-lisp.net/project/anaphora/
-cl-ppcre - http://www.weitz.de/cl-ppcre/
+my-util - http://github.com/tomoyuki28jp/my-util/tree/master
 shtml - http://github.com/tomoyuki28jp/shtml/tree/master
 hunchentoot (1.0.0 or higher) - http://www.weitz.de/hunchentoot/
 bordeaux-threads - http://common-lisp.net/project/bordeaux-threads/
