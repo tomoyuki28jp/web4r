@@ -168,17 +168,10 @@
 (defmacro %form/cont (multipart-p cont &rest body)
   (let ((cid (gensym)))
     `(let ((,cid (set-cont (cont/lambda ,cont))))
-       (p (indent) "<FORM METHOD=\"post\" ACTION=\"\"")
-       (if ,multipart-p
-           (p " ENCTYPE=\"multipart/form-data\""))
-       (p ">" #\Newline)
-       ,@(loop for a in body collect
-               `(let ((*indent-level* (1+ *indent-level*))) (pr ,a)))
-       (p (let ((*indent-level* (1+ *indent-level*))) (indent)))
-       ,(unless (find-input "submit" `',body 'submit)
-         `(let ((*indent-level* (1+ *indent-level*))) (submit)))
-       [input :type "hidden" :name "cid" :value ,cid]
-       (p (indent) "</FORM>" #\Newline))))
+       (form :method "post" :action ""
+             ,@(when multipart-p '(:enctype "multipart/form-data"))
+             ,@body
+             [input :type "hidden" :name "cid" :value ,cid]))))
 
 (defmacro form/cont (cont &rest body)
   `(%form/cont nil ,cont ,@body))
