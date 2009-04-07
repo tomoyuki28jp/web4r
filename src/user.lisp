@@ -57,6 +57,7 @@
         (session-value :user-id)  user-id))
 
 (defun logout ()
+  (destroy-conts-by-session *session*)
   (remove-session *session*))
 
 (defun login-user ()
@@ -88,6 +89,8 @@
 
 (defun logout-page (&optional (redirect-uri (host-uri)))
   (logout)
+  (setf (session *request*) nil)
+  (start-session)
   (redirect/msgs redirect-uri (login-msg :logged-out)))
 
 (defun regist-page (&optional (redirect-uri (host-uri)))
