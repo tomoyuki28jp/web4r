@@ -49,6 +49,10 @@
    'blog-post :oid oid :slot-values `((user-oid ,(login-user-oid)))
    :redirect-uri (page-uri "blog" "index" (login-user-id))))
 
+(defpage blog/delete (oid :auth)
+  (scaffold-delete 'blog-post oid
+                   (page-uri "blog" "index" (login-user-id))))
+
 (defpage blog/show (oid)
   (let ((ins (get-instance-by-oid 'blog-post oid)))
     (multiple-value-bind (comments pager)

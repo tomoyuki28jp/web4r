@@ -19,8 +19,7 @@
                             (progn
                               [td [a :href (w/p (page-uri cname "show" (oid x))) "Show"]]
                               [td [a :href (w/p (page-uri cname "edit" (oid x))) "Edit"]]
-                              [td (a/cont (delete/cont x cname redirect-uri)
-                                            "Delete")]))])
+                              [td [a :href (page-uri cname "delete" (oid x)) "Delete"]]))])
                   it)])
               [p "There are no " cname])
          [p [a :href (w/p (page-uri cname "edit")) "New " cname]]])

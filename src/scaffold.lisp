@@ -4,10 +4,10 @@
   `(progn
      (defpage ,class () (scaffold-index ',class :index ',index))
      (defpage ,(join "/" class 'show) (oid) (scaffold-show ',class oid))
-     (defpage ,(join "/" class 'edit) (oid) (scaffold-edit ',class :oid oid))))
+     (defpage ,(join "/" class 'edit) (oid) (scaffold-edit ',class :oid oid))
+     (defpage ,(join "/" class 'delete) (oid) (scaffold-delete ',class oid))))
 
-(defun scaffold-index (class &key (index 'updated-at)
-                       (maxlength 20) (redirect-uri (request-uri*)))
+(defun scaffold-index (class &key (index 'updated-at) (maxlength 20))
   (let* ((cname (->string-down class))
          (slots (get-excluded-slots class)))
     (multiple-value-bind (items pager)
@@ -32,18 +32,14 @@
                                            :slot-values slot-values))))
     (load-sml (sml-file-path "scaffold/edit.sml"))))
 
-(defun per-page (items &key (index 'updated-at) (sort #'>))
-  (let* ((total (length items))
-         (pager (make-instance 'pager :total-items total))
-         (items (with-slots (item-start item-end items-per-page) pager
-                  (when (<= (current-page pager) (total-pages pager))
-                    (subseq (sort items sort :key index) item-start item-end)))))
-    (values items pager)))
-
-(defun delete/cont (ins cname redirect-uri)
-  (drop-instance ins)
+(defun scaffold-delete (class oid &optional
+                        (redirect-uri
+                         (page-uri (->string-down (join "/" class "index")))))
   (redirect/msgs (rem-parameter redirect-uri "page")
-                 (concat cname " was successfully deleted")))
+    (aif (aand oid (get-instance-by-oid class it))
+         (progn (drop-instance it)
+                (concat (->string-down class) " was successfully deleted"))
+         "No such item")))
 
 (defun edit/cont (class ins page &key with-slots without-slots slot-values)
   (let ((*with-slots* (or with-slots *with-slots*))
@@ -61,3 +57,11 @@
              (if (functionp page)
                  (funcall page msg)
                  (redirect/msgs page msg)))))))
+
+(defun per-page (items &key (index 'updated-at) (sort #'>))
+  (let* ((total (length items))
+         (pager (make-instance 'pager :total-items total))
+         (items (with-slots (item-start item-end items-per-page) pager
+                  (when (<= (current-page pager) (total-pages pager))
+                    (subseq (sort items sort :key index) item-start item-end)))))
+    (values items pager)))

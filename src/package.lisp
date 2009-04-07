@@ -113,8 +113,8 @@
                    :scaffold-index
                    :scaffold-show
                    :scaffold-edit
+                   :scaffold-delete
                    :per-page
-                   :delete/cont
                    :edit/cont
                    :make-pinstance
                    :update-pinstance
