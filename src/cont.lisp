@@ -143,7 +143,7 @@
                  (let ((g (gensym)))
                    (push (list g (nth 1 x)) *last-posts*)
                    g))
-                ((unless (eq (car x) 'form/cont/)
+                ((unless (eq (car x) 'form/cont)
                    (cont-expand x)))
                 (t x)))))
 
@@ -158,28 +158,28 @@
              ,@(subseq expanded 2))))
         expanded)))
 
-(defmacro a/cont/ (cont &rest body)
+(defmacro a/cont (cont &rest body)
   (let ((cid (gensym)))
     `(let ((,cid (set-cont (cont/lambda ,cont))))
-       (a/ :href (concat (host-uri) "?cid=" ,cid) ,@body))))
+       [a :href (concat (host-uri) "?cid=" ,cid) ,@body])))
 
-(defmacro %form/cont/ (multipart-p cont &rest body)
+(defmacro %form/cont (multipart-p cont &rest body)
   (let ((cid (gensym)))
     `(let ((,cid (set-cont (cont/lambda ,cont))))
        (p (indent) "<FORM METHOD=\"post\" ACTION=\"\"")
        (if ,multipart-p
            (p " ENCTYPE=\"multipart/form-data\""))
-       (p ">" *br*)
-       ,@(loop for a in body
-               collect `(let ((*level* (1+ *level*))) (pr ,a)))
-       (p (let ((*level* (1+ *level*))) (indent)))
-       ,(unless (find-input "submit" `',body 'submit/)
-         `(let ((*level* (1+ *level*))) (submit/)))
-       (input/ :type "hidden" :name "cid" :value ,cid)
-       (p (indent) "</FORM>" *br*))))
+       (p ">" #\Newline)
+       ,@(loop for a in body collect
+               `(let ((*indent-level* (1+ *indent-level*))) (pr ,a)))
+       (p (let ((*indent-level* (1+ *indent-level*))) (indent)))
+       ,(unless (find-input "submit" `',body 'submit)
+         `(let ((*indent-level* (1+ *indent-level*))) (submit)))
+       [input :type "hidden" :name "cid" :value ,cid]
+       (p (indent) "</FORM>" #\Newline))))
 
-(defmacro form/cont/ (cont &rest body)
-  `(%form/cont/ nil ,cont ,@body))
+(defmacro form/cont (cont &rest body)
+  `(%form/cont nil ,cont ,@body))
 
-(defmacro multipart-form/cont/ (cont &rest body)
-  `(%form/cont/ t   ,cont ,@body))
+(defmacro multipart-form/cont (cont &rest body)
+  `(%form/cont t   ,cont ,@body))

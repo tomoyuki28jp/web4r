@@ -84,7 +84,7 @@
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
       (let ((*with-slots* (list (user-id-slot) (user-pass-slot))))
-        (load-shtml (shtml-file-path "login.shtml")))))
+        (load-sml (sml-file-path "login.sml")))))
 
 (defun logout-page (&optional (redirect-uri (host-uri)))
   (logout)

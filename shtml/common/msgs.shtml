@@ -1,3 +1,0 @@
-(ul/ :style "color: blue"
-     (loop for msg in msgs
-           do (li/ msg)))

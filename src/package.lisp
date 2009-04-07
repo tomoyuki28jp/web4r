@@ -3,12 +3,12 @@
 (macrolet
     ((define-web4r-package ()
        `(defpackage :web4r
-          (:use :cl :my-util :shtml :hunchentoot :elephant)
+          (:use :cl :my-util :sml :hunchentoot :elephant)
           (:export ; --- util ---
                    :*web4r-dir*
-                   :*shtml-dir*
+                   :*sml-dir*
                    :web4r-file-path
-                   :shtml-file-path
+                   :sml-file-path
                    :nl->br
                    :assoc*
                    :replace-assoc*
@@ -32,9 +32,9 @@
                    :cont-session
                    :rem-cont-session
                    :sid
-                   :a/cont/
-                   :form/cont/
-                   :multipart-form/cont/
+                   :a/cont
+                   :form/cont
+                   :multipart-form/cont
                    :last-post
                    ; --- server ---
                    :*default-page*
@@ -54,7 +54,7 @@
                    :page/msgs
                    :page/error-msgs
                    :get-msgs
-                   :msgs/
+                   :msgs
                    ; --- validations ---
                    :validation-errors
                    :with-validations
@@ -63,8 +63,8 @@
                    :pager
                    :total-pages
                    :get-current-page
-                   :page-links/
-                   :page-summary/
+                   :page-links
+                   :page-summary
                    :w/p
                    ; --- pclass ---
                    :*tmp-save-dir*
@@ -96,8 +96,8 @@
                    :form-label
                    :must-mark
                    :form-comment
-                   :form-for/cont/
-                   :select-date/
+                   :form-for/cont
+                   :select-date
                    :slot-validation-errors
                    :class-validation-errors
                    :defpclass

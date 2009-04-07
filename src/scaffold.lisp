@@ -12,13 +12,13 @@
          (slots (get-excluded-slots class)))
     (multiple-value-bind (items pager)
         (per-page (get-instances-by-class class) :index index)
-      (load-shtml (shtml-file-path "scaffold/index.shtml")))))
+      (load-sml (sml-file-path "scaffold/index.sml")))))
 
 (defun scaffold-show (class oid)
   (let ((cname (->string-down class))
         (slots (get-excluded-slots class))
         (ins (get-instance-by-oid class oid)))
-    (load-shtml (shtml-file-path "scaffold/show.shtml"))))
+    (load-sml (sml-file-path "scaffold/show.sml"))))
 
 (defun scaffold-edit (class &key oid slot-values redirect-uri)
   (let* ((cname (->string-down class))
@@ -30,7 +30,7 @@
                                            :with-slots with-slots
                                            :without-slots without-slots
                                            :slot-values slot-values))))
-    (load-shtml (shtml-file-path "scaffold/edit.shtml"))))
+    (load-sml (sml-file-path "scaffold/edit.sml"))))
 
 (defun per-page (items &key (index 'updated-at) (sort #'>))
   (let* ((total (length items))

@@ -33,7 +33,7 @@
 (defpage blog (:default)
   (multiple-value-bind (items pager)
       (per-page (get-instances-by-class 'blog-user))
-    (load-shtml (web4r-file-path "examples/blog/shtml/blog.shtml"))))
+    (load-sml (web4r-file-path "examples/blog/sml/blog.sml"))))
 
 (defpage blog/index (user-id)
   (let ((slots (get-excluded-slots 'blog-post))
@@ -42,7 +42,7 @@
     (multiple-value-bind (items pager)
         (per-page (get-instances-by-value
                    'blog-post 'user-oid (get-user-oid user-id)))
-      (load-shtml (web4r-file-path "examples/blog/shtml/blog_index.shtml")))))
+      (load-sml (web4r-file-path "examples/blog/sml/blog_index.sml")))))
 
 (defpage blog/edit (oid :auth)
   (scaffold-edit
@@ -53,7 +53,7 @@
   (let ((ins (get-instance-by-oid 'blog-post oid)))
     (multiple-value-bind (comments pager)
         (per-page (get-instances-by-value 'comment 'blog-oid oid))
-      (load-shtml (web4r-file-path "examples/blog/shtml/blog_show.shtml")))))
+      (load-sml (web4r-file-path "examples/blog/sml/blog_show.sml")))))
 
 (defun blog-user-id (blog-ins)
   (user-id (get-instance-by-oid 'blog-user (user-oid blog-ins))))

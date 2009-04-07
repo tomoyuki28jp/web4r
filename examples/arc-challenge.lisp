@@ -21,8 +21,8 @@
 
 ; web4r: codetree of 18 nodes: 11 leaves/tokens + 7 interior nodes
 (defpage said ()
-  (form/cont/ (a/cont/ (p/ "You said: " (last-post "foo")) "click here")
-   (input-text/ "foo")))
+  (form/cont (a/cont [p "You said: " (last-post "foo")] "click here")
+   (input-text "foo")))
 
 (defparameter *srv* (start-server))
 ;(stop-server *srv*)

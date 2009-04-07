@@ -54,7 +54,7 @@
   (start-session)
   (catch 'web4r-dispatcher
     (handler-bind ((error #'backtrace-log))
-      (with-output-to-string (*html-output*)
+      (with-output-to-string (*sml-output*)
         (if (get-cont (cid))
             (call-cont (cid))
             (multiple-value-bind (fn paths) (get-page (request-uri* request))
@@ -103,8 +103,8 @@
 
 ; --- Messages --------------------------------------------------
 
-(defclass msgs ()       ((msgs :initarg :msgs :accessor msgs)))
-(defclass error-msgs () ((msgs :initarg :msgs :accessor msgs)))
+(defclass msgs ()       ((msgs :initarg :msgs)))
+(defclass error-msgs () ((msgs :initarg :msgs)))
 
 (defun mid () (parameter "mid"))
 
@@ -128,10 +128,10 @@
              *msgs*)
     (when (and (member (type-of it) '(msgs error-msgs))
                (or (null type) (typep it type)))
-      (msgs it))))
+      (slot-value it 'msgs))))
 
-(defun msgs/ ()
+(defun msgs ()
   (when-let (msgs (get-msgs 'msgs))
-    (load-shtml (shtml-file-path "common/msgs.shtml")))
+    (load-sml (sml-file-path "common/msgs.sml")))
   (when-let (error-msgs (get-msgs 'error-msgs))
-    (load-shtml (shtml-file-path "common/error_msgs.shtml"))))
+    (load-sml (sml-file-path "common/error_msgs.sml"))))

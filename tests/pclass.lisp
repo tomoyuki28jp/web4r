@@ -245,7 +245,7 @@
   (is (eq :image   (web4r::slot-type (get-slot 'testdb1 'image)))))
 
 (defun safe= (html safe)
-  (equal html (rem-newline (slot-value safe 'shtml::obj))))
+  (equal html (rem-newline (slot-value safe 'sml::obj))))
 
 (test slot-display-value
   (let ((i (make-instance 'testdb1
@@ -285,9 +285,9 @@
                (slot-display-value i (get-slot 'testdb1 'note))))
     (is (safe= "Hello<br>World"
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
-    (is (string=* "<A HREF=\"http://localhost:8080/image/?file=test.gif&amp;type=upload\">
-<IMG SRC=\"http://localhost:8080/thumbnail/?file=test&type=upload&width=&height=\" ALT=\"IMAGE\"></A>"
-                  (shtml->html (slot-display-value i (get-slot 'testdb1 'image)))))))
+    (is (string=* "<a href=\"http://localhost:8080/image/?file=test.gif&amp;type=upload\">
+<img src=\"http://localhost:8080/thumbnail/?file=test&type=upload&width=&height=\" alt=\"IMAGE\" /></a>"
+                  (sml->ml (slot-display-value i (get-slot 'testdb1 'image)))))))
 
 (test slot-save-value
   (with-post-parameters
@@ -333,47 +333,47 @@ World")
     (is (equal "Hello
 World"         (slot-save-value (get-slot 'testdb1 'note))))))
 
-(defmacro shtml= (shtml html)
-  `(string=* (shtml->html ,shtml) ,html))
+(defmacro sml= (sml ml)
+  `(string=* (sml->ml ,sml) ,ml))
 
 (test form-input
   (with-post-parameters '()
-    (is-true (shtml= (form-input (get-slot 'testdb1 'name))
-                     "<INPUT TYPE=\"text\" NAME=\"NAME\" ID=\"NAME\" SIZE=\"30\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'password))
-                     "<INPUT TYPE=\"password\" NAME=\"PASSWORD\" ID=\"PASSWORD\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'email))
-                     "<INPUT TYPE=\"text\" NAME=\"EMAIL\" ID=\"EMAIL\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'sex))
-                     "<INPUT TYPE=\"radio\" VALUE=\"Male\" ID=\"Male\" NAME=\"SEX\">
-<LABEL FOR=\"Male\">Male</LABEL>
-<INPUT TYPE=\"radio\" VALUE=\"Female\" ID=\"Female\" NAME=\"SEX\">
-<LABEL FOR=\"Female\">Female</LABEL>"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'marriage))
-                     "<SELECT NAME=\"MARRIAGE\" ID=\"MARRIAGE\">
-<OPTION VALUE=\"single\">single</OPTION>
-<OPTION VALUE=\"married\">married</OPTION>
-<OPTION VALUE=\"divorced\">divorced</OPTION>
-</SELECT>"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'hobbies))
-                     "<INPUT TYPE=\"checkbox\" VALUE=\"sports\" ID=\"HOBBIES-sports\" NAME=\"HOBBIES-sports\">
-<LABEL FOR=\"sports\">sports</LABEL>
-<INPUT TYPE=\"checkbox\" VALUE=\"music\" ID=\"HOBBIES-music\" NAME=\"HOBBIES-music\">
-<LABEL FOR=\"music\">music</LABEL>
-<INPUT TYPE=\"checkbox\" VALUE=\"reading\" ID=\"HOBBIES-reading\" NAME=\"HOBBIES-reading\">
-<LABEL FOR=\"reading\">reading</LABEL>"))
-    (is-true (equalp (shtml->html (select-date/ "BIRTH-DATE"))
-                     (shtml->html (form-input (get-slot 'testdb1 'birth-date)))))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'nickname))
-                     "<INPUT TYPE=\"text\" NAME=\"NICKNAME\" ID=\"NICKNAME\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'phone-number))
-                     "<INPUT TYPE=\"text\" NAME=\"PHONE-NUMBER\" ID=\"PHONE-NUMBER\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'zip-code))
-                     "<INPUT TYPE=\"text\" NAME=\"ZIP-CODE\" ID=\"ZIP-CODE\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'note))
-                     "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\"></TEXTAREA>"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'image))
-                     "<INPUT TYPE=\"file\" NAME=\"IMAGE\" ID=\"IMAGE\">")))
+    (is-true (sml= (form-input (get-slot 'testdb1 'name))
+                     "<input type=\"text\" name=\"NAME\" id=\"NAME\" size=\"30\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'password))
+                     "<input type=\"password\" name=\"PASSWORD\" id=\"PASSWORD\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'email))
+                     "<input type=\"text\" name=\"EMAIL\" id=\"EMAIL\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'sex))
+                     "<input type=\"radio\" value=\"Male\" id=\"Male\" name=\"SEX\" />
+<label for=\"Male\">Male</label>
+<input type=\"radio\" value=\"Female\" id=\"Female\" name=\"SEX\" />
+<label for=\"Female\">Female</label>"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'marriage))
+                     "<select name=\"MARRIAGE\" id=\"MARRIAGE\">
+<option value=\"single\">single</option>
+<option value=\"married\">married</option>
+<option value=\"divorced\">divorced</option>
+</select>"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'hobbies))
+                     "<input type=\"checkbox\" value=\"sports\" id=\"HOBBIES-sports\" name=\"HOBBIES-sports\" />
+<label for=\"sports\">sports</label>
+<input type=\"checkbox\" value=\"music\" id=\"HOBBIES-music\" name=\"HOBBIES-music\" />
+<label for=\"music\">music</label>
+<input type=\"checkbox\" value=\"reading\" id=\"HOBBIES-reading\" name=\"HOBBIES-reading\" />
+<label for=\"reading\">reading</label>"))
+    (is-true (equalp (sml->ml (select-date "BIRTH-DATE"))
+                     (sml->ml (form-input (get-slot 'testdb1 'birth-date)))))
+    (is-true (sml= (form-input (get-slot 'testdb1 'nickname))
+                     "<input type=\"text\" name=\"NICKNAME\" id=\"NICKNAME\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'phone-number))
+                     "<input type=\"text\" name=\"PHONE-NUMBER\" id=\"PHONE-NUMBER\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'zip-code))
+                     "<input type=\"text\" name=\"ZIP-CODE\" id=\"ZIP-CODE\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'note))
+                     "<textarea name=\"NOTE\" rows=\"5\" cols=\"30\" id=\"NOTE\"></textarea>"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'image))
+                     "<input type=\"file\" name=\"IMAGE\" id=\"IMAGE\" />")))
   (with-post-parameters
       '(("NAME" . "Tomoyuki Matsumoto")
         ("PASSWORD" . "password")
@@ -394,43 +394,43 @@ World")
          ("type" . "image/gif")
          ("tmp-name" . "/tmp/web4r/tmp/579198166B")
          ("size" . 1841)))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'name))
-                     "<INPUT TYPE=\"text\" NAME=\"NAME\" VALUE=\"Tomoyuki Matsumoto\" ID=\"NAME\" SIZE=\"30\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'password))
-                     "<INPUT TYPE=\"password\" NAME=\"PASSWORD\" VALUE=\"password\" ID=\"PASSWORD\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'email))
-                     "<INPUT TYPE=\"text\" NAME=\"EMAIL\" VALUE=\"tomo@tomo.com\" ID=\"EMAIL\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'sex))
-                     "<INPUT TYPE=\"radio\" CHECKED=\"checked\" VALUE=\"Male\" ID=\"Male\" NAME=\"SEX\">
-<LABEL FOR=\"Male\">Male</LABEL>
-<INPUT TYPE=\"radio\" VALUE=\"Female\" ID=\"Female\" NAME=\"SEX\">
-<LABEL FOR=\"Female\">Female</LABEL>"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'marriage))
-                     "<SELECT NAME=\"MARRIAGE\" ID=\"MARRIAGE\">
-<OPTION VALUE=\"single\" SELECTED=\"selected\">single</OPTION>
-<OPTION VALUE=\"married\">married</OPTION>
-<OPTION VALUE=\"divorced\">divorced</OPTION>
-</SELECT>"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'hobbies))
-                     "<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"sports\" ID=\"HOBBIES-sports\" NAME=\"HOBBIES-sports\">
-<LABEL FOR=\"sports\">sports</LABEL>
-<INPUT TYPE=\"checkbox\" VALUE=\"music\" ID=\"HOBBIES-music\" NAME=\"HOBBIES-music\">
-<LABEL FOR=\"music\">music</LABEL>
-<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"reading\" ID=\"HOBBIES-reading\" NAME=\"HOBBIES-reading\">
-<LABEL FOR=\"reading\">reading</LABEL>"))
-    (is-true (equalp (shtml->html (select-date/ "BIRTH-DATE" :y 1983 :m 9 :d 28))
-                     (shtml->html (form-input (get-slot 'testdb1 'birth-date)))))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'nickname))
-                     "<INPUT TYPE=\"text\" NAME=\"NICKNAME\" VALUE=\"tomo\" ID=\"NICKNAME\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'phone-number))
-                     "<INPUT TYPE=\"text\" NAME=\"PHONE-NUMBER\" VALUE=\"408-644-6198\" ID=\"PHONE-NUMBER\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'zip-code))
-                     "<INPUT TYPE=\"text\" NAME=\"ZIP-CODE\" VALUE=\"95129\" ID=\"ZIP-CODE\">"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'note))
-                     "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\">Hello
-World</TEXTAREA>"))
-    (is-true (shtml= (form-input (get-slot 'testdb1 'image))
-                     "<INPUT TYPE=\"file\" NAME=\"IMAGE\" ID=\"IMAGE\">")
+    (is-true (sml= (form-input (get-slot 'testdb1 'name))
+                     "<input type=\"text\" name=\"NAME\" value=\"Tomoyuki Matsumoto\" id=\"NAME\" size=\"30\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'password))
+                     "<input type=\"password\" name=\"PASSWORD\" value=\"password\" id=\"PASSWORD\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'email))
+                     "<input type=\"text\" name=\"EMAIL\" value=\"tomo@tomo.com\" id=\"EMAIL\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'sex))
+                     "<input type=\"radio\" checked=\"checked\" value=\"Male\" id=\"Male\" name=\"SEX\" />
+<label for=\"Male\">Male</label>
+<input type=\"radio\" value=\"Female\" id=\"Female\" name=\"SEX\" />
+<label for=\"Female\">Female</label>"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'marriage))
+                     "<select name=\"MARRIAGE\" id=\"MARRIAGE\">
+<option value=\"single\" selected=\"selected\">single</option>
+<option value=\"married\">married</option>
+<option value=\"divorced\">divorced</option>
+</select>"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'hobbies))
+                     "<input type=\"checkbox\" checked=\"checked\" value=\"sports\" id=\"HOBBIES-sports\" name=\"HOBBIES-sports\" />
+<label for=\"sports\">sports</label>
+<input type=\"checkbox\" value=\"music\" id=\"HOBBIES-music\" name=\"HOBBIES-music\" />
+<label for=\"music\">music</label>
+<input type=\"checkbox\" checked=\"checked\" value=\"reading\" id=\"HOBBIES-reading\" name=\"HOBBIES-reading\" />
+<label for=\"reading\">reading</label>"))
+    (is-true (equalp (sml->ml (select-date "BIRTH-DATE" :y 1983 :m 9 :d 28))
+                     (sml->ml (form-input (get-slot 'testdb1 'birth-date)))))
+    (is-true (sml= (form-input (get-slot 'testdb1 'nickname))
+                     "<input type=\"text\" name=\"NICKNAME\" value=\"tomo\" id=\"NICKNAME\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'phone-number))
+                     "<input type=\"text\" name=\"PHONE-NUMBER\" value=\"408-644-6198\" id=\"PHONE-NUMBER\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'zip-code))
+                     "<input type=\"text\" name=\"ZIP-CODE\" value=\"95129\" id=\"ZIP-CODE\" />"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'note))
+                     "<textarea name=\"NOTE\" rows=\"5\" cols=\"30\" id=\"NOTE\">Hello
+World</textarea>"))
+    (is-true (sml= (form-input (get-slot 'testdb1 'image))
+                     "<input type=\"file\" name=\"IMAGE\" id=\"IMAGE\" />")
              ))
   (with-post-parameters '()
     (let ((i (make-instance 'testdb1
@@ -446,91 +446,91 @@ World</TEXTAREA>"))
                             :zip-code     "95129"
                             :note         (format nil "Hello~%World")
                             :image        "test.gif")))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'name) i)
-                       "<INPUT TYPE=\"text\" NAME=\"NAME\" VALUE=\"Tomoyuki Matsumoto\" ID=\"NAME\" SIZE=\"30\">"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'password) i)
-                       "<INPUT TYPE=\"password\" NAME=\"PASSWORD\" VALUE=\"password\" ID=\"PASSWORD\">"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'email) i)
-                       "<INPUT TYPE=\"text\" NAME=\"EMAIL\" VALUE=\"tomo@tomo.com\" ID=\"EMAIL\">"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'sex) i)
-                       "<INPUT TYPE=\"radio\" CHECKED=\"checked\" VALUE=\"Male\" ID=\"Male\" NAME=\"SEX\">
-<LABEL FOR=\"Male\">Male</LABEL>
-<INPUT TYPE=\"radio\" VALUE=\"Female\" ID=\"Female\" NAME=\"SEX\">
-<LABEL FOR=\"Female\">Female</LABEL>"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'marriage) i)
-                       "<SELECT NAME=\"MARRIAGE\" ID=\"MARRIAGE\">
-<OPTION VALUE=\"single\" SELECTED=\"selected\">single</OPTION>
-<OPTION VALUE=\"married\">married</OPTION>
-<OPTION VALUE=\"divorced\">divorced</OPTION>
-</SELECT>"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'hobbies) i)
-                       "<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"sports\" ID=\"HOBBIES-sports\" NAME=\"HOBBIES-sports\">
-<LABEL FOR=\"sports\">sports</LABEL>
-<INPUT TYPE=\"checkbox\" VALUE=\"music\" ID=\"HOBBIES-music\" NAME=\"HOBBIES-music\">
-<LABEL FOR=\"music\">music</LABEL>
-<INPUT TYPE=\"checkbox\" CHECKED=\"checked\" VALUE=\"reading\" ID=\"HOBBIES-reading\" NAME=\"HOBBIES-reading\">
-<LABEL FOR=\"reading\">reading</LABEL>"))
-      (is-true (equalp (shtml->html (select-date/ "BIRTH-DATE" :y 1983 :m 9 :d 28))
-                       (shtml->html (form-input (get-slot 'testdb1 'birth-date) i))))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'nickname) i)
-                       "<INPUT TYPE=\"text\" NAME=\"NICKNAME\" VALUE=\"tomo\" ID=\"NICKNAME\">"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'phone-number) i)
-                       "<INPUT TYPE=\"text\" NAME=\"PHONE-NUMBER\" VALUE=\"408-644-6198\" ID=\"PHONE-NUMBER\">"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'zip-code) i)
-                       "<INPUT TYPE=\"text\" NAME=\"ZIP-CODE\" VALUE=\"95129\" ID=\"ZIP-CODE\">"))
-      (is-true (shtml= (form-input (get-slot 'testdb1 'note) i)
-                       "<TEXTAREA NAME=\"NOTE\" ROWS=\"5\" COLS=\"30\" ID=\"NOTE\">Hello
-World</TEXTAREA>")))))
+      (is-true (sml= (form-input (get-slot 'testdb1 'name) i)
+                       "<input type=\"text\" name=\"NAME\" value=\"Tomoyuki Matsumoto\" id=\"NAME\" size=\"30\" />"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'password) i)
+                       "<input type=\"password\" name=\"PASSWORD\" value=\"password\" id=\"PASSWORD\" />"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'email) i)
+                       "<input type=\"text\" name=\"EMAIL\" value=\"tomo@tomo.com\" id=\"EMAIL\" />"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'sex) i)
+                       "<input type=\"radio\" checked=\"checked\" value=\"Male\" id=\"Male\" name=\"SEX\" />
+<label for=\"Male\">Male</label>
+<input type=\"radio\" value=\"Female\" id=\"Female\" name=\"SEX\" />
+<label for=\"Female\">Female</label>"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'marriage) i)
+                       "<select name=\"MARRIAGE\" id=\"MARRIAGE\">
+<option value=\"single\" selected=\"selected\">single</option>
+<option value=\"married\">married</option>
+<option value=\"divorced\">divorced</option>
+</select>"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'hobbies) i)
+                       "<input type=\"checkbox\" checked=\"checked\" value=\"sports\" id=\"HOBBIES-sports\" name=\"HOBBIES-sports\" />
+<label for=\"sports\">sports</label>
+<input type=\"checkbox\" value=\"music\" id=\"HOBBIES-music\" name=\"HOBBIES-music\" />
+<label for=\"music\">music</label>
+<input type=\"checkbox\" checked=\"checked\" value=\"reading\" id=\"HOBBIES-reading\" name=\"HOBBIES-reading\" />
+<label for=\"reading\">reading</label>"))
+      (is-true (equalp (sml->ml (select-date "BIRTH-DATE" :y 1983 :m 9 :d 28))
+                       (sml->ml (form-input (get-slot 'testdb1 'birth-date) i))))
+      (is-true (sml= (form-input (get-slot 'testdb1 'nickname) i)
+                       "<input type=\"text\" name=\"NICKNAME\" value=\"tomo\" id=\"NICKNAME\" />"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'phone-number) i)
+                       "<input type=\"text\" name=\"PHONE-NUMBER\" value=\"408-644-6198\" id=\"PHONE-NUMBER\" />"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'zip-code) i)
+                       "<input type=\"text\" name=\"ZIP-CODE\" value=\"95129\" id=\"ZIP-CODE\" />"))
+      (is-true (sml= (form-input (get-slot 'testdb1 'note) i)
+                       "<textarea name=\"NOTE\" rows=\"5\" cols=\"30\" id=\"NOTE\">Hello
+World</textarea>")))))
 
 (test form-label
-  (is (string=* "<LABEL FOR=\"NAME\">Full Name</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'name)))))
-  (is (string=* "<LABEL FOR=\"PASSWORD\">Password</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'password)))))
-  (is (string=* "<LABEL FOR=\"EMAIL\">Email</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'email)))))
-  (is (string=* "<LABEL FOR=\"SEX\">Sex</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'sex)))))
-  (is (string=* "<LABEL FOR=\"MARRIAGE\">Marriage</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'marriage)))))
-  (is (string=* "<LABEL FOR=\"HOBBIES\">Hobbies</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'hobbies)))))
-  (is (string=* "<LABEL FOR=\"BIRTH-DATE-Y\">Birth Date</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'birth-date)))))
-  (is (string=* "<LABEL FOR=\"NICKNAME\">Nickname</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'nickname)))))
-  (is (string=* "<LABEL FOR=\"PHONE-NUMBER\">Phone Number</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'phone-number)))))
-  (is (string=* "<LABEL FOR=\"ZIP-CODE\">Zip Code</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'zip-code)))))
-  (is (string=* "<LABEL FOR=\"NOTE\">Note</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'note)))))
-  (is (string=* "<LABEL FOR=\"IMAGE\">Image</LABEL>"
-                (shtml->html (form-label (get-slot 'testdb1 'image))))))
+  (is (string=* "<label for=\"NAME\">Full Name</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'name)))))
+  (is (string=* "<label for=\"PASSWORD\">Password</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'password)))))
+  (is (string=* "<label for=\"EMAIL\">Email</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'email)))))
+  (is (string=* "<label for=\"SEX\">Sex</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'sex)))))
+  (is (string=* "<label for=\"MARRIAGE\">Marriage</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'marriage)))))
+  (is (string=* "<label for=\"HOBBIES\">Hobbies</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'hobbies)))))
+  (is (string=* "<label for=\"BIRTH-DATE-Y\">Birth Date</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'birth-date)))))
+  (is (string=* "<label for=\"NICKNAME\">Nickname</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'nickname)))))
+  (is (string=* "<label for=\"PHONE-NUMBER\">Phone Number</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'phone-number)))))
+  (is (string=* "<label for=\"ZIP-CODE\">Zip Code</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'zip-code)))))
+  (is (string=* "<label for=\"NOTE\">Note</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'note)))))
+  (is (string=* "<label for=\"IMAGE\">Image</label>"
+                (sml->ml (form-label (get-slot 'testdb1 'image))))))
 
 (test must-mark
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'name)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'password)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'email)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'sex)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'marriage)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'hobbies)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'birth-date)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'name)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'password)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'email)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'sex)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'marriage)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'hobbies)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'birth-date)))))
   (is (eq nil
           (must-mark (get-slot 'testdb1 'nickname))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'phone-number)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'zip-code)))))
-  (is (string=* "<FONT COLOR=\"red\">*</FONT>"
-                (shtml->html (must-mark (get-slot 'testdb1 'note)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'phone-number)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'zip-code)))))
+  (is (string=* "<font color=\"red\">*</font>"
+                (sml->ml (must-mark (get-slot 'testdb1 'note)))))
   (is (eq nil
           (must-mark (get-slot 'testdb1 'image)))))
 

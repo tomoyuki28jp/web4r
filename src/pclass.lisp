@@ -107,9 +107,9 @@
     (let ((input (slot-input slot)))
       (cond ((and nl->br (eq input :textarea)) (safe (nl->br (escape it))))
             ((eq (slot-type slot) :image)
-             (a/ :href (image-uri it :type "upload")
-                 (img/ :src (safe (thumbnail-uri (pathname-name it) :type "upload"))
-                       :alt (slot-id slot))))
+             [a :href (image-uri it :type "upload")
+                [img :src (safe (thumbnail-uri (pathname-name it) :type "upload"))
+                     :alt (slot-id slot) /]])
             ((eq input :checkbox) (apply #'join (append '(", ") it)))
             (t it)))
     ""))
@@ -148,67 +148,67 @@
     (let* ((saved (aand ins (ignore-errors (slot-value it symbol))))
            (value (or (post-parameter id) saved)))
       (cond ((eq input :select)
-             (select-form/ id options value))
+             (select-form id options value))
             (options
              (loop for o in options as oid = (concat id "-" o)
                    do (if (eq input :checkbox)
-                          (input-checked/ "checkbox"
-                                          (or (post-parameter oid)
-                                              (when (member o saved :test #'equal) o))
-                                          :value o :id oid :name oid)
-                          (input-checked/ "radio" value :value o :id o :name id))
-                   do (label/ :for o o)))
+                          (input-checked "checkbox"
+                                         (or (post-parameter oid)
+                                             (when (member o saved :test #'equal) o))
+                                         :value o :id oid :name oid)
+                          (input-checked "radio" value :value o :id o :name id))
+                   do [label :for o o]))
             ((eq type :date)
              (let ((date (when (stringp value) (split "-" value))))
                (multiple-value-bind (y m d) (posted-date id)
-                 (select-date/ id :y (or y (nth 0 date)) :m (or m (nth 1 date))
+                 (select-date id :y (or y (nth 0 date)) :m (or m (nth 1 date))
                                   :d (or d (nth 2 date))))))
             ((eq input :textarea)
              (with-slots (rows cols) slot
-               (textarea/ :name id :rows rows :cols cols :id id value)))
+               [textarea :name id :rows rows :cols cols :id id value]))
             ((eq input :file)
              (aif (aand (or (cont-session slot) saved) (probe-file it))
-                 (progn (p/ "change: " (input-file/ id :id id))
-                        (p/ "delete: " (input-checked/ "checkbox" nil
+                 (progn [p "change: " (input-file id :id id)]
+                        [p "delete: " (input-checked "checkbox" nil
                                         :value "t" :name (concat id "-delete") :id id)
-                            (img/ :src (thumbnail-uri it) :alt id)))
-               (input-file/ id :id id)))
-            (t (input/ :type (if (eq input :password) "password" "text")
-                       :name id :value value :id id :size size))))))
+                            [img :src (thumbnail-uri it) :alt id /]])
+               (input-file id :id id)))
+            (t [input :type (if (eq input :password) "password" "text")
+                      :name id :value value :id id :size size /])))))
 
 (defgeneric form-label (slot))
 (defmethod form-label ((slot slot-options))
   (with-slots (type label id nullable) slot
     (if (eq type :date)
-        (label/ :for (concat id "-Y") label)
-        (and label id (label/ :for id label)))))
+        [label :for (concat id "-Y") label]
+        (and label id [label :for id label]))))
 
 (defgeneric must-mark (slot))
 (defmethod must-mark ((slot slot-options))
   (unless (slot-nullable slot)
-    (font/ :color "red" "*")))
+    [font :color "red" "*"]))
 
 (defgeneric form-comment (slot))
 (defmethod form-comment ((slot slot-options))
   (aand (slot-comment slot) (not (equal it ""))
-        (font/ :color "grey" "(" it ")")))
+        [font :color "grey" "(" it ")"]))
 
-(defmacro form-for/cont/ (cont &key class instance (submit "submit"))
-  `(%form/cont/ (file-slots ,class) ,cont
-     (table/
-       (loop for s in (get-excluded-slots ,class)
-             do (tr/ (td/ (form-label s) (must-mark s) (form-comment s)))
-             do (tr/ (td/ (form-input s ,instance))))
-       (tr/ (td/ (submit/ :value ,submit))))))
+(defmacro form-for/cont (cont &key class instance (submit "submit"))
+  `(%form/cont (file-slots ,class) ,cont
+     [table
+      (loop for s in (get-excluded-slots ,class)
+            do [tr [td (form-label s) (must-mark s) (form-comment s)]]
+            do [tr [td (form-input s ,instance)]])
+       [tr [td (submit :value ,submit)]]]))
 
-(defun select-date/ (name &key y m d (y-start 1900) (y-end 2030))
+(defun select-date (name &key y m d (y-start 1900) (y-end 2030))
   (multiple-value-bind (sec min hour date month year)
       (decode-universal-time (get-universal-time))
     (declare (ignore sec min hour))
     (flet ((lst (from to) (loop for i from from to to collect i)))
-      (select-form/ (concat name "-Y") (lst y-start y-end) (or (->int y) year))
-      (select-form/ (concat name "-M") (lst 1 12) (or (->int m) month))
-      (select-form/ (concat name "-D") (lst 1 31) (or (->int d) date)))))
+      (select-form (concat name "-Y") (lst y-start y-end) (or (->int y) year))
+      (select-form (concat name "-M") (lst 1 12) (or (->int m) month))
+      (select-form (concat name "-D") (lst 1 31) (or (->int d) date)))))
 
 ; --- Validations -----------------------------------------------
 
