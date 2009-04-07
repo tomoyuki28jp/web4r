@@ -103,6 +103,7 @@
 (defun destroy-conts-by-session (session)
   (let ((sid (sid session)))
     (when-let (cids (gethash sid *sid->cid*))
+      (remhash sid *sid->cid*)
       (dolist (cid cids) (destroy-cont cid))
       (remhash sid *sid->cid*))))
 
