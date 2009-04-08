@@ -29,7 +29,7 @@
     (loop for p in pages do (is (string= p (get-page p))))))
 
 (test msgs
-  (defpage test1 () (p (apply #'join " " (get-msgs))))
+  (defpage test1 () (p (apply #'join " " (slot-value (get-msgs) 'msgs))))
   (defpage test2 () (page/msgs "test1" '("m1" "m2")))
   (is (string= (http-request (page-uri "test2")) "m1 m2"))
   (defpage test3 () (redirect/msgs (page-uri "test1") '("m1" "m2")))

@@ -1,1 +1,1 @@
-[ul :style "color: red" (dolist (e error-msgs) [li e])]
+[ul :style "color: red" (dolist (m msgs) [li m])]
