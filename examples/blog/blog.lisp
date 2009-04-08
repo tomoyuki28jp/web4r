@@ -44,16 +44,14 @@
       (load-sml (web4r-file-path "examples/blog/sml/blog_index.sml")))))
 
 (defpage blog/edit (oid :auth)
+  (blog-owner-check oid)
   (scaffold-edit
    'blog-post :oid oid :slot-values `((user-oid ,(login-user-oid)))
    :redirect-uri (page-uri "blog" "index" (login-user-id))))
 
 (defpage blog/delete (oid :auth)
-  (let ((uri (page-uri "blog" "index" (login-user-id)))
-        (ins (aand oid (get-instance-by-oid 'blog-post it))))
-    (if (and ins (eq (user-oid ins) (login-user-oid)))
-        (scaffold-delete 'blog-post oid uri)
-        (redirect/error-msgs uri "Illegal action"))))
+  (blog-owner-check oid)
+  (scaffold-delete 'blog-post oid (my-page-uri)))
 
 (defpage blog/show (oid)
   (let ((ins (get-instance-by-oid 'blog-post oid)))
@@ -61,8 +59,11 @@
         (per-page (get-instances-by-value 'comment 'blog-oid oid))
       (load-sml (web4r-file-path "examples/blog/sml/blog_show.sml")))))
 
-(defun blog-user-id (blog-ins)
-  (user-id (get-instance-by-oid 'blog-user (user-oid blog-ins))))
+(defun blog-owner-check (oid)
+  (unless (owner-p 'blog-post 'user-oid oid)
+    (redirect/error-msgs (my-page-uri) "Illegal action")))
+
+(defun my-page-uri () (page-uri "blog" "index" (login-user-id)))
 
 (defun save-comment (oid)
   (aif (class-validation-errors 'comment)
