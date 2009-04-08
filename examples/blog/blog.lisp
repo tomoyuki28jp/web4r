@@ -37,8 +37,7 @@
 
 (defpage blog/index (user-id)
   (let ((slots (get-excluded-slots 'blog-post))
-        (owner-p (aand user-id (equal it (login-user-id))))
-        (uri (request-uri*)))
+        (owner-p (aand user-id (equal it (login-user-id)))))
     (multiple-value-bind (items pager)
         (per-page (get-instances-by-value
                    'blog-post 'user-oid (get-user-oid user-id)))
