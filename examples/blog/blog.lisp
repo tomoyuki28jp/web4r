@@ -49,8 +49,11 @@
    :redirect-uri (page-uri "blog" "index" (login-user-id))))
 
 (defpage blog/delete (oid :auth)
-  (scaffold-delete 'blog-post oid
-                   (page-uri "blog" "index" (login-user-id))))
+  (let ((uri (page-uri "blog" "index" (login-user-id)))
+        (ins (aand oid (get-instance-by-oid 'blog-post it))))
+    (if (and ins (eq (user-oid ins) (login-user-oid)))
+        (scaffold-delete 'blog-post oid uri)
+        (redirect/error-msgs uri "Illegal action"))))
 
 (defpage blog/show (oid)
   (let ((ins (get-instance-by-oid 'blog-post oid)))
