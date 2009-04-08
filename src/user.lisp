@@ -97,3 +97,7 @@
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
       (scaffold-edit (user-class) :redirect-uri redirect-uri)))
+
+(defun owner-p (class slot oid)
+  (aand (awhen oid (get-instance-by-oid class it))
+        (eq (slot-value it slot) (login-user-oid))))

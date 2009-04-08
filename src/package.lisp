@@ -144,6 +144,7 @@
                    :login-page
                    :logout-page
                    :regist-page
+                   :owner-p
                    ; --- image ---
                    :*image-dirs*
                    :mime-type
