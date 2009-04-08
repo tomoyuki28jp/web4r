@@ -32,7 +32,9 @@
 (defun file-type (name) (file-data name 2))
 
 (defun default-page ()
-  (page *default-page*))
+  (if (functionp *default-page*)
+      (funcall *default-page*)
+      (page *default-page*)))
 
 (defun set-post-parameters (params)
   (setf (slot-value *request* 'hunchentoot::post-parameters) params))
