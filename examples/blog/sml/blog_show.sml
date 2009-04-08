@@ -20,7 +20,7 @@
                               (time-format "~y/~m/~d ~h:~i" (created-at c))]))
                 ; comment form
                 [h3 "Leave your comment"]
-                (form-for/cont (save-comment oid)
+                (form-for/cont (post-comment/cont oid)
                   :class 'comment :submit "Post"))
               (progn
                 [p "That page doesn't exist!"]

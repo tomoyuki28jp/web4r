@@ -8,13 +8,11 @@
   (asdf:oos 'asdf:load-op :web4r))
 
 (in-package :cl-user)
-(defpackage :blog
-  (:use :cl :web4r :elephant)
-  (:shadowing-import-from :web4r :defpclass))
+(defpackage :blog (:use :cl :web4r :elephant)
+                  (:shadowing-import-from :web4r :defpclass))
 (in-package :blog)
 
-(open-store
- '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
+(open-store '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
 
 (defpclass blog-user (user)
   ((email :type :email :unique t)
@@ -39,15 +37,13 @@
   (let ((slots (get-excluded-slots 'blog-post))
         (owner-p (aand user-id (equal it (login-user-id)))))
     (multiple-value-bind (items pager)
-        (per-page (get-instances-by-value
-                   'blog-post 'user-oid (get-user-oid user-id)))
+        (per-page (get-instances-by-value 'blog-post 'user-oid (get-user-oid user-id)))
       (load-sml (web4r-file-path "examples/blog/sml/blog_index.sml")))))
 
 (defpage blog/edit (oid :auth)
   (blog-owner-check oid)
-  (scaffold-edit
-   'blog-post :oid oid :slot-values `((user-oid ,(login-user-oid)))
-   :redirect-uri (page-uri "blog" "index" (login-user-id))))
+  (scaffold-edit 'blog-post :oid oid :slot-values `((user-oid ,(login-user-oid)))
+                 :redirect-uri (page-uri "blog" "index" (login-user-id))))
 
 (defpage blog/delete (oid :auth)
   (blog-owner-check oid)
@@ -65,12 +61,8 @@
 
 (defun my-page-uri () (page-uri "blog" "index" (login-user-id)))
 
-(defun save-comment (oid)
-  (aif (class-validation-errors 'comment)
-       (page/error-msgs "blog/show" it oid)
-       (progn (make-pinstance 'comment `((blog-oid ,oid)))
-              (redirect/msgs (w/p (page-uri "blog" "show" oid))
-                             "Comment posted"))))
+(defun post-comment/cont (oid)
+  (edit/cont 'comment nil (request-uri*) :slot-values `((blog-oid ,oid))))
 
 (defparameter *srv* (start-server))
 ;(stop-server *srv*)
