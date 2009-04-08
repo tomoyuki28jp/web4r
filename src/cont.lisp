@@ -61,11 +61,13 @@
 ; (gc process will clean it up anyways.)
 (defun call-cont (cid)
   (awhen (get-cont cid)
-    (funcall it)
-    (destroy-cont cid))
-  (when (= (random *cont-gc-probability*) 0)
-    (bordeaux-threads:make-thread
-     (lambda () (cont-gc)))))
+    ; without unwind-protect, destroy-cont and cont-gc won't be
+    ; executed when we call hunchentoot:redirect inside a cont.
+    (unwind-protect (funcall it)
+      (destroy-cont cid)
+      (when (= (random *cont-gc-probability*) 0)
+        (bordeaux-threads:make-thread
+         (lambda () (cont-gc)))))))
 
 (defun cont-gc (&optional (end (length *cid-generated-order*)))
   (when (and (plusp end)
