@@ -68,7 +68,7 @@
                    :page/error-msgs
                    :get-msgs
                    :msgs
-                   ; --- validations ---
+                   ; --- valid ---
                    :validation-errors
                    :with-validations
                    ; --- pager ---
@@ -152,8 +152,8 @@
                    :owner-p
                    ; --- image ---
                    :mime-type
-                   :image-path
                    :image-file-p
+                   :image-path
                    :thumbnail
                    :thumbnail-uri
                    ; --- my-util ---
