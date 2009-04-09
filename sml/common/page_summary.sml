@@ -1,1 +1,2 @@
-[p "Results " item-start " - " item-end " of " total-items]
+[div :class "paging"
+     "Results " item-start " - " item-end " of " total-items]

@@ -22,4 +22,4 @@
                               [td [a :href (page-uri cname "delete" (oid x)) "Delete"]]))])
                   it)])
               [p "There are no " cname])
-         [p [a :href (w/p (page-uri cname "edit")) "New " cname]]])
+         [div :id "new_link" [a :href (w/p (page-uri cname "edit")) "New " cname]]])
