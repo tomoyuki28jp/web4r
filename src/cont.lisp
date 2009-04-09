@@ -1,25 +1,5 @@
 (in-package :web4r)
 
-(defvar *sid->cid*  (make-hash-table)
-  "sid(session-id) -> cid(continuation-id) : mapping index")
-
-(defvar *cid->cont* (make-hash-table :test 'equal)
-  "cid(continuation-id) -> instance of the cont structure")
-
-(defvar *cid-generated-order*
-  (make-array 0 :fill-pointer 0 :adjustable t)
-  "cids by the order of their generated time.
-   this will be used to destroy expired continuations")
-
-(defvar *cont-gc-lifetime* 1440
-  "continuation lifetime")
-
-(defvar *cont-gc-probability* 100
-  "probability to start a gc process")
-
-(defvar *cont-sessions* (make-hash-table :test 'equal)
-  "continuations based session data")
-
 ; --- Continuations ---------------------------------------------
 
 (defstruct cont
@@ -129,9 +109,6 @@
                 (list (cons key value)))))
 
 ; --- Form with Continuations -----------------------------------
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar *last-posts* nil))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun ->lambda (body)

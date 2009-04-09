@@ -1,7 +1,5 @@
 (in-package :web4r)
 
-(defvar *page-param* "page")
-
 (defclass pager ()
   ((items-per-page :type integer :initform 10 :initarg :items-per-page)
    (links-per-page :type integer :initform 10 :initarg :links-per-page)

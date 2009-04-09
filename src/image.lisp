@@ -1,19 +1,6 @@
 (in-package :web4r)
-
+-
 ; --- Util ------------------------------------------------------
-
-(defvar *image-dirs*
-  (list (cons "tmp"    '*tmp-save-dir*)
-        (cons "upload" '*upload-save-dir*)))
-
-(defun image-dir (type)
-  (awhen (cdr (assoc type *image-dirs* :test #'equal))
-    (symbol-value it)))
-
-(defun image-dir-type (dir)
-  (car (find-if
-        #'(lambda (x) (equal (symbol-value (cdr x)) dir))
-        *image-dirs*)))
 
 (defun mime-type (file)
   (let* ((file  (namestring file))

@@ -1,17 +1,5 @@
 (in-package :web4r)
 
-(defvar *page-uri-paths* 0
-  "The number of current page uri paths")
-
-(defvar *pages* nil
-  "Page paths -> handler alist")
-
-(defvar *msgs* nil
-  "Instance of the msgs structure")
-
-(defvar *default-page* nil
-  "Default page uri")
-
 ; --- Util ------------------------------------------------------
 
 (defun uri-path (n &optional (request *request*))
@@ -31,11 +19,6 @@
 (defun file-name (name) (file-data name 1))
 (defun file-type (name) (file-data name 2))
 
-(defun default-page ()
-  (if (functionp *default-page*)
-      (funcall *default-page*)
-      (page *default-page*)))
-
 (defun set-post-parameters (params)
   (setf (slot-value *request* 'hunchentoot::post-parameters) params))
 
@@ -45,10 +28,21 @@
 (defun start-server (&optional acceptor)
   (start (or acceptor
              (make-instance 'acceptor :port 8080
-                            :request-dispatcher 'web4r-dispatcher))))
+               :request-dispatcher 'web4r-dispatcher))))
 
 (defun stop-server (acceptor)
   (stop  acceptor))
+
+; --- Public directories ----------------------------------------
+
+(push (create-folder-dispatcher-and-handler "/images/" *image-dir*)
+      *dispatch-table*)
+
+(push (create-folder-dispatcher-and-handler "/tmp/"    *tmp-save-dir*)
+      *dispatch-table*)
+
+(push (create-folder-dispatcher-and-handler "/upload/" *upload-save-dir*)
+      *dispatch-table*)
 
 ; --- Dispatcher ------------------------------------------------
 
@@ -61,7 +55,7 @@
             (call-cont (cid))
             (multiple-value-bind (fn paths) (get-page (request-uri* request))
               (if fn (let ((*page-uri-paths* paths)) (funcall fn))
-                     (default-page))))))))
+                     (hunchentoot::list-request-dispatcher request))))))))
 
 (defun get-page (uri)
   (labels ((get-page* (idx alist &optional (path 0))
@@ -96,7 +90,8 @@
   `(progn
      (set-page (->string-down ',name) (page-lambda (,@args) ,@body))
      (when (member :default ',args)
-       (setf *default-page* (->string-down ',name)))))
+       (setf *default-handler*
+             (lambda () (page (->string-down ',name)))))))
 
 (defun page (page &rest args)
   (multiple-value-bind (fn paths) (get-page page)
@@ -135,5 +130,5 @@
   (awhen (get-msgs)
     (when-let (msgs (slot-value it 'msgs))
       (case (type-of it)
-        (msgs       (load-sml (sml-file-path "common/msgs.sml")))
-        (error-msgs (load-sml (sml-file-path "common/error_msgs.sml")))))))
+        (msgs       (load-sml (sml-path "common/msgs.sml")))
+        (error-msgs (load-sml (sml-path "common/error_msgs.sml")))))))

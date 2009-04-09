@@ -1,11 +1,5 @@
 (in-package :web4r)
 
-(defvar *login-msgs*
-  '((:login-failed      . "Wrong username and password combination")
-    (:login-succeeded   . "Logged in")
-    (:logged-out        . "Logged out")
-    (:already-logged-in . "You are already logged in")))
-
 (defun login-msg (key)
   (cdr (assoc key *login-msgs*)))
 

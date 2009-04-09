@@ -22,6 +22,7 @@
                          :serial  t
                          :components
                          ((:file "package")
+                          (:file "specials")
                           (:file "util")
                           (:file "debug")
                           (:file "cont")

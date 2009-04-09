@@ -1,25 +1,10 @@
 (in-package :web4r)
 
-; --- Error Messages --------------------------------------------
-
-(defvar *error-formats*
-  '((:invalid      . "~A is invalid")
-    (:empty        . "~A can't be empty")
-    (:too-long     . "~A is too long (maximum is ~D characters)")
-    (:too-short    . "~A is too short (minimum is ~D characters)")
-    (:too-big      . "~A is too big (maximum is ~D bytes)")
-    (:too-small    . "~A is too small (minimum is ~D bytes)")
-    (:not-a-number . "~A is not a number")
-    (:not-alpha    . "~A must contains only alphabetic characters")
-    (:not-alnum    . "~A must contains only alphabetic and digit characters")
-    (:not-a-unique . "The same ~A has already been registered")
-    (:not-a-image  . "~A must be a jpeg, png or gif image file.")))
+; --- Util ------------------------------------------------------
 
 (defun error-msg (type &rest args)
   (awhen (cdr (assoc type *error-formats*))
     (apply #'format (append (list nil it) args))))
-
-; --- Util ------------------------------------------------------
 
 (defun leap-year-p (year)
   (check-type year integer)
@@ -51,8 +36,6 @@
       t)))
 
 ; --- Validators ------------------------------------------------
-
-(defvar *validators* (make-hash-table))
 
 (defmacro define-validator (name args &rest body)
   `(setf (gethash (->keyword ',name) *validators*)

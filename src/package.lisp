@@ -36,8 +36,6 @@
                    :file-length*
                    :time-format
                    ; --- debug ---
-                   :*debug-log-file*
-                   :*debug-mode*
                    :ps
                    :with-post-parameters
                    :with-get-parameters
@@ -54,11 +52,9 @@
                    :multipart-form/cont
                    :last-post
                    ; --- server ---
-                   :*default-page*
                    :uri-path
                    :host-uri
                    :page-uri
-                   :default-page
                    :set-post-parameters
                    :set-get-parameters
                    :start-server
@@ -76,7 +72,6 @@
                    :validation-errors
                    :with-validations
                    ; --- pager ---
-                   :*page-param*
                    :pager
                    :total-pages
                    :get-current-page
@@ -84,12 +79,6 @@
                    :page-summary
                    :w/p
                    ; --- pclass ---
-                   :*tmp-save-dir*
-                   :*upload-save-dir*
-                   :*tmp-files-gc-lifetime*
-                   :*tmp-files-gc-probability*
-                   :*with-slots*
-                   :*without-slots*
                    :slot-symbol
                    :slot-id
                    :slot-label
@@ -136,7 +125,6 @@
                    :make-pinstance
                    :update-pinstance
                    ; --- user.lisp ---
-                   :*login-msgs*
                    :login-msg
                    :*user*
                    :id
@@ -163,15 +151,9 @@
                    :regist-page
                    :owner-p
                    ; --- image ---
-                   :*image-dirs*
                    :mime-type
+                   :image-path
                    :image-file-p
-                   :serve-image
-                   :image-uri
-                   :noimage
-                   :noimage-uri
-                   :*thumbnail-width*
-                   :*thumbnail-height*
                    :thumbnail
                    :thumbnail-uri
                    ; --- my-util ---

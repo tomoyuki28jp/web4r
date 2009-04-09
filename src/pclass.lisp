@@ -1,28 +1,6 @@
 (in-package :web4r)
 
-(defvar *tmp-save-dir* "/tmp/web4r/tmp/"
-  "Directory path to save temporary uploaded files")
-
-(defvar *upload-save-dir* "/tmp/web4r/upload/"
-  "Directory path to save upload files")
-
-(defvar *tmp-files-gc-lifetime* 1440
-  "Temporary saved files lifetime")
-
-(defvar *tmp-files-gc-probability* 100
-  "Probability to start a gc process for temporary saved files")
-
-(ensure-directories-exist *tmp-save-dir*    :verbose nil)
-(ensure-directories-exist *upload-save-dir* :verbose nil)
-
 ; --- Slots -----------------------------------------------------
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar *slots* (make-hash-table)))
-
-(defvar *with-slots* nil)
-
-(defvar *without-slots* nil)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass slot-options ()

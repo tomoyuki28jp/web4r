@@ -1,9 +1,5 @@
 (in-package :web4r)
 
-(defvar *debug-log-file* "/tmp/debug.log")
-
-(defvar *debug-mode* nil)
-
 ; --- Util ------------------------------------------------------
 
 (defun ps (instance)
