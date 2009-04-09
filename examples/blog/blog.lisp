@@ -41,7 +41,7 @@
       (load-sml (web4r-path "examples/blog/sml/blog_index.sml")))))
 
 (defpage blog/edit (oid :auth)
-  (blog-owner-check oid)
+  (when oid (blog-owner-check oid))
   (scaffold-edit 'blog-post :oid oid :slot-values `((user-oid ,(login-user-oid)))
                  :redirect-uri (page-uri "blog" "index" (login-user-id))))
 
