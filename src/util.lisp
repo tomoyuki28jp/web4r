@@ -1,23 +1,9 @@
 (in-package :web4r)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar *web4r-dir*
-    (awhen (load-time-value #.*compile-file-pathname*)
-      (truename (merge-pathnames
-                 "../" (directory-namestring it))))
-    "The path of web4r directory"))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar *sml-dir* (merge-pathnames "sml/" *web4r-dir*)
-    "The path of sml directory under the web4r directory"))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun web4r-file-path (file)
-    (merge-pathnames file *web4r-dir*)))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun sml-file-path (file)
-    (merge-pathnames file *sml-dir*)))
+  (defun web4r-path  (file) (merge-pathnames file *web4r-dir*))
+  (defun public-path (file) (merge-pathnames file *public-dir*))
+  (defun sml-path    (file) (merge-pathnames file *sml-dir*)))
 
 (defun nl->br (x)
   (regex-replace-all #\Newline x (format nil "<br>~%")))

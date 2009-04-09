@@ -44,12 +44,12 @@
 (defun page-links (pager)
   (with-slots (total-pages link-start link-end current-page) pager
     (when (> total-pages 1)
-      (load-sml (sml-file-path "common/page_links.sml")))))
+      (load-sml (sml-path "common/page_links.sml")))))
 
 (defun page-summary (pager)
   (with-slots (total-items item-start item-end) pager
     (let ((item-start (1+ item-start)))
-      (load-sml (sml-file-path "common/page_summary.sml")))))
+      (load-sml (sml-path "common/page_summary.sml")))))
 
 (defun w/p (link)
   "returns the link with a page parameter"

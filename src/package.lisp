@@ -4,11 +4,28 @@
     ((define-web4r-package ()
        `(defpackage :web4r
           (:use :cl :my-util :sml :hunchentoot :elephant)
-          (:export ; --- util ---
+          (:export ; --- specials ---
                    :*web4r-dir*
+                   :*public-dir*
+                   :*image-dir*
                    :*sml-dir*
-                   :web4r-file-path
-                   :sml-file-path
+                   :*upload-save-dir*
+                   :*tmp-save-dir*
+                   :*tmp-files-gc-lifetime*
+                   :*tmp-files-gc-probability*
+                   :*image-public-dirs*
+                   :*debug-log-file*
+                   :*debug-mode*
+                   :*page-param*
+                   :*with-slots*
+                   :*without-slots*
+                   :*login-msgs*
+                   :*thumbnail-width*
+                   :*thumbnail-height*
+                   ; --- util ---
+                   :web4r-path
+                   :public-path
+                   :sml-path
                    :nl->br
                    :assoc*
                    :replace-assoc*

@@ -1,4 +1,4 @@
-(with-sml-file (sml-file-path "common/template.sml")
+(with-sml-file (sml-path "common/template.sml")
   :title [title "Listing " cname]
   :body [body
          (msgs)
