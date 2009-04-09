@@ -28,11 +28,9 @@
    (note         :length 3000 :rows 5 :cols 30)
    (image        :input :file :type :image :length (1000 500000) :nullable t)))
 
-(defpage customer ()
-  (scaffold-index 'customer))
-
-(defpage customer/show (oid)
-  (scaffold-show  'customer oid))
+(defpage customer () (scaffold-index 'customer))
+(defpage customer/show (oid)   (scaffold-show  'customer oid))
+(defpage customer/delete (oid) (scaffold-delete 'customer oid))
 
 (defpage customer/edit (oid)
   (let ((*with-slots* :all))
