@@ -53,12 +53,6 @@
       (read-sequence array in)
       (equalp array (http-request uri)))))
 
-(test noimage
-  (defpage noimage () (noimage))
-  (is (file-content=
-       (merge-pathnames "images/noimage.gif" *web4r-dir*)
-       (page-uri "noimage"))))
-
 (defun dest-size= (width height max-width max-height w h)
   (multiple-value-bind (w* h*)
       (web4r::dest-size width height max-width max-height)
