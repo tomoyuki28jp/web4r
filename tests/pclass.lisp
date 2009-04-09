@@ -509,33 +509,6 @@ World</textarea>")))))
   (is (string=* "<label for=\"IMAGE\">Image</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'image))))))
 
-(test must-mark
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'name)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'password)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'email)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'sex)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'marriage)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'hobbies)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'birth-date)))))
-  (is (eq nil
-          (must-mark (get-slot 'testdb1 'nickname))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'phone-number)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'zip-code)))))
-  (is (string=* "<font color=\"red\">*</font>"
-                (sml->ml (must-mark (get-slot 'testdb1 'note)))))
-  (is (eq nil
-          (must-mark (get-slot 'testdb1 'image)))))
-
-
 (defun list= (x y)
   (and (null (set-difference x y :test #'equal))
        (null (set-difference y x :test #'equal))))
