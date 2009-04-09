@@ -1,4 +1,4 @@
-(with-sml-file (sml-path "common/template.sml")
+(with-sml-file (sml-path "template.sml")
   :title [title "Listing blog posts"]
   :body [body
          (msgs)

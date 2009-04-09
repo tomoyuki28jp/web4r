@@ -85,9 +85,7 @@
     (let ((input (slot-input slot)))
       (cond ((and nl->br (eq input :textarea)) (safe (nl->br (escape it))))
             ((eq (slot-type slot) :image)
-             [a :href (concat (page-uri "upload") it)
-                [img :src (safe (thumbnail-uri it :type "upload"))
-                     :alt (slot-id slot) /]])
+             (load-sml-path "form/display/image.sml"))
             ((eq input :checkbox) (apply #'join (append '(", ") it)))
             (t it)))
     ""))
@@ -143,36 +141,28 @@
                                   :d (or d (nth 2 date))))))
             ((eq input :textarea)
              (with-slots (rows cols) slot
-               [textarea :name id :rows rows :cols cols :id id value]))
+               (load-sml-path "form/input/textarea.sml")))
             ((eq input :file)
              (let* ((type (if (cont-session slot) "tmp" (when saved "upload")))
                     (file (aand (image-path (or (cont-session slot) saved) type)
                                 (pathname-name it))))
-               (if file
-                 (progn [p "change: " (input-file id :id id)]
-                        [p "delete: " (input-checked "checkbox" nil
-                                        :value "t" :name (concat id "-delete") :id id)
-                           [img :src (thumbnail-uri file :type type) :alt id /]])
-               (input-file id :id id))))
-            (t [input :type (if (eq input :password) "password" "text")
-                      :name id :value value :id id :size size /])))))
+               (load-sml-path "form/input/file.sml")))
+            (t (load-sml-path "form/input/text.sml"))))))
 
 (defgeneric form-label (slot))
 (defmethod form-label ((slot slot-options))
   (with-slots (type label id nullable) slot
-    (if (eq type :date)
-        [label :for (concat id "-Y") label]
-        (and label id [label :for id label]))))
+    (load-sml-path "form/input/label.sml")))
 
 (defgeneric must-mark (slot))
 (defmethod must-mark ((slot slot-options))
   (unless (slot-nullable slot)
-    (load-sml-path "common/must_mark.sml")))
+    (load-sml-path "form/input/must_mark.sml")))
 
 (defgeneric form-comment (slot))
 (defmethod form-comment ((slot slot-options))
-  (aand (slot-comment slot) (not (equal it ""))
-        [font :color "grey" "(" it ")"]))
+  (when-let (comment (aand (slot-comment slot) (not (equal it "")) it))
+    (load-sml-path "form/input/comment.sml")))
 
 (defmacro form-for/cont (cont &key class instance (submit "submit"))
   `(%form/cont (file-slots ,class) ,cont
