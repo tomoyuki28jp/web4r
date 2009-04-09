@@ -10,9 +10,6 @@
   (defvar *public-dir* (merge-pathnames "public/" *web4r-dir*)
     "Pathname of the public directory")
 
-  (defvar *image-dir*  (merge-pathnames "images/" *public-dir*)
-    "Pathname of the image directory")
-
   (defvar *sml-dir*    (merge-pathnames "sml/"    *web4r-dir*)
     "Pathname of the sml directory"))
 

@@ -7,7 +7,6 @@
           (:export ; --- specials ---
                    :*web4r-dir*
                    :*public-dir*
-                   :*image-dir*
                    :*sml-dir*
                    :*upload-save-dir*
                    :*tmp-save-dir*

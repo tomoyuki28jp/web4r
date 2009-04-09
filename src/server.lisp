@@ -35,14 +35,11 @@
 
 ; --- Public directories ----------------------------------------
 
-(push (create-folder-dispatcher-and-handler "/images/" *image-dir*)
-      *dispatch-table*)
-
-(push (create-folder-dispatcher-and-handler "/tmp/"    *tmp-save-dir*)
-      *dispatch-table*)
-
-(push (create-folder-dispatcher-and-handler "/upload/" *upload-save-dir*)
-      *dispatch-table*)
+(dolist (x `(("/tmp/"    . ,*tmp-save-dir*)
+             ("/upload/" . ,*upload-save-dir*)
+             ("/images/" . ,(merge-pathnames "images/" *public-dir*))
+             ("/css/"    . ,(merge-pathnames "css/"    *public-dir*))))
+  (push (create-folder-dispatcher-and-handler (car x) (cdr x)) *dispatch-table*))
 
 ; --- Dispatcher ------------------------------------------------
 
