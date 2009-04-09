@@ -27,5 +27,5 @@
                   it)])
               [p "There are no blog post yet"])
          (when owner-p
-           [p [a :href (w/p (page-uri "blog" "edit")) "New post"]])
-         [p [a :href (page-uri "blog") "Top"]]])
+           [div [a :href (w/p (page-uri "blog" "edit")) "New post"]])
+         [div [a :href (page-uri "blog") "Top"]]])

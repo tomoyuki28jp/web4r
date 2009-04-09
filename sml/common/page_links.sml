@@ -1,4 +1,4 @@
-[div :class "paging" :id "page_links"
+[div :id "page_links"
      (loop for page from link-start to link-end
            do (if (= page current-page)
                   [span page]

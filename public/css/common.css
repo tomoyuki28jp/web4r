@@ -5,4 +5,5 @@ ul.msgs            { font-weight: bold; color: #0000FF; }
 ul.errors          { font-weight: bold; color: #FF0000; }
 #must_mark         { font-weight: bold; color: #FF0000; }
 #page_links span   { font-weight: bold; }
-.paging, #new_link { margin: 5px 5px 5px 0; }
+div                { margin: 8px; }
+

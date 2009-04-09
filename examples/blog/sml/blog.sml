@@ -14,7 +14,7 @@
                           [td (time-format "~y/~m/~d" (updated-at i))]])])
               [p "There are no blog yet"])
          (if (login-user)
-             [p [a :href (page-uri "blog" "index" (login-user-id)) "My Blog"] " | "
-                [a :href (page-uri "logout") "Logout"]]
-             [p [a :href (page-uri "login")  "Login"] " | "
-                [a :href (page-uri "regist") "Sign up"]])])
+             [div [a :href (page-uri "blog" "index" (login-user-id)) "My Blog"] " | "
+                  [a :href (page-uri "logout") "Logout"]]
+             [div [a :href (page-uri "login")  "Login"] " | "
+                  [a :href (page-uri "regist") "Sign up"]])])
