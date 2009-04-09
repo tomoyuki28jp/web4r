@@ -1,2 +1,3 @@
-ul.msgs   { color: #0000FF; font-weight: bold; }
-ul.errors { color: #FF0000; font-weight: bold; }
+ul.msgs    { color: #0000FF; font-weight: bold; }
+ul.errors  { color: #FF0000; font-weight: bold; }
+#must_mark { color: #FF0000; font-weight: bold; }
