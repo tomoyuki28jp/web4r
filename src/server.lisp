@@ -127,5 +127,5 @@
   (awhen (get-msgs)
     (when-let (msgs (slot-value it 'msgs))
       (case (type-of it)
-        (msgs       (load-sml (sml-path "common/msgs.sml")))
-        (error-msgs (load-sml (sml-path "common/error_msgs.sml")))))))
+        (msgs       (load-sml-path "common/msgs.sml"))
+        (error-msgs (load-sml-path "common/error_msgs.sml"))))))

@@ -25,6 +25,7 @@
                    :web4r-path
                    :public-path
                    :sml-path
+                   :load-sml-path
                    :nl->br
                    :assoc*
                    :replace-assoc*

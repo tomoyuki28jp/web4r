@@ -5,6 +5,9 @@
   (defun public-path (file) (merge-pathnames file *public-dir*))
   (defun sml-path    (file) (merge-pathnames file *sml-dir*)))
 
+(defmacro load-sml-path (path)
+  `(load-sml (sml-path ,path)))
+
 (defun nl->br (x)
   (regex-replace-all #\Newline x (format nil "<br>~%")))
 

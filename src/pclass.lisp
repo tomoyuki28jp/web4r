@@ -167,7 +167,7 @@
 (defgeneric must-mark (slot))
 (defmethod must-mark ((slot slot-options))
   (unless (slot-nullable slot)
-    [font :color "red" "*"]))
+    (load-sml-path "common/must_mark.sml")))
 
 (defgeneric form-comment (slot))
 (defmethod form-comment ((slot slot-options))
