@@ -285,9 +285,10 @@
                (slot-display-value i (get-slot 'testdb1 'note))))
     (is (safe= "Hello<br>World"
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
-    (is (string=* "<a href=\"http://localhost:8080/image/?file=test.gif&amp;type=upload\">
-<img src=\"http://localhost:8080/thumbnail/?file=test&type=upload&width=&height=\" alt=\"IMAGE\" /></a>"
-                  (sml->ml (slot-display-value i (get-slot 'testdb1 'image)))))))
+    (is (string=* 
+"<a href=\"http://localhost:8080/upload/test.gif\">
+<img src=\"http://localhost:8080/thumbnail/?file=test.gif&type=upload&width=&height=\" alt=\"IMAGE\" />
+</a>"          (sml->ml (slot-display-value i (get-slot 'testdb1 'image)))))))
 
 (test slot-save-value
   (with-post-parameters

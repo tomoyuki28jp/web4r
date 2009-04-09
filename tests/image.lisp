@@ -1,16 +1,6 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
-(test image-dirs
-  (let* ((*tmp-save-dir*    "/tmp/web4r/tmp/")
-         (*upload-save-dir* "/tmp/web4r/upload/")
-         (*image-dirs*   (list (cons "tmp"    '*tmp-save-dir*)
-                               (cons "upload" '*upload-save-dir*))))
-    (is (equal (web4r::image-dir "tmp")    *tmp-save-dir*))
-    (is (equal (web4r::image-dir "upload") *upload-save-dir*))
-    (is (equal (web4r::image-dir-type *tmp-save-dir*)    "tmp"))
-    (is (equal (web4r::image-dir-type *upload-save-dir*) "upload"))))
-
 (defun mime-type= (file mime-type)
   (equal (mime-type (test-file file)) mime-type))
 

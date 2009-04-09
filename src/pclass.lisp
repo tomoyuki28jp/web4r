@@ -85,8 +85,8 @@
     (let ((input (slot-input slot)))
       (cond ((and nl->br (eq input :textarea)) (safe (nl->br (escape it))))
             ((eq (slot-type slot) :image)
-             [a :href (image-uri it :type "upload")
-                [img :src (safe (thumbnail-uri (pathname-name it) :type "upload"))
+             [a :href (concat (page-uri "upload") it)
+                [img :src (safe (thumbnail-uri it :type "upload"))
                      :alt (slot-id slot) /]])
             ((eq input :checkbox) (apply #'join (append '(", ") it)))
             (t it)))
@@ -103,7 +103,7 @@
             ((eq input :file)
              (awhen (cont-session slot)
                (rem-cont-session slot)
-               (save-file it *upload-save-dir*)))
+               (save-file (image-path it "tmp") *upload-save-dir*)))
             ((eq input :checkbox)
              (loop for o in options
                    as v = (post-parameter (concat id "-" o))
@@ -145,12 +145,15 @@
              (with-slots (rows cols) slot
                [textarea :name id :rows rows :cols cols :id id value]))
             ((eq input :file)
-             (aif (aand (or (cont-session slot) saved) (probe-file it))
+             (let* ((type (if (cont-session slot) "tmp" (when saved "upload")))
+                    (file (aand (image-path (or (cont-session slot) saved) type)
+                                (pathname-name it))))
+               (if file
                  (progn [p "change: " (input-file id :id id)]
                         [p "delete: " (input-checked "checkbox" nil
                                         :value "t" :name (concat id "-delete") :id id)
-                            [img :src (thumbnail-uri it) :alt id /]])
-               (input-file id :id id)))
+                           [img :src (thumbnail-uri file :type type) :alt id /]])
+               (input-file id :id id))))
             (t [input :type (if (eq input :password) "password" "text")
                       :name id :value value :id id :size size /])))))
 
@@ -200,7 +203,7 @@
            ((eq input :checkbox)
             (loop for o in options
                   collect (post-parameter (concat id "-" o))))
-           ((eq input :file) (cont-session slot))
+           ((eq input :file) (image-path (cont-session slot) "tmp"))
            (t (post-parameter id)))
      (append (list :nullable nullable :length length :type type)
              (when unique `(:unique ,(list class symbol ins)))))))
@@ -301,7 +304,7 @@
                (awhen (aand new-file (save-file it *tmp-save-dir*))
                  (awhen tmp-file   (delete-tmp-file it))
                  (awhen saved-file (delete-saved-file it))
-                 (setf (cont-session s) it)))))
+                 (setf (cont-session s) (pathname-name it))))))
 
 (defun save-file (file dir)
   (when (probe-file file)

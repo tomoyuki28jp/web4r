@@ -29,46 +29,11 @@
                (member (nth 1 s) '("png" "jpeg" "gif") :test #'equalp))
       (->keyword (nth 1 s)))))
 
-(defun image-file-path (file type)
-  (let* ((dir  (image-dir type))
-         (name (aand file (file-namestring it)))
-         (file (and dir name (merge-pathnames file dir))))
-    (when (probe-file file)
-      file)))
-
-; --- Image -----------------------------------------------------
-
-(defun serve-image (file type)
-  (aif (image-file-path file type)
-       (handle-static-file it)
-       (noimage)))
-
-(defpage image (:get file type)
-  (serve-image file type))
-
-(defun image-uri (file &key type thumbnail)
-  (let* ((file (or file ""))
-         (type (or type (image-dir-type (directory-namestring file))))
-         (name (file-namestring file)))
-    (add-parameters (page-uri (if thumbnail "thumbnail" "image"))
-                    "file" name "type" type)))
-
-; --- No image --------------------------------------------------
-
-(defun noimage ()
-  (handle-static-file
-   (merge-pathnames "images/noimage.gif" *web4r-dir*)))
-
-(defpage noimage ()
-  (noimage))
-
-(defun noimage-uri ()
-  (page-uri "noimage"))
+(defun image-path (file type)
+  (when-let (dir (cdr (assoc type *image-public-dirs* :test #'equal)))
+    (and file (probe-file (merge-pathnames file (symbol-value dir))))))
 
 ; --- Thumbnail -------------------------------------------------
-
-(defvar *thumbnail-width*  100)
-(defvar *thumbnail-height* 100)
 
 (defun dest-size (width height max-width max-height)
   (when (and max-width  (> width max-width))
@@ -80,13 +45,13 @@
   (values width height))
 
 (defun thumbnail (file &key type width (height *thumbnail-height*))
-  (let* ((file   (image-file-path file type))
+  (let* ((file   (image-path file type))
          (mime   (aand file (mime-type it)))
          (type   (aand mime (image-type it)))
          (width  (or (aand width  (->int it)) *thumbnail-width*))
          (height (or (aand height (->int it)) *thumbnail-width*)))
     (if (or (null file) (null type))
-        (noimage)
+        (handle-static-file (public-path "images/noimage.gif"))
         (cl-gd:with-image-from-file (im file type)
           (multiple-value-bind (w h) (cl-gd:image-size im)
             (multiple-value-bind (dw dh) (dest-size w h width height)
@@ -104,5 +69,5 @@
   (thumbnail file :type type :width width :height height))
 
 (defun thumbnail-uri (file &key type width height)
-  (add-parameters (image-uri file :type type :thumbnail t)
-                  "width" width "height" height))
+  (add-parameters (page-uri "thumbnail")
+                  "file" file "type" type  "width" width "height" height))
