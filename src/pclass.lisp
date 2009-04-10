@@ -11,9 +11,9 @@
       (label    :accessor slot-label    :initarg :label    :type string
                 :documentation "form label")
       (unique   :accessor slot-unique   :initarg :unique   :initform nil
-                :documentation "Uniqueness of slot values")
-      (nullable :accessor slot-nullable :initarg :nullable :initform nil
-                :documentation "allow empty value")
+                :documentation "uniqueness of slot values")
+      (required :accessor slot-required :initarg :required :initform nil
+                :documentation "required")
       (rows     :accessor slot-rows     :initarg :rows     :initform nil
                 :documentation "int rows for textarea")
       (cols     :accessor slot-cols     :initarg :cols     :initform nil
@@ -65,18 +65,19 @@
     (flet ((opt (x) (awhen (member x slot) (nth 1 it))))
       (append
        (let ((id (symbol-name (car slot))))
-         (list :symbol (car slot)
-               :id     id
-               :label  (or (opt :label)
-                           (string-capitalize (regex-replace-all "-" id " ")))
-               :input  (or (opt :input)
-                           (aand (opt :length) (< 256 (if (atom it) it (car it)))
-                                 :textarea))
-               :type   (or (opt :type) (awhen (opt :options) (list :member it)))
-               :hide   (or (opt :hide)
-                           (aand (opt :initform) (equal it '(ele:make-pset)) t))))
+         (list :symbol   (car slot)
+               :id       id
+               :label    (or (opt :label)
+                             (string-capitalize (regex-replace-all "-" id " ")))
+               :input    (or (opt :input)
+                             (aand (opt :length) (< 256 (if (atom it) it (car it)))
+                                   :textarea))
+               :type     (or (opt :type) (awhen (opt :options) (list :member it)))
+               :hide     (or (opt :hide)
+                             (aand (opt :initform) (equal it '(ele:make-pset)) t))
+               :required (aif (member :required slot) (nth 1 it) t)))
        (let ((fn (lambda (x) (awhen (opt x) (list x it))))
-             (op '(:unique :nullable :length :size :rows :cols :comment :options)))
+             (op '(:unique :length :size :rows :cols :comment :options)))
          (apply #'append (remove nil (mapcar fn op))))))))
 
 (defgeneric slot-display-value (instance slot &key nl->br))
@@ -151,13 +152,13 @@
 
 (defgeneric form-label (slot))
 (defmethod form-label ((slot slot-options))
-  (with-slots (type label id nullable) slot
+  (with-slots (type label id required) slot
     (load-sml-path "form/input/label.sml")))
 
-(defgeneric must-mark (slot))
-(defmethod must-mark ((slot slot-options))
-  (unless (slot-nullable slot)
-    (load-sml-path "form/input/must_mark.sml")))
+(defgeneric required-mark (slot))
+(defmethod required-mark ((slot slot-options))
+  (when (slot-required slot)
+    (load-sml-path "form/input/required_mark.sml")))
 
 (defgeneric form-comment (slot))
 (defmethod form-comment ((slot slot-options))
@@ -166,9 +167,10 @@
 
 (defmacro form-for/cont (cont &key class instance (submit "submit"))
   `(%form/cont (file-slots ,class) ,cont
+     :id ,class
      [table
       (loop for s in (get-excluded-slots ,class)
-            do [tr [td (form-label s) (must-mark s) (form-comment s)]]
+            do [tr [td (form-label s) (required-mark s) (form-comment s)]]
             do [tr [td (form-input s ,instance)]])
        [tr [td (submit :value ,submit)]]]))
 
@@ -184,7 +186,7 @@
 ; --- Validations -----------------------------------------------
 
 (defun slot-validation-errors (class slot &optional ins)
-  (with-slots (symbol id type nullable length unique options input) slot
+  (with-slots (symbol id type required length unique options input) slot
     (validation-errors
      (slot-label slot)
      (cond ((eq type :date)
@@ -195,7 +197,7 @@
                   collect (post-parameter (concat id "-" o))))
            ((eq input :file) (image-path (cont-session slot) "tmp"))
            (t (post-parameter id)))
-     (append (list :nullable nullable :length length :type type)
+     (append (list :required required :length length :type type)
              (when unique `(:unique ,(list class symbol ins)))))))
 
 (defun class-validation-errors (class &optional ins)

@@ -83,7 +83,7 @@
                    :slot-id
                    :slot-label
                    :slot-unique
-                   :slot-nullable
+                   :slot-required
                    :slot-rows
                    :slot-cols
                    :slot-size
@@ -100,7 +100,7 @@
                    :slot-save-value
                    :form-input
                    :form-label
-                   :must-mark
+                   :required-mark
                    :form-comment
                    :form-for/cont
                    :select-date

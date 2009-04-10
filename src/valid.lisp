@@ -71,8 +71,8 @@
                           return (error-msg :invalid label)))
           (otherwise (awhen type (error "invalid type: ~A" it))))))))
 
-(define-validator nullable (label value args)
-  (when (and (null args) (empty value))
+(define-validator required (label value args)
+  (when (and args (empty value))
     (error-msg :empty label)))
 
 (define-validator unique (label value args)
