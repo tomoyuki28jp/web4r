@@ -169,6 +169,10 @@
           (:shadow :defpclass))))
   (define-web4r-package))
 
-(let ((version hunchentoot::*hunchentoot-version*))
-  (unless (string= "1" (subseq version 0 1))
-    (error "Hunchentoot must be version 1.0.0 or higher")))
+(flet ((int (x) (parse-integer (remove #\. x))))
+  (loop for v in '((:hunchentoot . "1.0.0")
+                   (:my-util     . "0.0.1")
+                   (:sml         . "0.1.1"))
+        as ver = (asdf:component-version (asdf:find-system (car v)))
+        unless (>= (int ver) (int (cdr v)))
+        do (error "~S must be version ~S or higher" (car v) (cdr v))))
