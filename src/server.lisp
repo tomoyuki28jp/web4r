@@ -41,6 +41,11 @@
              ("/css/"    . ,(merge-pathnames "css/"    *public-dir*))))
   (push (create-folder-dispatcher-and-handler (car x) (cdr x)) *dispatch-table*))
 
+; default page
+(setf *default-handler*
+      #'(lambda ()
+          (handle-static-file (public-path "default.html"))))
+
 ; --- Dispatcher ------------------------------------------------
 
 (defun web4r-dispatcher (request)
