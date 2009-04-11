@@ -484,29 +484,29 @@ world</textarea>"))
 world</textarea>")))))
 
 (test form-label
-  (is (string=* "<label for=\"name\">full name</label>"
+  (is (string=* "<label for=\"testdb1_name\">full name</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'name)))))
-  (is (string=* "<label for=\"password\">password</label>"
+  (is (string=* "<label for=\"testdb1_password\">Password</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'password)))))
-  (is (string=* "<label for=\"email\">email</label>"
+  (is (string=* "<label for=\"testdb1_email\">Email</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'email)))))
-  (is (string=* "<label for=\"sex\">sex</label>"
+  (is (string=* "<label for=\"testdb1_sex_male\">Sex</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'sex)))))
-  (is (string=* "<label for=\"marriage\">marriage</label>"
+  (is (string=* "<label for=\"testdb1_marriage\">Marriage</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'marriage)))))
-  (is (string=* "<label for=\"hobbies\">hobbies</label>"
+  (is (string=* "<label for=\"testdb1_hobbies_sports\">Hobbies</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'hobbies)))))
-  (is (string=* "<label for=\"birth-date-y\">birth date</label>"
+  (is (string=* "<label for=\"testdb1_birth-date-Y\">Birth Date</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'birth-date)))))
-  (is (string=* "<label for=\"nickname\">nickname</label>"
+  (is (string=* "<label for=\"testdb1_nickname\">Nickname</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'nickname)))))
-  (is (string=* "<label for=\"phone-number\">phone number</label>"
+  (is (string=* "<label for=\"testdb1_phone-number\">Phone Number</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'phone-number)))))
-  (is (string=* "<label for=\"zip-code\">zip code</label>"
+  (is (string=* "<label for=\"testdb1_zip-code\">Zip Code</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'zip-code)))))
-  (is (string=* "<label for=\"note\">note</label>"
+  (is (string=* "<label for=\"testdb1_note\">Note</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'note)))))
-  (is (string=* "<label for=\"image\">image</label>"
+  (is (string=* "<label for=\"testdb1_image\">Image</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'image))))))
 
 (defun list= (x y)
