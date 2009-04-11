@@ -38,7 +38,8 @@
 (dolist (x `(("/tmp/"    . ,*tmp-save-dir*)
              ("/upload/" . ,*upload-save-dir*)
              ("/images/" . ,(merge-pathnames "images/" *public-dir*))
-             ("/css/"    . ,(merge-pathnames "css/"    *public-dir*))))
+             ("/css/"    . ,(merge-pathnames "css/"    *public-dir*))
+             ("/js/"     . ,(merge-pathnames "js/"     *public-dir*))))
   (push (create-folder-dispatcher-and-handler (car x) (cdr x)) *dispatch-table*))
 
 ; default page
