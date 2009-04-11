@@ -56,18 +56,18 @@
         do (is (eq s (web4r::slot-symbol (get-slot 'testdb1 s))))))
 
 (test slot-id
-  (is (equal "NAME"         (web4r::slot-id (get-slot 'testdb1 'name))))
-  (is (equal "PASSWORD"     (web4r::slot-id (get-slot 'testdb1 'password))))
-  (is (equal "EMAIL"        (web4r::slot-id (get-slot 'testdb1 'email))))
-  (is (equal "SEX"          (web4r::slot-id (get-slot 'testdb1 'sex))))
-  (is (equal "MARRIAGE"     (web4r::slot-id (get-slot 'testdb1 'marriage))))
-  (is (equal "HOBBIES"      (web4r::slot-id (get-slot 'testdb1 'hobbies))))
-  (is (equal "BIRTH-DATE"   (web4r::slot-id (get-slot 'testdb1 'birth-date))))
-  (is (equal "NICKNAME"     (web4r::slot-id (get-slot 'testdb1 'nickname))))
-  (is (equal "PHONE-NUMBER" (web4r::slot-id (get-slot 'testdb1 'phone-number))))
-  (is (equal "ZIP-CODE"     (web4r::slot-id (get-slot 'testdb1 'zip-code))))
-  (is (equal "NOTE"         (web4r::slot-id (get-slot 'testdb1 'note))))
-  (is (equal "IMAGE"        (web4r::slot-id (get-slot 'testdb1 'image)))))
+  (is (equal "testdb1_name"         (web4r::slot-id (get-slot 'testdb1 'name))))
+  (is (equal "testdb1_password"     (web4r::slot-id (get-slot 'testdb1 'password))))
+  (is (equal "testdb1_email"        (web4r::slot-id (get-slot 'testdb1 'email))))
+  (is (equal "testdb1_sex"          (web4r::slot-id (get-slot 'testdb1 'sex))))
+  (is (equal "testdb1_marriage"     (web4r::slot-id (get-slot 'testdb1 'marriage))))
+  (is (equal "testdb1_hobbies"      (web4r::slot-id (get-slot 'testdb1 'hobbies))))
+  (is (equal "testdb1_birth-date"   (web4r::slot-id (get-slot 'testdb1 'birth-date))))
+  (is (equal "testdb1_nickname"     (web4r::slot-id (get-slot 'testdb1 'nickname))))
+  (is (equal "testdb1_phone-number" (web4r::slot-id (get-slot 'testdb1 'phone-number))))
+  (is (equal "testdb1_zip-code"     (web4r::slot-id (get-slot 'testdb1 'zip-code))))
+  (is (equal "testdb1_note"         (web4r::slot-id (get-slot 'testdb1 'note))))
+  (is (equal "testdb1_image"        (web4r::slot-id (get-slot 'testdb1 'image)))))
 
 (test slot-label
   (is (equal "Full Name"    (web4r::slot-label (get-slot 'testdb1 'name))))
@@ -285,10 +285,10 @@
                (slot-display-value i (get-slot 'testdb1 'note))))
     (is (safe= "Hello<br>World"
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
-    (is (string=* 
-"<a href=\"http://localhost:8080/upload/test.gif\">
-<img src=\"http://localhost:8080/thumbnail/?file=test.gif&type=upload&width=&height=\" alt=\"IMAGE\" />
-</a>"          (sml->ml (slot-display-value i (get-slot 'testdb1 'image)))))))
+    (is (string=* "<a href=\"http://localhost:8080/upload/test.gif\">
+<img src=\"http://localhost:8080/thumbnail/?file=test.gif&type=upload&width=&height=\"
+ alt=\"testdb1_image\" /></a>"
+                  (sml->ml (slot-display-value i (get-slot 'testdb1 'image)))))))
 
 (test slot-save-value
   (with-post-parameters
