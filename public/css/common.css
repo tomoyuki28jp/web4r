@@ -1,9 +1,9 @@
-body               { font-size:   12pt; color: #828282; font-family:Verdana; }
-input, textarea    { font-size:   12pt; color: #000000; font-family:Courier; }
-h1                 { font-size:   28px; color: #150517; }
-ul.msgs            { font-weight: bold; color: #0000FF; }
-ul.errors          { font-weight: bold; color: #FF0000; }
-label.error        { font-weight: bold; color: #FF0000; padding-left: .5em;}
-#required_mark     { font-weight: bold; color: #FF0000; }
-#page_links span   { font-weight: bold; }
-div                { margin: 8px; }
+body             { font-size:   12pt; color: #828282; font-family:Verdana; }
+input, textarea  { font-size:   12pt; color: #000000; font-family:Courier; }
+h1               { font-size:   28px; color: #150517; }
+ul.msgs          { font-weight: bold; color: #0000FF; }
+ul.errors        { font-weight: bold; color: #FF0000; }
+label.error      { font-weight: bold; color: #FF0000; padding-left: .5em; vertical-align: top; }
+#required_mark   { font-weight: bold; color: #FF0000; }
+#page_links span { font-weight: bold; }
+div              { margin:      8px; }
