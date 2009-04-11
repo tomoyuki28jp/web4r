@@ -32,7 +32,7 @@
     ("tmp"    . *tmp-save-dir*))
   "Alist of image public directories")
 
-(defvar *debug-log-file* #P"/tmp/debug.log"
+(defvar *debug-log-file* #P"/tmp/web4r/debug.log"
   "Pathname of the debug log file")
 
 (defvar *debug-mode* nil
