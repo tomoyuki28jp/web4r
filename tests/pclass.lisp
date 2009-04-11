@@ -2,16 +2,16 @@
 (in-suite web4r)
 
 (defun rem-newline (x)
-  (remove #\Newline x))
+  (remove #\newline x))
 
 (defun string=* (str1 str2)
   (string= (rem-newline str1) (rem-newline str2)))
 
 (defpclass testdb1 ()
-    ((name         :length 50 :label "Full Name" :size 30)
+    ((name         :length 50 :label "full name" :size 30)
      (password     :input :password :length (8 12) :hide t :comment "8-12 characters")
      (email        :type :email :unique t)
-     (sex          :input :radio :options ("Male" "Female"))
+     (sex          :input :radio :options ("male" "female"))
      (marriage     :input :select :options ("single" "married" "divorced"))
      (hobbies      :input :checkbox :options ("sports" "music" "reading"))
      (birth-date   :type :date)
@@ -70,7 +70,7 @@
   (is (equal "testdb1_image"        (web4r::slot-id (get-slot 'testdb1 'image)))))
 
 (test slot-label
-  (is (equal "Full Name"    (web4r::slot-label (get-slot 'testdb1 'name))))
+  (is (equal "full name"    (web4r::slot-label (get-slot 'testdb1 'name))))
   (is (equal "Password"     (web4r::slot-label (get-slot 'testdb1 'password))))
   (is (equal "Email"        (web4r::slot-label (get-slot 'testdb1 'email))))
   (is (equal "Sex"          (web4r::slot-label (get-slot 'testdb1 'sex))))
@@ -185,7 +185,7 @@
   (is (eq nil (web4r::slot-options (get-slot 'testdb1 'name))))
   (is (eq nil (web4r::slot-options (get-slot 'testdb1 'password))))
   (is (eq nil (web4r::slot-options (get-slot 'testdb1 'email))))
-  (is (equal '("Male" "Female")
+  (is (equal '("male" "female")
                  (web4r::slot-options (get-slot 'testdb1 'sex))))
   (is (equal '("single" "married" "divorced")
                  (web4r::slot-options (get-slot 'testdb1 'marriage))))
@@ -230,11 +230,11 @@
   (is (eq nil      (web4r::slot-type (get-slot 'testdb1 'name))))
   (is (eq nil      (web4r::slot-type (get-slot 'testdb1 'password))))
   (is (eq :email   (web4r::slot-type (get-slot 'testdb1 'email))))
-  (is (equal '(:MEMBER ("Male" "Female"))
+  (is (equal '(:member ("male" "female"))
                    (web4r::slot-type (get-slot 'testdb1 'sex))))
-  (is (equal '(:MEMBER ("single" "married" "divorced"))
+  (is (equal '(:member ("single" "married" "divorced"))
                    (web4r::slot-type (get-slot 'testdb1 'marriage))))
-  (is (equal '(:MEMBER ("sports" "music" "reading"))
+  (is (equal '(:member ("sports" "music" "reading"))
                    (web4r::slot-type (get-slot 'testdb1 'hobbies))))
   (is (eq :date    (web4r::slot-type (get-slot 'testdb1 'birth-date))))
   (is (eq nil      (web4r::slot-type (get-slot 'testdb1 'nickname))))
@@ -249,25 +249,25 @@
 
 (test slot-display-value
   (let ((i (make-instance 'testdb1
-             :name         "Tomoyuki Matsumoto"
+             :name         "tomoyuki matsumoto"
              :password     "password"
              :email        "tomo@example.com"
-             :sex          "Male"
+             :sex          "male"
              :marriage     "single"
              :hobbies      '("sports" "reading")
              :birth-date   "1983-09-28"
              :nickname     "tomo"
              :phone-number "408-644-6198"
              :zip-code     "95129"
-             :note         (format nil "Hello~%World")
+             :note         (format nil "hello~%world")
              :image        "test.gif")))
-    (is (equal "Tomoyuki Matsumoto"
+    (is (equal "tomoyuki matsumoto"
                (slot-display-value i (get-slot 'testdb1 'name))))
     (is (equal "password"
                (slot-display-value i (get-slot 'testdb1 'password))))
     (is (equal "tomo@example.com"
                (slot-display-value i (get-slot 'testdb1 'email))))
-    (is (equal "Male"
+    (is (equal "male"
                (slot-display-value i (get-slot 'testdb1 'sex))))
     (is (equal "single"
                (slot-display-value i (get-slot 'testdb1 'marriage))))
@@ -281,9 +281,9 @@
                (slot-display-value i (get-slot 'testdb1 'phone-number))))
     (is (equal "95129"
                (slot-display-value i (get-slot 'testdb1 'zip-code))))
-    (is (equal (format nil "Hello~%World")
+    (is (equal (format nil "hello~%world")
                (slot-display-value i (get-slot 'testdb1 'note))))
-    (is (safe= "Hello<br>World"
+    (is (safe= "hello<br>world"
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
     (is (string=* "<a href=\"http://localhost:8080/upload/test.gif\">
 <img src=\"http://localhost:8080/thumbnail/?file=test.gif&type=upload&width=&height=\"
@@ -292,32 +292,32 @@
 
 (test slot-save-value
   (with-post-parameters
-      '(("NAME" . "Tomoyuki Matsumoto")
-        ("PASSWORD" . "password")
-        ("EMAIL" . "tomo@tomo.com")
-        ("SEX" . "Male")
-        ("MARRIAGE" . "single")
-        ("HOBBIES-sports" . "sports")
-        ("HOBBIES-reading" . "reading")
-        ("BIRTH-DATE-Y" . "1983")
-        ("BIRTH-DATE-M" . "9")
-        ("BIRTH-DATE-D" . "28")
-        ("NICKNAME" . "tomo")
-        ("PHONE-NUMBER" . "408-644-6198")
-        ("ZIP-CODE" . "95129")
-        ("NOTE" . "Hello
-World")
-        ("IMAGE" ("name" . "test.gif")
+      '(("testdb1_name" . "tomoyuki matsumoto")
+        ("testdb1_password" . "password")
+        ("testdb1_email" . "tomo@tomo.com")
+        ("testdb1_sex" . "male")
+        ("testdb1_marriage" . "single")
+        ("testdb1_hobbies_sports" . "sports")
+        ("testdb1_hobbies_reading" . "reading")
+        ("testdb1_birth-date-Y" . "1983")
+        ("testdb1_birth-date-M" . "9")
+        ("testdb1_birth-date-D" . "28")
+        ("testdb1_nickname" . "tomo")
+        ("testdb1_phone-number" . "408-644-6198")
+        ("testdb1_zip-code" . "95129")
+        ("testdb1_note" . "hello
+world")
+        ("image" ("name" . "test.gif")
          ("type" . "image/gif")
-         ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+         ("tmp-name" . "/tmp/web4r/tmp/579198166b")
          ("size" . 1841)))
-    (is (equal "Tomoyuki Matsumoto"
+    (is (equal "tomoyuki matsumoto"
                (slot-save-value (get-slot 'testdb1 'name))))
     (is (equal "password"
                (slot-save-value (get-slot 'testdb1 'password))))
     (is (equal "tomo@tomo.com"
                (slot-save-value (get-slot 'testdb1 'email))))
-    (is (equal "Male"
+    (is (equal "male"
                (slot-save-value (get-slot 'testdb1 'sex))))
     (is (equal "single"
                (slot-save-value (get-slot 'testdb1 'marriage))))
@@ -331,8 +331,8 @@ World")
                (slot-save-value (get-slot 'testdb1 'phone-number))))
     (is (equal "95129"
                (slot-save-value (get-slot 'testdb1 'zip-code))))
-    (is (equal "Hello
-World"         (slot-save-value (get-slot 'testdb1 'note))))))
+    (is (equal "hello
+world"         (slot-save-value (get-slot 'testdb1 'note))))))
 
 (defmacro sml= (sml ml)
   `(string=* (sml->ml ,sml) ,ml))
@@ -340,173 +340,173 @@ World"         (slot-save-value (get-slot 'testdb1 'note))))))
 (test form-input
   (with-post-parameters '()
     (is-true (sml= (form-input (get-slot 'testdb1 'name))
-                     "<input type=\"text\" class=\"required\" name=\"NAME\" id=\"NAME\" size=\"30\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_name\" id=\"testdb1_name\" size=\"30\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'password))
-                     "<input type=\"password\" class=\"required\" name=\"PASSWORD\" id=\"PASSWORD\" />"))
+"<input type=\"password\" class=\"required\" name=\"testdb1_password\" id=\"testdb1_password\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'email))
-                     "<input type=\"text\" class=\"required\" name=\"EMAIL\" id=\"EMAIL\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_email\" id=\"testdb1_email\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'sex))
-                     "<input type=\"radio\" value=\"Male\" id=\"Male\" name=\"SEX\" />
-<label for=\"Male\">Male</label>
-<input type=\"radio\" value=\"Female\" id=\"Female\" name=\"SEX\" />
-<label for=\"Female\">Female</label>"))
+"<input type=\"radio\" value=\"male\" id=\"testdb1_sex_male\" name=\"testdb1_sex\" />
+<label for=\"testdb1_sex_male\">male</label>
+<input type=\"radio\" value=\"female\" id=\"testdb1_sex_female\" name=\"testdb1_sex\" />
+<label for=\"testdb1_sex_female\">female</label>"))
     (is-true (sml= (form-input (get-slot 'testdb1 'marriage))
-                     "<select name=\"MARRIAGE\" id=\"MARRIAGE\">
+"<select name=\"testdb1_marriage\" id=\"testdb1_marriage\">
 <option value=\"single\">single</option>
 <option value=\"married\">married</option>
 <option value=\"divorced\">divorced</option>
 </select>"))
     (is-true (sml= (form-input (get-slot 'testdb1 'hobbies))
-                     "<input type=\"checkbox\" value=\"sports\" id=\"HOBBIES-sports\" name=\"HOBBIES-sports\" />
-<label for=\"sports\">sports</label>
-<input type=\"checkbox\" value=\"music\" id=\"HOBBIES-music\" name=\"HOBBIES-music\" />
-<label for=\"music\">music</label>
-<input type=\"checkbox\" value=\"reading\" id=\"HOBBIES-reading\" name=\"HOBBIES-reading\" />
-<label for=\"reading\">reading</label>"))
-    (is-true (equalp (sml->ml (select-date "BIRTH-DATE"))
+"<input type=\"checkbox\" value=\"sports\" id=\"testdb1_hobbies_sports\" name=\"testdb1_hobbies_sports\" />
+<label for=\"testdb1_hobbies_sports\">sports</label>
+<input type=\"checkbox\" value=\"music\" id=\"testdb1_hobbies_music\" name=\"testdb1_hobbies_music\" />
+<label for=\"testdb1_hobbies_music\">music</label>
+<input type=\"checkbox\" value=\"reading\" id=\"testdb1_hobbies_reading\" name=\"testdb1_hobbies_reading\" />
+<label for=\"testdb1_hobbies_reading\">reading</label>"))
+    (is-true (equalp (sml->ml (select-date "testdb1_birth-date"))
                      (sml->ml (form-input (get-slot 'testdb1 'birth-date)))))
     (is-true (sml= (form-input (get-slot 'testdb1 'nickname))
-                     "<input type=\"text\" class=\"\" name=\"NICKNAME\" id=\"NICKNAME\" />"))
+"<input type=\"text\" class=\"\" name=\"testdb1_nickname\" id=\"testdb1_nickname\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'phone-number))
-                     "<input type=\"text\" class=\"required\" name=\"PHONE-NUMBER\" id=\"PHONE-NUMBER\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_phone-number\" id=\"testdb1_phone-number\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'zip-code))
-                     "<input type=\"text\" class=\"required\" name=\"ZIP-CODE\" id=\"ZIP-CODE\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_zip-code\" id=\"testdb1_zip-code\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'note))
-                     "<textarea name=\"NOTE\" rows=\"5\" cols=\"30\" id=\"NOTE\"></textarea>"))
+"<textarea name=\"testdb1_note\" rows=\"5\" cols=\"30\" id=\"testdb1_note\"></textarea>"))
     (is-true (sml= (form-input (get-slot 'testdb1 'image))
-                     "<input type=\"file\" name=\"IMAGE\" id=\"IMAGE\" />")))
+"<input type=\"file\" name=\"testdb1_image\" id=\"testdb1_image\" />")))
   (with-post-parameters
-      '(("NAME" . "Tomoyuki Matsumoto")
-        ("PASSWORD" . "password")
-        ("EMAIL" . "tomo@tomo.com")
-        ("SEX" . "Male")
-        ("MARRIAGE" . "single")
-        ("HOBBIES-sports" . "sports")
-        ("HOBBIES-reading" . "reading")
-        ("BIRTH-DATE-Y" . "1983")
-        ("BIRTH-DATE-M" . "9")
-        ("BIRTH-DATE-D" . "28")
-        ("NICKNAME" . "tomo")
-        ("PHONE-NUMBER" . "408-644-6198")
-        ("ZIP-CODE" . "95129")
-        ("NOTE" . "Hello
-World")
-        ("IMAGE" ("name" . "test.gif")
+      '(("testdb1_name" . "tomoyuki matsumoto")
+        ("testdb1_password" . "password")
+        ("testdb1_email" . "tomo@tomo.com")
+        ("testdb1_sex" . "male")
+        ("testdb1_marriage" . "single")
+        ("testdb1_hobbies-sports" . "sports")
+        ("testdb1_hobbies-reading" . "reading")
+        ("testdb1_birth-date-Y". "1983")
+        ("testdb1_birth-date-M". "9")
+        ("testdb1_birth-date-D". "28")
+        ("testdb1_nickname" . "tomo")
+        ("testdb1_phone-number" . "408-644-6198")
+        ("testdb1_zip-code" . "95129")
+        ("testdb1_note" . "hello
+world")
+        ("image" ("name" . "test.gif")
          ("type" . "image/gif")
-         ("tmp-name" . "/tmp/web4r/tmp/579198166B")
+         ("tmp-name" . "/tmp/web4r/tmp/579198166b")
          ("size" . 1841)))
     (is-true (sml= (form-input (get-slot 'testdb1 'name))
-                     "<input type=\"text\" class=\"required\" name=\"NAME\" value=\"Tomoyuki Matsumoto\" id=\"NAME\" size=\"30\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_name\" value=\"tomoyuki matsumoto\" id=\"testdb1_name\" size=\"30\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'password))
-                     "<input type=\"password\" class=\"required\" name=\"PASSWORD\" value=\"password\" id=\"PASSWORD\" />"))
+"<input type=\"password\" class=\"required\" name=\"testdb1_password\" value=\"password\" id=\"testdb1_password\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'email))
-                     "<input type=\"text\" class=\"required\" name=\"EMAIL\" value=\"tomo@tomo.com\" id=\"EMAIL\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_email\" value=\"tomo@tomo.com\" id=\"testdb1_email\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'sex))
-                     "<input type=\"radio\" checked=\"checked\" value=\"Male\" id=\"Male\" name=\"SEX\" />
-<label for=\"Male\">Male</label>
-<input type=\"radio\" value=\"Female\" id=\"Female\" name=\"SEX\" />
-<label for=\"Female\">Female</label>"))
+"<input type=\"radio\" checked=\"checked\" value=\"male\" id=\"testdb1_sex_male\" name=\"testdb1_sex\" />
+<label for=\"testdb1_sex_male\">male</label>
+<input type=\"radio\" value=\"female\" id=\"testdb1_sex_female\" name=\"testdb1_sex\" />
+<label for=\"testdb1_sex_female\">female</label>"))
     (is-true (sml= (form-input (get-slot 'testdb1 'marriage))
-                     "<select name=\"MARRIAGE\" id=\"MARRIAGE\">
+"<select name=\"testdb1_marriage\" id=\"testdb1_marriage\">
 <option value=\"single\" selected=\"selected\">single</option>
 <option value=\"married\">married</option>
 <option value=\"divorced\">divorced</option>
 </select>"))
     (is-true (sml= (form-input (get-slot 'testdb1 'hobbies))
-                     "<input type=\"checkbox\" checked=\"checked\" value=\"sports\" id=\"HOBBIES-sports\" name=\"HOBBIES-sports\" />
-<label for=\"sports\">sports</label>
-<input type=\"checkbox\" value=\"music\" id=\"HOBBIES-music\" name=\"HOBBIES-music\" />
-<label for=\"music\">music</label>
-<input type=\"checkbox\" checked=\"checked\" value=\"reading\" id=\"HOBBIES-reading\" name=\"HOBBIES-reading\" />
-<label for=\"reading\">reading</label>"))
-    (is-true (equalp (sml->ml (select-date "BIRTH-DATE" :y 1983 :m 9 :d 28))
+"<input type=\"checkbox\" value=\"sports\" id=\"testdb1_hobbies_sports\" name=\"testdb1_hobbies_sports\" />
+<label for=\"testdb1_hobbies_sports\">sports</label>
+<input type=\"checkbox\" value=\"music\" id=\"testdb1_hobbies_music\" name=\"testdb1_hobbies_music\" />
+<label for=\"testdb1_hobbies_music\">music</label>
+<input type=\"checkbox\" value=\"reading\" id=\"testdb1_hobbies_reading\" name=\"testdb1_hobbies_reading\" />
+<label for=\"testdb1_hobbies_reading\">reading</label>"))
+    (is-true (equalp (sml->ml (select-date "testdb1_birth-date" :y 1983 :m 9 :d 28))
                      (sml->ml (form-input (get-slot 'testdb1 'birth-date)))))
     (is-true (sml= (form-input (get-slot 'testdb1 'nickname))
-                     "<input type=\"text\" class=\"\" name=\"NICKNAME\" value=\"tomo\" id=\"NICKNAME\" />"))
+"<input type=\"text\" class=\"\" name=\"testdb1_nickname\" value=\"tomo\" id=\"testdb1_nickname\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'phone-number))
-                     "<input type=\"text\" class=\"required\" name=\"PHONE-NUMBER\" value=\"408-644-6198\" id=\"PHONE-NUMBER\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_phone-number\" value=\"408-644-6198\" id=\"testdb1_phone-number\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'zip-code))
-                     "<input type=\"text\" class=\"required\" name=\"ZIP-CODE\" value=\"95129\" id=\"ZIP-CODE\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_zip-code\" value=\"95129\" id=\"testdb1_zip-code\" />"))
     (is-true (sml= (form-input (get-slot 'testdb1 'note))
-                     "<textarea name=\"NOTE\" rows=\"5\" cols=\"30\" id=\"NOTE\">Hello
-World</textarea>"))
+"<textarea name=\"testdb1_note\" rows=\"5\" cols=\"30\" id=\"testdb1_note\">hello
+world</textarea>"))
     (is-true (sml= (form-input (get-slot 'testdb1 'image))
-                     "<input type=\"file\" name=\"IMAGE\" id=\"IMAGE\" />")
+"<input type=\"file\" name=\"testdb1_image\" id=\"testdb1_image\" />")
              ))
   (with-post-parameters '()
     (let ((i (make-instance 'testdb1
-                            :name         "Tomoyuki Matsumoto"
+                            :name         "tomoyuki matsumoto"
                             :password     "password"
                             :email        "tomo@tomo.com"
-                            :sex          "Male"
+                            :sex          "male"
                             :marriage     "single"
                             :hobbies      '("sports" "reading")
                             :birth-date   "1983-09-28"
                             :nickname     "tomo"
                             :phone-number "408-644-6198"
                             :zip-code     "95129"
-                            :note         (format nil "Hello~%World")
+                            :note         (format nil "hello~%world")
                             :image        "test.gif")))
       (is-true (sml= (form-input (get-slot 'testdb1 'name) i)
-                       "<input type=\"text\" class=\"required\" name=\"NAME\" value=\"Tomoyuki Matsumoto\" id=\"NAME\" size=\"30\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_name\" value=\"tomoyuki matsumoto\" id=\"testdb1_name\" size=\"30\" />"))
       (is-true (sml= (form-input (get-slot 'testdb1 'password) i)
-                       "<input type=\"password\" class=\"required\" name=\"PASSWORD\" value=\"password\" id=\"PASSWORD\" />"))
+"<input type=\"password\" class=\"required\" name=\"testdb1_password\" value=\"password\" id=\"testdb1_password\" />"))
       (is-true (sml= (form-input (get-slot 'testdb1 'email) i)
-                       "<input type=\"text\" class=\"required\" name=\"EMAIL\" value=\"tomo@tomo.com\" id=\"EMAIL\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_email\" value=\"tomo@tomo.com\" id=\"testdb1_email\" />"))
       (is-true (sml= (form-input (get-slot 'testdb1 'sex) i)
-                       "<input type=\"radio\" checked=\"checked\" value=\"Male\" id=\"Male\" name=\"SEX\" />
-<label for=\"Male\">Male</label>
-<input type=\"radio\" value=\"Female\" id=\"Female\" name=\"SEX\" />
-<label for=\"Female\">Female</label>"))
+"<input type=\"radio\" checked=\"checked\" value=\"male\" id=\"testdb1_sex_male\" name=\"testdb1_sex\" />
+<label for=\"testdb1_sex_male\">male</label>
+<input type=\"radio\" value=\"female\" id=\"testdb1_sex_female\" name=\"testdb1_sex\" />
+<label for=\"testdb1_sex_female\">female</label>"))
       (is-true (sml= (form-input (get-slot 'testdb1 'marriage) i)
-                       "<select name=\"MARRIAGE\" id=\"MARRIAGE\">
+"<select name=\"testdb1_marriage\" id=\"testdb1_marriage\">
 <option value=\"single\" selected=\"selected\">single</option>
 <option value=\"married\">married</option>
 <option value=\"divorced\">divorced</option>
 </select>"))
       (is-true (sml= (form-input (get-slot 'testdb1 'hobbies) i)
-                       "<input type=\"checkbox\" checked=\"checked\" value=\"sports\" id=\"HOBBIES-sports\" name=\"HOBBIES-sports\" />
-<label for=\"sports\">sports</label>
-<input type=\"checkbox\" value=\"music\" id=\"HOBBIES-music\" name=\"HOBBIES-music\" />
-<label for=\"music\">music</label>
-<input type=\"checkbox\" checked=\"checked\" value=\"reading\" id=\"HOBBIES-reading\" name=\"HOBBIES-reading\" />
-<label for=\"reading\">reading</label>"))
-      (is-true (equalp (sml->ml (select-date "BIRTH-DATE" :y 1983 :m 9 :d 28))
+"<input type=\"checkbox\" checked=\"checked\" value=\"sports\" id=\"testdb1_hobbies_sports\" name=\"testdb1_hobbies_sports\" />
+<label for=\"testdb1_hobbies_sports\">sports</label>
+<input type=\"checkbox\" value=\"music\" id=\"testdb1_hobbies_music\" name=\"testdb1_hobbies_music\" />
+<label for=\"testdb1_hobbies_music\">music</label>
+<input type=\"checkbox\" checked=\"checked\" value=\"reading\" id=\"testdb1_hobbies_reading\" name=\"testdb1_hobbies_reading\" />
+<label for=\"testdb1_hobbies_reading\">reading</label>"))
+      (is-true (equalp (sml->ml (select-date "testdb1_birth-date" :y 1983 :m 9 :d 28))
                        (sml->ml (form-input (get-slot 'testdb1 'birth-date) i))))
       (is-true (sml= (form-input (get-slot 'testdb1 'nickname) i)
-                       "<input type=\"text\" class=\"\" name=\"NICKNAME\" value=\"tomo\" id=\"NICKNAME\" />"))
+"<input type=\"text\" class=\"\" name=\"testdb1_nickname\" value=\"tomo\" id=\"testdb1_nickname\" />"))
       (is-true (sml= (form-input (get-slot 'testdb1 'phone-number) i)
-                       "<input type=\"text\" class=\"required\" name=\"PHONE-NUMBER\" value=\"408-644-6198\" id=\"PHONE-NUMBER\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_phone-number\" value=\"408-644-6198\" id=\"testdb1_phone-number\" />"))
       (is-true (sml= (form-input (get-slot 'testdb1 'zip-code) i)
-                       "<input type=\"text\" class=\"required\" name=\"ZIP-CODE\" value=\"95129\" id=\"ZIP-CODE\" />"))
+"<input type=\"text\" class=\"required\" name=\"testdb1_zip-code\" value=\"95129\" id=\"testdb1_zip-code\" />"))
       (is-true (sml= (form-input (get-slot 'testdb1 'note) i)
-                       "<textarea name=\"NOTE\" rows=\"5\" cols=\"30\" id=\"NOTE\">Hello
-World</textarea>")))))
+"<textarea name=\"testdb1_note\" rows=\"5\" cols=\"30\" id=\"testdb1_note\">hello
+world</textarea>")))))
 
 (test form-label
-  (is (string=* "<label for=\"NAME\">Full Name</label>"
+  (is (string=* "<label for=\"name\">full name</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'name)))))
-  (is (string=* "<label for=\"PASSWORD\">Password</label>"
+  (is (string=* "<label for=\"password\">password</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'password)))))
-  (is (string=* "<label for=\"EMAIL\">Email</label>"
+  (is (string=* "<label for=\"email\">email</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'email)))))
-  (is (string=* "<label for=\"SEX\">Sex</label>"
+  (is (string=* "<label for=\"sex\">sex</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'sex)))))
-  (is (string=* "<label for=\"MARRIAGE\">Marriage</label>"
+  (is (string=* "<label for=\"marriage\">marriage</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'marriage)))))
-  (is (string=* "<label for=\"HOBBIES\">Hobbies</label>"
+  (is (string=* "<label for=\"hobbies\">hobbies</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'hobbies)))))
-  (is (string=* "<label for=\"BIRTH-DATE-Y\">Birth Date</label>"
+  (is (string=* "<label for=\"birth-date-y\">birth date</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'birth-date)))))
-  (is (string=* "<label for=\"NICKNAME\">Nickname</label>"
+  (is (string=* "<label for=\"nickname\">nickname</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'nickname)))))
-  (is (string=* "<label for=\"PHONE-NUMBER\">Phone Number</label>"
+  (is (string=* "<label for=\"phone-number\">phone number</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'phone-number)))))
-  (is (string=* "<label for=\"ZIP-CODE\">Zip Code</label>"
+  (is (string=* "<label for=\"zip-code\">zip code</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'zip-code)))))
-  (is (string=* "<label for=\"NOTE\">Note</label>"
+  (is (string=* "<label for=\"note\">note</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'note)))))
-  (is (string=* "<label for=\"IMAGE\">Image</label>"
+  (is (string=* "<label for=\"image\">image</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'image))))))
 
 (defun list= (x y)
@@ -516,25 +516,25 @@ World</textarea>")))))
 (test class-validation-errors
   (web4r::drop-class-instances 'testdb1)
   (with-post-parameters
-      '(("NAME" . "Tomoyuki Matsumoto")
-        ("PASSWORD" . "password")
-        ("EMAIL" . "tomo@tomo.com")
-        ("SEX" . "Male")
-        ("MARRIAGE" . "single")
-        ("HOBBIES-sports" . "sports")
-        ("HOBBIES-reading" . "reading")
-        ("BIRTH-DATE-Y" . "1983")
-        ("BIRTH-DATE-M" . "9")
-        ("BIRTH-DATE-D" . "28")
-        ("NICKNAME" . "tomo")
-        ("PHONE-NUMBER" . "408-644-6198")
-        ("ZIP-CODE" . "95129")
-        ("NOTE" . "Hello World"))
+      '(("testdb1_name" . "tomoyuki matsumoto")
+        ("testdb1_password" . "password")
+        ("testdb1_email" . "tomo@tomo.com")
+        ("testdb1_sex" . "male")
+        ("marriage" . "single")
+        ("hobbies-sports" . "sports")
+        ("hobbies-reading" . "reading")
+        ("birth-date-y" . "1983")
+        ("birth-date-m" . "9")
+        ("birth-date-d" . "28")
+        ("nickname" . "tomo")
+        ("phone-number" . "408-644-6198")
+        ("zip-code" . "95129")
+        ("note" . "hello world"))
     (is-false (class-validation-errors 'testdb1)))
   ; required
-  (with-post-parameters '(("BIRTH-DATE-Y" . "")
-                          ("BIRTH-DATE-M" . "")
-                          ("BIRTH-DATE-D" . ""))
+  (with-post-parameters '(("birth-date-y" . "")
+                          ("birth-date-m" . "")
+                          ("birth-date-d" . ""))
     (is (list= (class-validation-errors 'testdb1)
                (list
                 (web4r::error-msg :empty   (web4r::slot-label (get-slot 'testdb1 'name)))
@@ -549,24 +549,24 @@ World</textarea>")))))
   ; length
   (let ((*with-slots* :all))
     (with-post-parameters
-        '(("NAME" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
-          ("PASSWORD" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
-          ("EMAIL" . "tomo@tomo.com")
-          ("SEX" . "Male")
-          ("MARRIAGE" . "single")
-          ("HOBBIES-sports" . "sports")
-          ("HOBBIES-reading" . "reading")
-          ("BIRTH-DATE-Y" . "1983")
-          ("BIRTH-DATE-M" . "9")
-          ("BIRTH-DATE-D" . "28")
-          ("NICKNAME" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
-          ("PHONE-NUMBER" . "408-644-6198")
-          ("ZIP-CODE" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
-          ("NOTE" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+        '(("testdb1_name" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+          ("testdb1_password" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+          ("testdb1_email" . "tomo@tomo.com")
+          ("testdb1_sex" . "male")
+          ("marriage" . "single")
+          ("hobbies-sports" . "sports")
+          ("hobbies-reading" . "reading")
+          ("birth-date-y" . "1983")
+          ("birth-date-m" . "9")
+          ("birth-date-d" . "28")
+          ("nickname" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+          ("phone-number" . "408-644-6198")
+          ("zip-code" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
+          ("note" . "toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")
-          ("IMAGE" . #P"/tmp/web4r/tmp/579198166B"))
+          ("image" . #p"/tmp/web4r/tmp/579198166b"))
     (is (list= (class-validation-errors 'testdb1)
                (list
                 (web4r::error-msg :too-long (web4r::slot-label (get-slot 'testdb1 'name)) 50)
@@ -576,21 +576,21 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
                 (web4r::error-msg :too-long (web4r::slot-label (get-slot 'testdb1 'note)) 300)))))
   ; type
   (with-post-parameters
-      '(("NAME" . "Tomoyuki Matsumoto")
-        ("PASSWORD" . "password")
-        ("EMAIL" . "invalid")
-        ("SEX" . "Male")
-        ("MARRIAGE" . "single")
-        ("HOBBIES-sports" . "sports")
-        ("HOBBIES-reading" . "reading")
-        ("BIRTH-DATE-Y" . "1983")
-        ("BIRTH-DATE-M" . "19")
-        ("BIRTH-DATE-D" . "28")
-        ("NICKNAME" . "tomo")
-        ("PHONE-NUMBER" . "408-644-61980")
-        ("ZIP-CODE" . "inval")
-        ("NOTE" . "Hello World")
-        ("IMAGE" . "/tmp/web4r/tmp/579198166B"))
+      '(("testdb1_name" . "tomoyuki matsumoto")
+        ("testdb1_password" . "password")
+        ("testdb1_email" . "invalid")
+        ("testdb1_sex" . "male")
+        ("marriage" . "single")
+        ("hobbies-sports" . "sports")
+        ("hobbies-reading" . "reading")
+        ("birth-date-y" . "1983")
+        ("birth-date-m" . "19")
+        ("birth-date-d" . "28")
+        ("nickname" . "tomo")
+        ("phone-number" . "408-644-61980")
+        ("zip-code" . "inval")
+        ("note" . "hello world")
+        ("image" . "/tmp/web4r/tmp/579198166b"))
     (is (list= (class-validation-errors 'testdb1)
                (list
                 (web4r::error-msg :invalid (web4r::slot-label (get-slot 'testdb1 'email)))
@@ -600,21 +600,21 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
   ; unique
   (let* ((i (make-instance 'testdb1 :email "uniquetest@uniquetest.com")))
     (with-post-parameters
-        '(("NAME" . "Tomoyuki Matsumoto")
-          ("PASSWORD" . "password")
-          ("EMAIL" . "uniquetest@uniquetest.com")
-          ("SEX" . "Male")
-          ("MARRIAGE" . "single")
-          ("HOBBIES-sports" . "sports")
-          ("HOBBIES-reading" . "reading")
-          ("BIRTH-DATE-Y" . "1983")
-          ("BIRTH-DATE-M" . "9")
-          ("BIRTH-DATE-D" . "28")
-          ("NICKNAME" . "tomo")
-          ("PHONE-NUMBER" . "408-644-6198")
-          ("ZIP-CODE" . "95129")
-          ("NOTE" . "Hello World")
-          ("IMAGE" . #P"/tmp/web4r/tmp/579198166B"))
+        '(("testdb1_name" . "tomoyuki matsumoto")
+          ("testdb1_password" . "password")
+          ("testdb1_email" . "uniquetest@uniquetest.com")
+          ("testdb1_sex" . "male")
+          ("marriage" . "single")
+          ("hobbies-sports" . "sports")
+          ("hobbies-reading" . "reading")
+          ("birth-date-y" . "1983")
+          ("birth-date-m" . "9")
+          ("birth-date-d" . "28")
+          ("nickname" . "tomo")
+          ("phone-number" . "408-644-6198")
+          ("zip-code" . "95129")
+          ("note" . "hello world")
+          ("image" . #p"/tmp/web4r/tmp/579198166b"))
       (is (list= (class-validation-errors 'testdb1)
                  (list (web4r::error-msg :not-a-unique (web4r::slot-label (get-slot 'testdb1 'email))))))
       (is-false (class-validation-errors 'testdb1 i))))))
@@ -651,30 +651,30 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 (test make-pinstance
   (web4r::drop-class-instances 'testdb1)
   (with-post-parameters 
-      '(("NAME" . "Tomoyuki Matsumoto")
-        ("EMAIL" . "tomo@tomo.com")
-        ("SEX" . "Male")
-        ("MARRIAGE" . "single")
-        ("HOBBIES-sports" . "sports")
-        ("HOBBIES-reading" . "reading")
-        ("BIRTH-DATE-Y" . "1983")
-        ("BIRTH-DATE-M" . "9")
-        ("BIRTH-DATE-D" . "28")
-        ("NICKNAME" . "tomo")
-        ("PHONE-NUMBER" . "408-644-6198")
-        ("ZIP-CODE" . "95129")
-        ("NOTE" . "Hello
-World"))
+      '(("testdb1_name" . "tomoyuki matsumoto")
+        ("testdb1_email" . "tomo@tomo.com")
+        ("testdb1_sex" . "male")
+        ("marriage" . "single")
+        ("hobbies-sports" . "sports")
+        ("hobbies-reading" . "reading")
+        ("birth-date-y" . "1983")
+        ("birth-date-m" . "9")
+        ("birth-date-d" . "28")
+        ("nickname" . "tomo")
+        ("phone-number" . "408-644-6198")
+        ("zip-code" . "95129")
+        ("note" . "hello
+world"))
     (let ((i (progn
                (make-pinstance 'testdb1 '((password "password")))
                (car (ele:get-instances-by-class 'testdb1)))))
-      (is (equal "Tomoyuki Matsumoto"
+      (is (equal "tomoyuki matsumoto"
                  (slot-display-value i (get-slot 'testdb1 'name))))
       (is (equal "password"
                  (slot-display-value i (get-slot 'testdb1 'password))))
       (is (equal "tomo@tomo.com"
                  (slot-display-value i (get-slot 'testdb1 'email))))
-      (is (equal "Male"
+      (is (equal "male"
                  (slot-display-value i (get-slot 'testdb1 'sex))))
       (is (equal "single"
                  (slot-display-value i (get-slot 'testdb1 'marriage))))
@@ -688,41 +688,41 @@ World"))
                  (slot-display-value i (get-slot 'testdb1 'phone-number))))
       (is (equal "95129"
                  (slot-display-value i (get-slot 'testdb1 'zip-code))))
-      (is (equal (format nil "Hello~%World")
+      (is (equal (format nil "hello~%world")
                  (slot-display-value i (get-slot 'testdb1 'note))))
-      (is (safe= "Hello<br>World"
+      (is (safe= "hello<br>world"
                  (slot-display-value i (get-slot 'testdb1 'note) :nl->br t))))))
 
 (test update-pinstance
   (web4r::drop-class-instances 'testdb1)
   (with-post-parameters
-      '(("NAME" . "Tomoyuki Matsumoto")
-        ("EMAIL" . "tomo@tomo.com")
-        ("SEX" . "Male")
-        ("MARRIAGE" . "single")
-        ("BIRTH-DATE-Y" . "1983")
-        ("BIRTH-DATE-M" . "9")
-        ("BIRTH-DATE-D" . "28")
-        ("NICKNAME" . "tomo")
-        ("PHONE-NUMBER" . "408-644-6198")
-        ("ZIP-CODE" . "95129")
-        ("NOTE" . "Hello
-World"))
+      '(("testdb1_name" . "tomoyuki matsumoto")
+        ("testdb1_email" . "tomo@tomo.com")
+        ("testdb1_sex" . "male")
+        ("marriage" . "single")
+        ("birth-date-y" . "1983")
+        ("birth-date-m" . "9")
+        ("birth-date-d" . "28")
+        ("nickname" . "tomo")
+        ("phone-number" . "408-644-6198")
+        ("zip-code" . "95129")
+        ("note" . "hello
+world"))
     (let ((i (progn
                (make-pinstance 'testdb1 '((password "password")))
                (car (ele:get-instances-by-class 'testdb1)))))
       (with-post-parameters
-          '(("NAME" . "Tomoyuki Matsumoto2")
-            ("EMAIL" . "tomo@tomo.com2")
-            ("SEX" . "Male2")
-            ("MARRIAGE" . "single2")
-            ("BIRTH-DATE-Y" . "1982")
-            ("BIRTH-DATE-M" . "8")
-            ("BIRTH-DATE-D" . "27")
-            ("NICKNAME" . "tomo2")
-            ("PHONE-NUMBER" . "408-644-6197")
-            ("ZIP-CODE" . "95128")
-            ("NOTE" . "Hello
+          '(("testdb1_name" . "tomoyuki matsumoto2")
+            ("testdb1_email" . "tomo@tomo.com2")
+            ("testdb1_sex" . "Male2")
+            ("testdb1_marriage" . "single2")
+            ("testdb1_birth-date-Y" . "1982")
+            ("testdb1_birth-date-M" . "8")
+            ("testdb1_birth-date-D" . "27")
+            ("testdb1_nickname" . "tomo2")
+            ("testdb1_phone-number" . "408-644-6197")
+            ("testdb1_zip-code" . "95128")
+            ("testdb1_note" . "Hello
 World2"))
         (update-pinstance 'testdb1 i '((password "password2"))))
       (is (equal "Tomoyuki Matsumoto2"
