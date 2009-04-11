@@ -165,6 +165,11 @@
                    ; --- hunchentoot ---
                    ,@(loop for s being the external-symbol
                            in :hunchentoot collect s)
+                   ; --- elephant ---
+                   ,@(loop for s being the external-symbol
+                           in :elephant
+                           unless (eq s 'defpclass)
+                           collect s)
                    )
           (:shadow :defpclass))))
   (define-web4r-package))
