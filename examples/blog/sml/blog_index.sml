@@ -25,7 +25,7 @@
                                          [td [a :href (page-uri "blog" "delete" (oid x)) "Delete"]]
                                          )))])
                           it)])
-                    [p "There are no blog post yet"])
+                    [p "There are no blog post"])
                   (when owner-p
                     [div [a :href (w/p (page-uri "blog" "edit")) "New post"]])
                   [div [a :href (page-uri "blog") "Top"]]]))

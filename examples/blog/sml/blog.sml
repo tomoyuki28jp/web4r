@@ -12,7 +12,7 @@
                                [tr [td [a :href (page-uri "blog" "index" (id i))
                                           (slot-value i 'blog-title)]]
                                    [td (time-format "~y/~m/~d" (updated-at i))]])])
-                    [p "There are no blog yet"])
+                    [p "There are no blog"])
                   (if (login-user)
                       [div [a :href (page-uri "blog" "index" (login-user-id)) "My Blog"] " | "
                            [a :href (page-uri "logout") "Logout"]]
