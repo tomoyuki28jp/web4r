@@ -1,3 +1,11 @@
+Version 0.1.5
+2009-04-11
+Updated to export all elephant's exported symbols (except defpclass)
+Renamed slot-id from "${slot}" to "${class}_${slot}"
+Updated the codes where using with-sml-file macro according to sml v0.1.1
+Added web4r default page
+Renamed nullable to required, and must_mark to required_mark
+
 Version 0.1.4
 2009-04-10
 Separated sml codes from lisp files into sml files
