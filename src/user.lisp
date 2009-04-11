@@ -65,8 +65,8 @@
   (session-value :user-oid))
 
 (defun login/cont (redirect-uri)
-  (let ((id   (post-parameter "ID"))
-        (pass (post-parameter "PASS")))
+  (let ((id   (post-parameter "user_id"))
+        (pass (post-parameter "user_pass")))
     (with-validations (((user-id-label)   id   '(:required t))
                        ((user-pass-label) pass '(:required t)))
       (lambda (e) (page/error-msgs "login" e))

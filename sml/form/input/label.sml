@@ -1,4 +1,8 @@
-(if (eq type :date)
-    [label :for (concat id "-Y") label]
-    (when (and label id)
-      [label :for id label]))
+[label :for (case type*
+              (:date   (concat id "-Y"))
+              (:member (case input
+                         ((:radio :checkbox)
+                          (concat id "_" (car (slot-options slot))))
+                         (t id)))
+              (t id))
+       label]

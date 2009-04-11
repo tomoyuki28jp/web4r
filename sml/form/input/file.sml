@@ -1,6 +1,8 @@
 (if file
-    (progn [p "change: " (input-file id :id id)]
-           [p "delete: " (input-checked "checkbox" nil :value "t"
-                                        :name (concat id "-delete") :id id)
+    (progn [p [label :for id "change: "]
+              (input-file id :id id)]
+           [p [label :for del-id "delete: "]
+              (input-checked "checkbox" nil :value "t"
+                             :name del-id :id del-id)
               [img :src (thumbnail-uri file :type type) :alt id /]])
     (input-file id :id id))

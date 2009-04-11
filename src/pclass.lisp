@@ -39,8 +39,8 @@
 (defun set-slots (name slots &optional parent)
   (setf (gethash name *slots*)
         (append (get-slots parent)
-                (loop for s in slots as s* = (parse-slot s) collect
-                      (apply #'make-instance 'slot-options s*)))))
+                (loop for s in slots as s* = (parse-slot name s)
+                      collect (apply #'make-instance 'slot-options s*)))))
 
 (defun get-slots (class)
   (gethash class *slots*))
@@ -60,13 +60,13 @@
             collect s)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun parse-slot (slot)
+  (defun parse-slot (class slot)
     (setf slot (->list slot))
     (flet ((opt (x) (awhen (member x slot) (nth 1 it))))
       (append
-       (let ((id (symbol-name (car slot))))
+       (let ((id (->string-down (car slot))))
          (list :symbol   (car slot)
-               :id       id
+               :id       (concat (->string-down class) "_" id)
                :label    (or (opt :label)
                              (string-capitalize (regex-replace-all "-" id " ")))
                :input    (or (opt :input)
@@ -102,10 +102,11 @@
             ((eq input :file)
              (awhen (cont-session slot)
                (rem-cont-session slot)
-               (save-file (image-path it "tmp") *upload-save-dir*)))
+               (pathname-name
+                (save-file (image-path it "tmp") *upload-save-dir*))))
             ((eq input :checkbox)
              (loop for o in options
-                   as v = (post-parameter (concat id "-" o))
+                   as v = (post-parameter (concat id "_" o))
                    when v collect o))
             (t value)))))
 
@@ -127,14 +128,14 @@
       (cond ((eq input :select)
              (select-form id options value))
             (options
-             (loop for o in options as oid = (concat id "-" o)
+             (loop for o in options as oid = (concat id "_" o)
                    do (if (eq input :checkbox)
                           (input-checked "checkbox"
                                          (or (post-parameter oid)
                                              (when (member o saved :test #'equal) o))
                                          :value o :id oid :name oid)
-                          (input-checked "radio" value :value o :id o :name id))
-                   do [label :for o o]))
+                          (input-checked "radio" value :value o :id oid :name id))
+                   do [label :for oid o]))
             ((eq type :date)
              (let ((date (when (stringp value) (split "-" value))))
                (multiple-value-bind (y m d) (posted-date id)
@@ -146,14 +147,16 @@
             ((eq input :file)
              (let* ((type (if (cont-session slot) "tmp" (when saved "upload")))
                     (file (aand (image-path (or (cont-session slot) saved) type)
-                                (pathname-name it))))
+                                (pathname-name it)))
+                    (del-id (concat id "_delete")))
                (load-sml-path "form/input/file.sml")))
             (t (load-sml-path "form/input/text.sml"))))))
 
 (defgeneric form-label (slot))
 (defmethod form-label ((slot slot-options))
-  (with-slots (type label id required) slot
-    (load-sml-path "form/input/label.sml")))
+  (with-slots (type label id input) slot
+    (let ((type* (if (listp type) (car type) type)))
+      (load-sml-path "form/input/label.sml"))))
 
 (defgeneric required-mark (slot))
 (defmethod required-mark ((slot slot-options))
@@ -167,7 +170,7 @@
 
 (defmacro form-for/cont (cont &key class instance (submit "submit"))
   `(%form/cont (file-slots ,class) ,cont
-     :id ,class
+     :id ,(->string-down class)
      [table
       (loop for s in (get-excluded-slots ,class)
             do [tr [td (form-label s) (required-mark s) (form-comment s)]]
@@ -194,7 +197,7 @@
               (list y m d)))
            ((eq input :checkbox)
             (loop for o in options
-                  collect (post-parameter (concat id "-" o))))
+                  collect (post-parameter (concat id "_" o))))
            ((eq input :file) (image-path (cont-session slot) "tmp"))
            (t (post-parameter id)))
      (append (list :required required :length length :type type)
@@ -256,7 +259,7 @@
   "makes an instance of pclass from posted parameters"
   (apply #'make-instance class
          (append (loop for s in (get-excluded-slots class)
-                       collect (->keyword (slot-id s))
+                       collect (->keyword (slot-symbol s))
                        collect (slot-save-value s))
                  (when slot-values
                    (loop for s in slot-values
@@ -289,7 +292,7 @@
         as new-file = (file-path (slot-id s))
         as tmp-file = (cont-session s)
         as saved-file = (aand ins (ignore-errors (slot-value it (slot-symbol s))))
-        do (if (equal (post-parameter (concat (slot-id s) "-delete")) "t")
+        do (if (equal (post-parameter (concat (slot-id s) "_delete")) "t")
                (progn (awhen tmp-file   (delete-tmp-file it))
                       (awhen saved-file (delete-saved-file it))
                       (rem-cont-session s))
