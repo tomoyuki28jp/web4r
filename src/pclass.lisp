@@ -170,7 +170,7 @@
 
 (defmacro form-for/cont (cont &key class instance (submit "submit"))
   `(%form/cont (file-slots ,class) ,cont
-     :id ,(->string-down class)
+     :id (concat (->string-down ,class) "_form")
      [table
       (loop for s in (get-excluded-slots ,class)
             do [tr [td (form-label s) (required-mark s) (form-comment s)]]
