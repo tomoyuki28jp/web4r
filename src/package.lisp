@@ -98,6 +98,7 @@
                    :get-excluded-slots
                    :slot-display-value
                    :slot-save-value
+                   :form-valid-attr
                    :form-input
                    :form-label
                    :required-mark
@@ -106,7 +107,6 @@
                    :select-date
                    :slot-validation-errors
                    :class-validation-errors
-                   :js-validation-rules
                    :defpclass
                    :created-at
                    :updated-at
