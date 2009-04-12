@@ -98,6 +98,7 @@
                    :get-excluded-slots
                    :slot-display-value
                    :slot-save-value
+                   :form-valid-attr
                    :form-input
                    :form-label
                    :required-mark

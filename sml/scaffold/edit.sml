@@ -1,4 +1,7 @@
 (with-sml-file (sml-path "template.sml")
+  (append  head  [script :type "text/javascript" :src "/js/jquery-1.3.2.min.js"])
+  (append  head  [script :type "text/javascript" :src "/js/jquery.validate.js"])
+  (append  head  [script (safe "$(document).ready(function(){$(\"#" cname "_form\").validate()})")])
   (replace title [title (if oid "Editing " "New ") cname])
   (replace body  [body
                   (if (and oid (not ins))

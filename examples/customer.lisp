@@ -26,7 +26,7 @@
    (phone-number :type (:regex "^\\d{3}-\\d{3}-\\d{4}$") :comment "xxx-xxx-xxxx")
    (zip-code     :type :integer :length (5 5) :comment "5 digit")
    (note         :length 3000 :rows 5 :cols 30)
-   (image        :input :file :type :image :length (1000 500000) :required nil)))
+   (image        :input :file :type :image :length (1000 500000) :required t)))
 
 (defpage customer () (scaffold-index 'customer))
 (defpage customer/show (oid)   (scaffold-show  'customer oid))

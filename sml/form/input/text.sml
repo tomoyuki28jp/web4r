@@ -1,3 +1,3 @@
-[input :type (if (eq input :password) "password" "text")
-       :class (if (slot-required slot) "required" "")
+[input (attr (form-valid-attr slot))
+       :type (if (eq input :password) "password" "text")
        :name id :value value :id id :size size /]

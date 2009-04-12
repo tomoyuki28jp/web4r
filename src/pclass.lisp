@@ -120,20 +120,33 @@
 
 ; --- Forms for slots -------------------------------------------
 
-(defgeneric form-input (slot &optional ins))
-(defmethod form-input ((slot slot-options) &optional ins)
-  (with-slots (input type label id length symbol options size) slot
-    (let* ((saved (aand ins (ignore-errors (slot-value it symbol))))
-           (value (or (post-parameter id) saved)))
-      (cond ((eq input :select)
-             (select-form id options value))
-            (options
-             (loop for o in options as oid = (concat id "_" o)
-                   do (if (eq input :checkbox)
-                          (input-checked "checkbox"
-                                         (or (post-parameter oid)
-                                             (when (member o saved :test #'equal) o))
-                                         :value o :id oid :name oid)
+(defgeneric form-valid-attr (slot))
+(defmethod form-valid-attr ((slot slot-options))
+  "attributes of form input for jquery validation
+http://docs.jquery.com/Plugins/Validation"
+  (with-slots (required type length input) slot
+    (append (awhen (append (when required '("required"))
+                           (when (eq type :email)   '("email"))
+                           (when (eq type :integer) '("number")))
+              `(:class ,(apply #'join " " it)))
+            (awhen (and (not (eq input :file)) length)
+              (append (aand (when (listp it) (car it))   `(:minlength ,it))
+                      (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it)))))))
+
+ (defgeneric form-input (slot &optional ins))
+ (defmethod form-input ((slot slot-options) &optional ins)
+   (with-slots (input type label id length symbol options size) slot
+     (let* ((saved (aand ins (ignore-errors (slot-value it symbol))))
+            (value (or (post-parameter id) saved)))
+       (cond ((eq input :select)
+              (select-form id options value))
+             (options
+              (loop for o in options as oid = (concat id "_" o)
+                    do (if (eq input :checkbox)
+                           (input-checked "checkbox"
+                                          (or (post-parameter oid)
+                                              (when (member o saved :test #'equal) o))
+                                          :value o :id oid :name oid)
                           (input-checked "radio" value :value o :id oid :name id))
                    do [label :for oid o]))
             ((eq type :date)
