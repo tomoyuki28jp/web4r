@@ -64,7 +64,7 @@
     (setf slot (->list slot))
     (flet ((opt (x) (awhen (member x slot) (nth 1 it))))
       (append
-       (let ((id (->string-down (car slot))))
+       (let ((id (regex-replace-all "-" (->string-down (car slot)) "_")))
          (list :symbol   (car slot)
                :id       (concat (->string-down class) "_" id)
                :label    (or (opt :label)
@@ -119,19 +119,6 @@
                  (get-excluded-slots class)))
 
 ; --- Forms for slots -------------------------------------------
-
-(defgeneric form-valid-attr (slot))
-(defmethod form-valid-attr ((slot slot-options))
-  "attributes of form input for jquery validation
-http://docs.jquery.com/Plugins/Validation"
-  (with-slots (required type length input) slot
-    (append (awhen (append (when required '("required"))
-                           (when (eq type :email)   '("email"))
-                           (when (eq type :integer) '("number")))
-              `(:class ,(apply #'join " " it)))
-            (awhen (and (not (eq input :file)) length)
-              (append (aand (when (listp it) (car it))   `(:minlength ,it))
-                      (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it)))))))
 
 (defgeneric form-input (slot &optional ins))
 (defmethod form-input ((slot slot-options) &optional ins)
@@ -222,6 +209,33 @@ http://docs.jquery.com/Plugins/Validation"
         as e = (slot-validation-errors class s ins)
         when (and e (eq (slot-input s) :file)) do (rem-cont-session s)
         when e collect (car e)))
+
+(defun js-validation-rules (class)
+  "javascript validation rules for jquery.validate.js 
+http://docs.jquery.com/Plugins/Validation"
+  (aand (loop for s in (get-excluded-slots class)
+              as rule = ""
+              as setr = (lambda (x) (setf rule (concat rule x)))
+              as len  = (slot-length s)
+              when (slot-required s)           do (funcall setr " required:true,")
+              when (eq (slot-type s) :email)   do (funcall setr " email:true,")
+              when (eq (slot-type s) :integer) do (funcall setr " number:true,")
+              when (and (not (eq (slot-input s) :file)) len)
+              do (progn (awhen (when (listp len) (car len))
+                          (funcall setr (concat " minlength:" it ",")))
+                        (awhen (if (atom len) len (nth 1 len))
+                          (funcall setr (concat " maxlength:" it ","))))
+              unless (string= rule "")
+              collect (concat (slot-id s) ": {" rule " },"))
+        (concat
+"       <script type=\"text/javascript\" src=\"/js/jquery-1.3.2.min.js\"></script>
+        <script type=\"text/javascript\" src=\"/js/jquery.validate.js\"></script>
+        <script type=\"text/javascript\">
+$(document).ready(function() {
+	var validator = $(\"#" (concat (->string-down class) "_form") "\").validate({
+		rules: {
+" (apply #'join #\Newline it) "}})});
+        </script>")))
 
 ; --- Elephant wrapper functions --------------------------------
 
