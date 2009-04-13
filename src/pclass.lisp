@@ -64,7 +64,7 @@
     (setf slot (->list slot))
     (flet ((opt (x) (awhen (member x slot) (nth 1 it))))
       (append
-       (let ((id (->string-down (car slot))))
+       (let ((id (regex-replace-all "-" (->string-down (car slot)) "_")))
          (list :symbol   (car slot)
                :id       (concat (->string-down class) "_" id)
                :label    (or (opt :label)
@@ -104,15 +104,8 @@
                (rem-cont-session slot)
                (pathname-name
                 (save-file (image-path it "tmp") *upload-save-dir*))))
-            ((eq input :checkbox)
-             (loop for o in options
-                   as v = (post-parameter (concat id "_" o))
-                   when v collect o))
+            ((eq input :checkbox) (posted-checkbox id))
             (t value)))))
-
-(defun posted-date (id)
-  (flet ((date (x) (post-parameter (concat id "-" x))))
-    (values (date "Y") (date "M") (date "D"))))
 
 (defun file-slots (class)
   (remove-if-not #'(lambda (s) (eq (slot-input s) :file))
@@ -143,14 +136,8 @@ http://docs.jquery.com/Plugins/Validation"
             (options
              (loop for o in options as oid = (concat id "_" o)
                    do (if (eq input :checkbox)
-                          (input-checked "checkbox"
-                                         (or (post-parameter oid)
-                                             (when (member o saved :test #'equal) o))
-                                         :value o :id oid :name oid
-                                         (attr (form-valid-attr slot)))
-                         (input-checked "radio" value :value o :id oid :name id
-                                        (attr (form-valid-attr slot))))
-                  do [label :for oid o]))
+                          (load-sml-path "form/input/checkbox.sml")
+                          (load-sml-path "form/input/radio.sml"))))
            ((eq type :date)
             (let ((date (when (stringp value) (split "-" value))))
               (multiple-value-bind (y m d) (posted-date id)
@@ -201,6 +188,15 @@ http://docs.jquery.com/Plugins/Validation"
       (select-form (concat name "-M") (lst 1 12) (or (->int m) month))
       (select-form (concat name "-D") (lst 1 31) (or (->int d) date)))))
 
+(defun posted-date (id)
+  (flet ((date (x) (post-parameter (concat id "-" x))))
+    (values (date "Y") (date "M") (date "D"))))
+
+(defun posted-checkbox (id)
+  (mapcar #'cdr
+          (remove-if-not #'(lambda (x) (equal (car x) (concat id "[]")))
+                         (post-parameters*))))
+
 ; --- Validations -----------------------------------------------
 
 (defun slot-validation-errors (class slot &optional ins)
@@ -210,10 +206,11 @@ http://docs.jquery.com/Plugins/Validation"
      (cond ((eq type :date)
             (multiple-value-bind (y m d) (posted-date id)
               (list y m d)))
-           ((eq input :checkbox)
-            (loop for o in options
-                  collect (post-parameter (concat id "_" o))))
-           ((eq input :file) (image-path (cont-session slot) "tmp"))
+           ((eq input :checkbox) (posted-checkbox id))
+           ((eq input :file)
+            (or (image-path (cont-session slot) "tmp")
+                (awhen (aand ins (slot-value it symbol))
+                  (image-path it "upload"))))
            (t (post-parameter id)))
      (append (list :required required :length length :type type)
              (when unique `(:unique ,(list class symbol ins)))))))
