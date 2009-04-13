@@ -209,7 +209,7 @@ http://docs.jquery.com/Plugins/Validation"
            ((eq input :checkbox) (posted-checkbox id))
            ((eq input :file)
             (or (image-path (cont-session slot) "tmp")
-                (awhen (aand ins (slot-value it symbol))
+                (awhen (aand ins (ignore-errors (slot-value it symbol)))
                   (image-path it "upload"))))
            (t (post-parameter id)))
      (append (list :required required :length length :type type)
