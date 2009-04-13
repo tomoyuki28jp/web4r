@@ -253,10 +253,8 @@ http://docs.jquery.com/Plugins/Validation"
   (handler-case (ele::oid instance)
     (error () nil)))
 
-(defun get-instance-by-oid (class oid &optional (sc *store-controller*))
-  (when-let (ins (ele::ele-with-fast-lock ((ele::instance-cache-lock sc))
-                   (ele::get-cache (->int oid) (ele::instance-cache sc))))
-    (when (typep ins class) ins)))
+(defun get-instance-by-oid (class oid)
+  (get-value (->int oid) (find-class-index class)))
 
 (defun drop-instance (instance)
   (drop-instances (list instance)))
