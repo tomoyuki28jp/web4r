@@ -1,3 +1,8 @@
+Version 0.1.6
+2009-04-13
+Implemented javascript client side validation
+Renamed names of checkbox inputs from "${id}_${option}" to "${id}[]"
+
 Version 0.1.5
 2009-04-11
 Updated to export all elephant's exported symbols (except defpclass)
