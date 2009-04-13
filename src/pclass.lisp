@@ -68,7 +68,7 @@
          (list :symbol   (car slot)
                :id       (concat (->string-down class) "_" id)
                :label    (or (opt :label)
-                             (string-capitalize (regex-replace-all "-" id " ")))
+                             (string-capitalize (regex-replace-all "_" id " ")))
                :input    (or (opt :input)
                              (aand (opt :length) (< 256 (if (atom it) it (car it)))
                                    :textarea))
