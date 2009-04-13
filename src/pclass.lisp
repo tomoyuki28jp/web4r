@@ -184,13 +184,13 @@ http://docs.jquery.com/Plugins/Validation"
       (decode-universal-time (get-universal-time))
     (declare (ignore sec min hour))
     (flet ((lst (from to) (loop for i from from to to collect i)))
-      (select-form (concat name "-Y") (lst y-start y-end) (or (->int y) year))
-      (select-form (concat name "-M") (lst 1 12) (or (->int m) month))
-      (select-form (concat name "-D") (lst 1 31) (or (->int d) date)))))
+      (select-form (concat name "_y") (lst y-start y-end) (or (->int y) year))
+      (select-form (concat name "_m") (lst 1 12) (or (->int m) month))
+      (select-form (concat name "_d") (lst 1 31) (or (->int d) date)))))
 
 (defun posted-date (id)
-  (flet ((date (x) (post-parameter (concat id "-" x))))
-    (values (date "Y") (date "M") (date "D"))))
+  (flet ((date (x) (post-parameter (concat id "_" x))))
+    (values (date "y") (date "m") (date "d"))))
 
 (defun posted-checkbox (id)
   (mapcar #'cdr
