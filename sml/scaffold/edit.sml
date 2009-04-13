@@ -1,6 +1,7 @@
 (with-sml-file (sml-path "template.sml")
   (append  head  [script :type "text/javascript" :src "/js/jquery-1.3.2.min.js"])
   (append  head  [script :type "text/javascript" :src "/js/jquery.validate.js"])
+  (append  head  [script :type "text/javascript" :src "/js/jquery.date.js"])
   (append  head  [script :type "text/javascript" (safe 
 "$(document).ready(function() {
     $(\"#" cname "_form\").validate({
@@ -8,6 +9,10 @@
             error.appendTo( element.parent() )
         }
     })
+"
+(when (date-slots class)
+  "    $(this).changeSelectDate();")
+"
 })")])
   (replace title [title (if oid "Editing " "New ") cname])
   (replace body  [body

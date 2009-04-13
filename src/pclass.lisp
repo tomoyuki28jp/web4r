@@ -111,6 +111,10 @@
   (remove-if-not #'(lambda (s) (eq (slot-input s) :file))
                  (get-excluded-slots class)))
 
+(defun date-slots (class)
+  (remove-if-not #'(lambda (s) (eq (slot-type s)  :date))
+                 (get-excluded-slots class)))
+
 ; --- Forms for slots -------------------------------------------
 
 (defgeneric form-valid-attr (slot))
@@ -132,7 +136,7 @@ http://docs.jquery.com/Plugins/Validation"
     (let* ((saved (aand ins (ignore-errors (slot-value it symbol))))
            (value (or (post-parameter id) saved)))
       (cond ((eq input :select)
-             (select-form id options value))
+             (select-form id options :selected value))
             (options
              (loop for o in options as oid = (concat id "_" o)
                    do (if (eq input :checkbox)
@@ -184,9 +188,13 @@ http://docs.jquery.com/Plugins/Validation"
       (decode-universal-time (get-universal-time))
     (declare (ignore sec min hour))
     (flet ((lst (from to) (loop for i from from to to collect i)))
-      (select-form (concat name "_y") (lst y-start y-end) (or (->int y) year))
-      (select-form (concat name "_m") (lst 1 12) (or (->int m) month))
-      (select-form (concat name "_d") (lst 1 31) (or (->int d) date)))))
+      [span :class "change_date"
+            (select-form (concat name "_y") (lst y-start y-end)
+                         :selected (or (->int y) year)  :class "y")
+            (select-form (concat name "_m") (lst 1 12)
+                         :selected (or (->int m) month) :class "m")
+            (select-form (concat name "_d") (lst 1 31)
+                         :selected (or (->int d) date)  :class "d")])))
 
 (defun posted-date (id)
   (flet ((date (x) (post-parameter (concat id "_" x))))
