@@ -350,7 +350,7 @@ world"         (slot-save-value (get-slot 'testdb1 'note))))))
                 (sml->ml (form-label (get-slot 'testdb1 'marriage)))))
   (is (string=* "<label for=\"testdb1_hobbies_sports\">Hobbies</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'hobbies)))))
-  (is (string=* "<label for=\"testdb1_birth_date-Y\">Birth Date</label>"
+  (is (string=* "<label for=\"testdb1_birth_date_y\">Birth Date</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'birth-date)))))
   (is (string=* "<label for=\"testdb1_nickname\">Nickname</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'nickname)))))
