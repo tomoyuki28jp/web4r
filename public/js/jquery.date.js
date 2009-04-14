@@ -9,19 +9,27 @@ $.extend($.fn, {
                 return d[m-1];
             }
         }
-        $(".change_date .y, .m").change(function () {
-            var id = $(this).attr("name").split("_").slice(0, -1).join("_");
-            var cl = $("#"+id+"_d option").length;
-            var dl = days_of( $("#"+id+"_y option:selected").text(),
-                              $("#"+id+"_m option:selected").text());
+	var change_date = function(y, m, id) {
+	    var dl = days_of(y, m);
+	    var cl = $("#"+id+" option").length;
             if (cl != dl) {
                 if (cl < dl) {
                     for (var i=(cl + 1); i<=dl; i++)
-                        $("#"+id+"_d").append("<option value='"+i+"'>"+i+"</option>");
+                        $("#"+id).append("<option value='"+i+"'>"+i+"</option>");
                 } else {
                     for (var i=cl; i>dl; i--)
-                        $("#"+id+"_d option[value='"+i+"']").remove();
+                        $("#"+id+" option[value='"+i+"']").remove();
                 }
             }
+	}
+	var today = new Date();
+	$(".change_date .d").each(function() {
+            change_date(today.getFullYear(), (today.getMonth() + 1), $(this).attr("id"));
+        })
+        $(".change_date .y, .m").change(function() {
+            var id = $(this).attr("name").split("_").slice(0, -1).join("_");
+	    change_date($("#"+id+"_y option:selected").text(),
+			$("#"+id+"_m option:selected").text(),
+			id+"_d");
         })}
 })})(jQuery);
