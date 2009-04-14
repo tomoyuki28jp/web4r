@@ -8,7 +8,7 @@
     $.validator.addMethod('regexp', function(value, element) {
        return value.match($(element).attr('regexp')) !== null
     }, 'Please fix this field.');
-    $('#" cname "_form').validate({
+    var validator = $('#" cname "_form').validate({
         errorPlacement: function(error, element) {
             error.appendTo( element.parent() )
         },
