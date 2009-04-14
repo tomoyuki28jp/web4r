@@ -1,3 +1,9 @@
+Version 0.1.7
+2009-04-14
+Implemented asynchronous uniquness validation
+Added jquery.date.js to manipulate date select options
+Bug fix in get-instance-by-oid
+
 Version 0.1.6
 2009-04-13
 Implemented javascript client side validation
