@@ -1,9 +1,21 @@
-body             { font-size:   12pt; color: #828282; font-family:Verdana; }
-input, textarea  { font-size:   12pt; color: #000000; font-family:Courier; }
+body             { font-size:   11pt; font-family:Verdana; }
+input, textarea  { font-size:   11pt; color: #000000; font-family:Courier; }
 h1               { font-size:   28px; color: #150517; }
 ul.msgs          { font-weight: bold; color: #0000FF; }
-ul.errors        { font-weight: bold; color: #FF0000; }
-label.error      { font-weight: bold; color: #FF0000; padding-left: .5em; vertical-align: top; }
-#required_mark   { font-weight: bold; color: #FF0000; }
+ul.errors        { font-weight: bold; color: #F60; }
+#required_mark   { font-weight: bold; color: #F60; }
 #page_links span { font-weight: bold; }
 div              { margin:      8px; }
+
+label.error  { 
+    border: solid #BBB 1px;
+    border-top: none;
+    border-left: none;
+    -moz-border-radius: 4px;
+    padding: .5em 1em .5em .8em;
+    color: #F60;
+    background: #EDEDED;
+    font-weight: bold;
+    vertical-align: top;
+    margin-left: 5px;
+}
