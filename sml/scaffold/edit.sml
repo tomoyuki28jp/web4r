@@ -3,8 +3,8 @@
   (append  head  [script :type "text/javascript" :src "/js/jquery.validate.js"])
   (append  head  [script :type "text/javascript" :src "/js/jquery.date.js"])
   (append  head  [script :type "text/javascript" (safe 
-"jQuery.validator.messages.remote = 'The save value is already in use.';
-$(document).ready(function() {
+"$(document).ready(function() {
+    $.validator.messages.remote = 'The save value is already in use.';
     $('#" cname "_form').validate({
         errorPlacement: function(error, element) {
             error.appendTo( element.parent() )
