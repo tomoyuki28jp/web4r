@@ -125,15 +125,18 @@
   "attributes of form input for jquery validation
 http://docs.jquery.com/Plugins/Validation"
   (with-slots (required type length input unique) slot
-    (append (awhen (append (when required '("required"))
-                           (when (eq type :email)   '("email"))
-                           (when (eq type :integer) '("number")))
-              `(:class ,(apply #'join " " it)))
-            (awhen (and (not (eq input :file)) length)
-              (append (aand (when (listp it) (car it))   `(:minlength ,it))
-                      (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it))))
-            (when unique
-              `(:remote ,(concat "/" (->string-down class) "/unique"))))))
+    (let ((regexp? (and (listp type) (eq (car type) :regex))))
+      (append (awhen (append (when required '("required"))
+                             (when (eq type :email)   '("email"))
+                             (when (eq type :integer) '("number"))
+                             (when regexp?            '("regexp")))
+                `(:class ,(apply #'join " " it)))
+              (awhen (and (not (eq input :file)) length)
+                (append (aand (when (listp it) (car it))   `(:minlength ,it))
+                        (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it))))
+              (when regexp? `(:regexp ,(cadr type)))
+              (when unique
+                `(:remote ,(concat "/" (->string-down class) "/unique")))))))
 
 (defgeneric form-input (class slot &optional ins))
 (defmethod form-input (class (slot slot-options) &optional ins)
