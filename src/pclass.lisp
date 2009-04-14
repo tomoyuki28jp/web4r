@@ -59,6 +59,17 @@
                        (aand *with-slots* (not (member symbol it))))
             collect s)))
 
+(defun get-slots-if (fn class)
+  (remove-if-not fn (get-excluded-slots class)))
+
+(defun file-slots (class)
+  (get-slots-if #'(lambda (s) (eq (slot-input s) :file)) class))
+
+(defun date-slots (class)
+  (get-slots-if #'(lambda (s) (eq (slot-type s)  :date)) class))
+
+(defun unique-slots (class) (get-slots-if #'slot-unique class))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun parse-slot (class slot)
     (setf slot (->list slot))
@@ -107,31 +118,25 @@
             ((eq input :checkbox) (posted-checkbox id))
             (t value)))))
 
-(defun file-slots (class)
-  (remove-if-not #'(lambda (s) (eq (slot-input s) :file))
-                 (get-excluded-slots class)))
-
-(defun date-slots (class)
-  (remove-if-not #'(lambda (s) (eq (slot-type s)  :date))
-                 (get-excluded-slots class)))
-
 ; --- Forms for slots -------------------------------------------
 
-(defgeneric form-valid-attr (slot))
-(defmethod form-valid-attr ((slot slot-options))
+(defgeneric form-valid-attr (class slot))
+(defmethod form-valid-attr (class (slot slot-options))
   "attributes of form input for jquery validation
 http://docs.jquery.com/Plugins/Validation"
-  (with-slots (required type length input) slot
+  (with-slots (required type length input unique) slot
     (append (awhen (append (when required '("required"))
                            (when (eq type :email)   '("email"))
                            (when (eq type :integer) '("number")))
               `(:class ,(apply #'join " " it)))
             (awhen (and (not (eq input :file)) length)
               (append (aand (when (listp it) (car it))   `(:minlength ,it))
-                      (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it)))))))
+                      (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it))))
+            (when unique
+              `(:remote ,(concat "/" (->string-down class) "/unique"))))))
 
-(defgeneric form-input (slot &optional ins))
-(defmethod form-input ((slot slot-options) &optional ins)
+(defgeneric form-input (class slot &optional ins))
+(defmethod form-input (class (slot slot-options) &optional ins)
   (with-slots (input type label id length symbol options size) slot
     (let* ((saved (aand ins (ignore-errors (slot-value it symbol))))
            (value (or (post-parameter id) saved)))
@@ -180,7 +185,7 @@ http://docs.jquery.com/Plugins/Validation"
      [table
       (loop for s in (get-excluded-slots ,class)
             do [tr [td (form-label s) (required-mark s) (form-comment s)]]
-            do [tr [td (form-input s ,instance)]])
+            do [tr [td (form-input ,class s ,instance)]])
        [tr [td (submit :value ,submit)]]]))
 
 (defun select-date (name &key y m d (y-start 1900) (y-end 2030))
@@ -255,7 +260,22 @@ http://docs.jquery.com/Plugins/Validation"
            '((created-at :accessor created-at :initform (get-universal-time))
              (updated-at :accessor updated-at :initform (get-universal-time)
               :index t)))
-         ,@class-opts))))
+         ,@class-opts)
+       (defpage-unique? ,name))))
+
+(defmacro defpage-unique? (class)
+  (with-gensyms (u r p)
+    `(when-let (,u (unique-slots ',class))
+       (defpage ,(concat class "/unique") ()
+         (let ((,r "false")
+               (,p (get-parameters*)))
+           (awhen (and (= 1 (length ,p))
+                       (find-if #'(lambda (x)
+                                    (equal (slot-id x) (caar ,p)))
+                                ,u))
+             (when (unique-p ',class (slot-symbol it) (cdar ,p))
+               (setf ,r "true")))
+           (p ,r))))))
 
 (defun oid (instance)
   (handler-case (ele::oid instance)

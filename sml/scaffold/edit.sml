@@ -3,17 +3,18 @@
   (append  head  [script :type "text/javascript" :src "/js/jquery.validate.js"])
   (append  head  [script :type "text/javascript" :src "/js/jquery.date.js"])
   (append  head  [script :type "text/javascript" (safe 
-"$(document).ready(function() {
-    $(\"#" cname "_form\").validate({
+"jQuery.validator.messages.remote = 'This value is already in use.';
+$(document).ready(function() {
+    $('#" cname "_form').validate({
         errorPlacement: function(error, element) {
             error.appendTo( element.parent() )
-        }
+        },
     })
 "
 (when (date-slots class)
-  "    $(this).changeSelectDate();")
-"
-})")])
+  "    $(this).changeSelectDate();
+")
+"})")])
   (replace title [title (if oid "Editing " "New ") cname])
   (replace body  [body
                   (if (and oid (not ins))

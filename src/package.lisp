@@ -69,6 +69,7 @@
                    :get-msgs
                    :msgs
                    ; --- valid ---
+                   :unique-p
                    :validation-errors
                    :with-validations
                    ; --- pager ---
@@ -96,6 +97,10 @@
                    :get-slots
                    :get-slot
                    :get-excluded-slots
+                   :get-slots-if
+                   :file-slots
+                   :date-slots
+                   :unique-slots
                    :slot-display-value
                    :slot-save-value
                    :form-valid-attr

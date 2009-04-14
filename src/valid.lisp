@@ -35,6 +35,12 @@
     (when (or (null x) (equal x ""))
       t)))
 
+(defun unique-p (class slot value &optional ins)
+  (let* ((i (get-instances-by-value class slot value))
+         (l (length i)))
+    (or (= l 0)
+        (and (= l 1) (eq (car i) ins)))))
+
 ; --- Validators ------------------------------------------------
 
 (defmacro define-validator (name args &rest body)
@@ -77,9 +83,8 @@
 
 (define-validator unique (label value args)
   (destructuring-bind (class slot &optional ins) args
-    (awhen (get-instances-by-value class slot value)
-      (when (or (> (length it) 1) (not (eq (car it) ins)))
-        (error-msg :not-a-unique label)))))
+    (unless (unique-p class slot value ins)
+      (error-msg :not-a-unique label))))
 
 ; --- Validations -----------------------------------------------
 
