@@ -182,7 +182,7 @@
 
 (flet ((int (x) (parse-integer (remove #\. x))))
   (loop for v in '((:hunchentoot . "1.0.0")
-                   (:my-util     . "0.0.1")
+                   (:my-util     . "0.0.2")
                    (:sml         . "0.1.1"))
         as ver = (asdf:component-version (asdf:find-system (car v)))
         unless (>= (int ver) (int (cdr v)))
