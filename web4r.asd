@@ -12,6 +12,7 @@
   :description "Common Lisp web application framework"
   :depends-on  (:my-util
                 :sml
+                :inflector
                 :hunchentoot
                 :bordeaux-threads
                 :elephant

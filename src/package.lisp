@@ -3,7 +3,7 @@
 (macrolet
     ((define-web4r-package ()
        `(defpackage :web4r
-          (:use :cl :my-util :sml :hunchentoot :elephant)
+          (:use :cl :my-util :sml :inflector :hunchentoot :elephant)
           (:export ; --- specials ---
                    :*web4r-dir*
                    :*public-dir*
@@ -162,6 +162,8 @@
                    :image-path
                    :thumbnail
                    :thumbnail-uri
+                   ; --- inflector ---
+                   :pluralize
                    ; --- my-util ---
                    ,@(loop for s being the external-symbol
                            in :my-util collect s)
@@ -183,7 +185,8 @@
 (flet ((int (x) (parse-integer (remove #\. x))))
   (loop for v in '((:hunchentoot . "1.0.0")
                    (:my-util     . "0.0.2")
-                   (:sml         . "0.1.1"))
+                   (:sml         . "0.1.1")
+                   (:inflector   . "0.1.0"))
         as ver = (asdf:component-version (asdf:find-system (car v)))
         unless (>= (int ver) (int (cdr v)))
         do (error "~S must be version ~S or higher" (car v) (cdr v))))
