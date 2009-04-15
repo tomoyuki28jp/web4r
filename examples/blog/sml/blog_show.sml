@@ -18,7 +18,7 @@
                                      do [p (name c) " said:"[br /]
                                            (safe (nl->br (escape (comment c))))[br /]
                                            (time-format "~y/~m/~d ~h:~i" (created-at c))]))]
-                                        ; comment form
+                        ; comment form
                         [h3 "Leave your comment"]
                         [div (form-for/cont (post-comment/cont oid)
                                :class 'comment :submit "Post")])
