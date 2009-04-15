@@ -7,9 +7,10 @@
      (defpage ,(join "/" class 'edit) (oid) (scaffold-edit ',class :oid oid))
      (defpage ,(join "/" class 'delete) (oid) (scaffold-delete ',class oid))))
 
-(defun scaffold-index (class &key (index 'updated-at) (maxlength 20))
-  (let* ((cname (->string-down class))
-         (slots (get-excluded-slots class)))
+(defun scaffold-index (class &key (index 'updated-at) (maxlength 20) plural)
+  (let* ((cname  (->string-down class))
+         (plural (or plural (pluralize cname)))
+         (slots  (get-excluded-slots class)))
     (multiple-value-bind (items pager)
         (per-page (get-instances-by-class class) :index index)
       (load-sml-path "scaffold/index.sml"))))
@@ -17,7 +18,7 @@
 (defun scaffold-show (class oid)
   (let ((cname (->string-down class))
         (slots (get-excluded-slots class))
-        (ins (get-instance-by-oid class oid)))
+        (ins   (get-instance-by-oid class oid)))
     (load-sml-path "scaffold/show.sml")))
 
 (defun scaffold-edit (class &key oid slot-values redirect-uri)

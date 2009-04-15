@@ -1,8 +1,8 @@
 (with-sml-file (sml-path "template.sml")
-  (replace title [title "Listing " cname])
+  (replace title [title "Listing " plural])
   (replace body  [body
                   (msgs)
-                  [h1 "Listing " cname]
+                  [h1 "Listing " plural]
                   (aif items
                       (progn
                         (page-summary pager)

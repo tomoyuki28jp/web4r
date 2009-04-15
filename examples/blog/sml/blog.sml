@@ -1,8 +1,8 @@
 (with-sml-file (sml-path "template.sml")
-  (replace title [title "Listing blog"])
+  (replace title [title "Listing blogs"])
   (replace body  [body
                   (msgs)
-                  [h1 "Listing blog"]
+                  [h1 "Listing blogs"]
                   (aif items
                       (progn
                         (page-summary pager)
