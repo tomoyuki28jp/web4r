@@ -4,11 +4,11 @@
                   (aif ins
                       (progn
                         (msgs)
-                                        ; blog post
+                        ; blog post
                         [div [p (time-format "~y/~m/~d" (updated-at it))]
                              [h3 (title it)]
                              [p (safe (nl->br (escape (body it))))]]
-                                        ; comment list
+                        ; comment list
                         [hr /]
                         [div [h3 "Comments"]
                              (awhen comments
