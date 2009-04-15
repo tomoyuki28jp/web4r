@@ -24,6 +24,7 @@ Library dependencies
 ====================
 my-util - http://github.com/tomoyuki28jp/my-util/tree/master
 sml - http://github.com/tomoyuki28jp/sml/tree/master
+inflector - http://github.com/tomoyuki28jp/inflector/tree/master
 hunchentoot (1.0.0 or higher) - http://www.weitz.de/hunchentoot/
 bordeaux-threads - http://common-lisp.net/project/bordeaux-threads/
 elephant - http://common-lisp.net/project/elephant/
