@@ -1,3 +1,9 @@
+Version 0.1.8
+2009-04-16
+Updated to display pluralized class name
+Updated to use the inflector package
+Added javascript regexp validation
+
 Version 0.1.7
 2009-04-14
 Implemented asynchronous uniquness validation
