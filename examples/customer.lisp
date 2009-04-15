@@ -29,7 +29,7 @@
    (image        :input :file :type :image :length (1000 500000) :required nil)))
 
 (defpage customer () (scaffold-index 'customer))
-(defpage customer/show (oid)   (scaffold-show  'customer oid))
+(defpage customer/show (oid) (scaffold-show  'customer oid))
 (defpage customer/delete (oid) (scaffold-delete 'customer oid))
 
 (defpage customer/edit (oid)
