@@ -7,7 +7,7 @@
 (defsystem :web4r
   :version "0.1.7"
   :name    "web4r"
-  :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
+  :author  "Tomoyuki Matsumoto <tomoyuki28jp@gmail.com>"
   :licence "BSD"
   :description "Common Lisp web application framework"
   :depends-on  (:my-util

@@ -6,7 +6,7 @@
 
 (defsystem :web4r-tests
   :name    "web4r-tests"
-  :author  "Tomoyuki Matsumoto <tomoyuki28jp@no-spam@yahoo.co.jp>"
+  :author  "Tomoyuki Matsumoto <tomoyuki28jp@gmail.com>"
   :licence "BSD"
   :description "tests for web4r"
   :depends-on  (:web4r :fiveam :drakma)
