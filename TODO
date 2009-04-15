@@ -6,6 +6,3 @@
 - Support more lisp implementations
 - Performance testing
 - Write documents
-
-* Ideas (low priority, might be implemented)
-- Implement pluralize and singularize functions for pclass name like Rails
