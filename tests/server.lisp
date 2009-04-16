@@ -19,7 +19,8 @@
   (is (string= (http-request (page-uri "test" "test" "foo" "bar"))
                   "path1: foo path2: bar"))
   (defpage test (:get g1 g2) (p g1 " " g2))
-  (is (string= (http-request (add-parameters (page-uri "test") "g1" "v1" "g2" "v2"))
+  (is (string= (http-request
+                (add-parameters (page-uri "test") "g1" "v1" "g2" "v2"))
                "v1 v2"))
   (defpage test (:post p1 p2) (p p1 " " p2))
   (is (string= (http-request (page-uri "test") :method :post
@@ -27,9 +28,10 @@
                "v1 v2"))
   (defpage test/test (path1 path2 :post p1 p2 :get g1 g2)
     (p (join " " path1 path2 p1 p2 g1 g2)))
-  (is (string= (http-request (add-parameters (page-uri "test" "test" "pp1" "pp2")
-                                             "g1" "gv1" "g2" "gv2")
-                             :method :post :parameters '(("p1" . "pv1") ("p2" . "pv2")))
+  (is (string= (http-request
+                (add-parameters (page-uri "test" "test" "pp1" "pp2")
+                                "g1" "gv1" "g2" "gv2")
+                :method :post :parameters '(("p1" . "pv1") ("p2" . "pv2")))
                "pp1 pp2 pv1 pv2 gv1 gv2")))
 
 (test set/get-page
