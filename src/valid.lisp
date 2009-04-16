@@ -7,7 +7,6 @@
     (apply #'format (append (list nil it) args))))
 
 (defun leap-year-p (year)
-  (check-type year integer)
   (and (plusp year)
        (zerop (mod year 4))
        (or (plusp (mod year 100))
