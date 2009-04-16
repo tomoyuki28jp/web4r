@@ -21,5 +21,5 @@
                                        [td [a :href (w/p (page-uri cname "edit" (oid x))) "Edit"]]
                                        [td [a :href (page-uri cname "delete" (oid x)) "Delete"]]))])
                           it)])
-                    [p "There are no " cname])
+                    [p "There is no " cname])
                   [div [a :href (w/p (page-uri cname "edit")) "New " cname]]]))
