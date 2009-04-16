@@ -1,11 +1,12 @@
-body             { font-size:   11pt; font-family:Verdana; }
-input, textarea  { font-size:   11pt; color: #000000; font-family:Courier; }
-h1               { font-size:   28px; color: #150517; }
-ul.msgs          { font-weight: bold; color: #0000FF; }
-ul.errors        { font-weight: bold; color: #F60; }
-#required_mark   { font-weight: bold; color: #F60; }
-#page_links span { font-weight: bold; }
-div              { margin:      8px; }
+body                { font-size:   11pt; font-family:Verdana; }
+input, textarea     { font-size:   11pt; color: #000000; font-family:Courier; }
+h1                  { font-size:   28px; color: #150517; }
+ul.msgs             { font-weight: bold; color: #0000FF; }
+ul.errors           { font-weight: bold; color: #F60; }
+span.required_mark  { font-weight: bold; color: #F60; }
+span.arrow          { font-size:    1px; }
+div.page_links span { font-weight: bold; }
+div                 { margin:       8px; }
 
 label.error  { 
     border: solid #BBB 1px;

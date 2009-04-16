@@ -1,1 +1,1 @@
-[span :id "required_mark" "*"]
+[span :class "required_mark" "*"]
