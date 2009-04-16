@@ -21,11 +21,6 @@
   (is-false (web4r::valid-date-p "2009" "2" "29"))
   (is       (web4r::valid-date-p "2008" "2" "29")))
 
-(test valid-email-p
-  (is       (web4r::valid-email-p "test+regexp@test.com"))
-  (is-false (web4r::valid-email-p "da.me..@test.com"))
-  (is-false (web4r::valid-email-p "invalid")))
-
 (test empty
   (is       (web4r::empty nil))
   (is       (web4r::empty ""))
@@ -44,78 +39,81 @@
   (is (equal (validation-errors *label* "1234567890" '(:length (3 5)))
              (list (web4r::error-msg :too-long *label* 5)))))
 
-(test type-date
-  (is-false  (validation-errors *label* '("1983" "9" "28")  '(:type :date)))
-  (is (equal (validation-errors *label* '("1983" "13" "28") '(:type :date))
-             (list (web4r::error-msg :invalid *label*))))
-  (is (equal (validation-errors *label* '("1983" "9" "32")  '(:type :date))
-             (list (web4r::error-msg :invalid *label*))))
-  (is (equal (validation-errors *label* '("2009" "2" "29")  '(:type :date))
-             (list (web4r::error-msg :invalid *label*))))
-  (is-false  (validation-errors *label* '("2008" "2" "29")  '(:type :date))))
-
-(test type-alpha
-  (is-false  (validation-errors *label* "ABCDEFGhijkl" '(:type :alpha)))
-  (is (equal (validation-errors *label* "aiueo1" '(:type :alpha))
+(test format-alpha
+  (is-false  (validation-errors *label* "ABCDEFGhijkl" '(:format :alpha)))
+  (is (equal (validation-errors *label* "aiueo1" '(:format :alpha))
              (list (web4r::error-msg :not-alpha *label*))))
-  (is (equal (validation-errors *label* "1aiueo" '(:type :alpha))
+  (is (equal (validation-errors *label* "1aiueo" '(:format :alpha))
              (list (web4r::error-msg :not-alpha *label*))))
-  (is (equal (validation-errors *label* "ai1ueo" '(:type :alpha))
+  (is (equal (validation-errors *label* "ai1ueo" '(:format :alpha))
              (list (web4r::error-msg :not-alpha *label*)))))
 
-(test type-alnum
-  (is-false (validation-errors *label* "aiueo1" '(:type :alnum)))
-  (is (equal (validation-errors *label* "ai@ueo" '(:type :alnum))
+(test format-alnum
+  (is-false (validation-errors *label* "aiueo1" '(:format :alnum)))
+  (is (equal (validation-errors *label* "ai@ueo" '(:format :alnum))
              (list (web4r::error-msg :not-alnum *label*))))
-  (is (equal (validation-errors *label* "!aiueo" '(:type :alnum))
+  (is (equal (validation-errors *label* "!aiueo" '(:format :alnum))
              (list (web4r::error-msg :not-alnum *label*))))
-  (is (equal (validation-errors *label* "aiueo-" '(:type :alnum))
+  (is (equal (validation-errors *label* "aiueo-" '(:format :alnum))
              (list (web4r::error-msg :not-alnum *label*)))))
 
-(test type-integer
-  (is-false  (validation-errors *label* "1234567890" '(:type :integer)))
-  (is (equal (validation-errors *label* "1234a56789" '(:type :integer))
+(test format-integer
+  (is-false  (validation-errors *label* "1234567890" '(:format :integer)))
+  (is (equal (validation-errors *label* "1234a56789" '(:format :integer))
              (list (web4r::error-msg :not-a-number *label*))))
-  (is (equal (validation-errors *label* "a123456789" '(:type :integer))
+  (is (equal (validation-errors *label* "a123456789" '(:format :integer))
              (list (web4r::error-msg :not-a-number *label*))))
-  (is (equal (validation-errors *label* "123456789a" '(:type :integer))
+  (is (equal (validation-errors *label* "123456789a" '(:format :integer))
              (list (web4r::error-msg :not-a-number *label*)))))
 
-(test type-email
-  (is-false  (validation-errors *label* "test@test.com" '(:type :email)))
-  (is (equal (validation-errors *label* "invalid"       '(:type :email))
+(test format-email
+  (is-false  (validation-errors *label* "test@test.com"        '(:format :email)))
+  (is-false  (validation-errors *label* "test+regexp@test.com" '(:format :email)))
+  (is (equal (validation-errors *label* "invalid"              '(:format :email))
+             (list (web4r::error-msg :invalid *label*))))
+  (is (equal (validation-errors *label* "da.me..@test.com"     '(:format :email))
              (list (web4r::error-msg :invalid *label*)))))
 
-(test type-regex
-  (is-false (validation-errors *label* "408-644-1234"
-                               '(:type (:regex "^\\d{3}-\\d{3}-\\d{4}$"))))
-  (is (equal (validation-errors *label* "408-644-12340"
-                                '(:type (:regex "^\\d{3}-\\d{3}-\\d{4}$")))
+(test format-date
+  (is-false  (validation-errors *label* '("1983" "9" "28")  '(:format :date)))
+  (is (equal (validation-errors *label* '("1983" "13" "28") '(:format :date))
              (list (web4r::error-msg :invalid *label*))))
-  (is (equal (validation-errors *label* "408-6440-1234"
-                                '(:type (:regex "^\\d{3}-\\d{3}-\\d{4}$")))
+  (is (equal (validation-errors *label* '("1983" "9" "32")  '(:format :date))
              (list (web4r::error-msg :invalid *label*))))
-  (is (equal (validation-errors *label* "4080-644-1234"
-                                '(:type (:regex "^\\d{3}-\\d{3}-\\d{4}$")))
-             (list (web4r::error-msg :invalid *label*)))))
+  (is (equal (validation-errors *label* '("2009" "2" "29")  '(:format :date))
+             (list (web4r::error-msg :invalid *label*))))
+  (is-false  (validation-errors *label* '("2008" "2" "29")  '(:format :date))))
 
-(test type-image
-  (is-false  (validation-errors *label* (test-file "test.gif")  '(:type :image)))
-  (is-false  (validation-errors *label* (test-file "test.jpeg") '(:type :image)))
-  (is-false  (validation-errors *label* (test-file "test.png")  '(:type :image)))
-  (is (equal (validation-errors *label* (test-file "test.ico")  '(:type :image))
+(test format-image
+  (is-false  (validation-errors *label* (test-file "test.gif")  '(:format :image)))
+  (is-false  (validation-errors *label* (test-file "test.jpeg") '(:format :image)))
+  (is-false  (validation-errors *label* (test-file "test.png")  '(:format :image)))
+  (is (equal (validation-errors *label* (test-file "test.ico")  '(:format :image))
              (list (web4r::error-msg :not-a-image *label*))))
-  (is (equal (validation-errors *label* (test-file "test")      '(:type :image))
+  (is (equal (validation-errors *label* (test-file "test")      '(:format :image))
              (list (web4r::error-msg :not-a-image *label*))))
-  (is (equal (validation-errors *label* (test-file "test.ico")  '(:type :image))
+  (is (equal (validation-errors *label* (test-file "test.ico")  '(:format :image))
              (list (web4r::error-msg :not-a-image *label*))))
-  (is (equal (validation-errors *label* (test-file "test.zip")  '(:type :image))
+  (is (equal (validation-errors *label* (test-file "test.zip")  '(:format :image))
              (list (web4r::error-msg :not-a-image *label*)))))
 
-(test type-member
-  (is (equal (validation-errors *label* "n" '(:type (:member ("a" "i" "u"))))
+(test format-regex
+  (is-false (validation-errors *label* "408-644-1234"
+                               '(:format "^\\d{3}-\\d{3}-\\d{4}$")))
+  (is (equal (validation-errors *label* "408-644-12340"
+                                '(:format "^\\d{3}-\\d{3}-\\d{4}$"))
+             (list (web4r::error-msg :invalid *label*))))
+  (is (equal (validation-errors *label* "408-6440-1234"
+                                '(:format "^\\d{3}-\\d{3}-\\d{4}$"))
+             (list (web4r::error-msg :invalid *label*))))
+  (is (equal (validation-errors *label* "4080-644-1234"
+                                '(:format "^\\d{3}-\\d{3}-\\d{4}$"))
+             (list (web4r::error-msg :invalid *label*)))))
+
+(test member
+  (is (equal (validation-errors *label* "n" '(:member ("a" "i" "u")))
               (list (web4r::error-msg :invalid *label*))))
-  (is-false  (validation-errors *label* "i" '(:type (:member ("a" "i" "u"))))))
+  (is-false  (validation-errors *label* "i" '(:member ("a" "i" "u")))))
 
 (test required
   (is-false  (validation-errors *label* " " '(:required t)))

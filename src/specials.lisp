@@ -85,6 +85,14 @@
 
 (defvar *validators* (make-hash-table))
 
+(defvar *valid-email-format*
+  (remove #\Newline
+"^(?:(?:(?:(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+)
+(?:\.(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+))*)|
+(?:\"(?:\\[^\r\n]|[^\\\"])*\")))\@
+(?:(?:(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+)
+(?:\.(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+))*))$"))
+
 (defvar *page-param* "page"
   "Name of a page get parameter")
 

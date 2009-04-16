@@ -5,8 +5,8 @@
   (append  head  [script :type "text/javascript" (safe 
 "$(document).ready(function() {
     $.validator.messages.remote = 'The save value is already in use.';
-    $.validator.addMethod('regexp', function(value, element) {
-       return value.match($(element).attr('regexp')) !== null
+    $.validator.addMethod('format', function(value, element) {
+       return value.match($(element).attr('format')) !== null
     }, 'Please fix this field.');
     var validator = $('#" cname "_form').validate({
         errorPlacement: function(error, element) {

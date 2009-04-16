@@ -1,4 +1,4 @@
-[label :for (case type*
+[label :for (case format
               (:date   (concat id "_y"))
               (:member (case input
                          ((:radio :checkbox)

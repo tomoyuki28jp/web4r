@@ -3,7 +3,7 @@
 
 (test user-class
   (defpclass test-user1 (user)
-      ((email :type :email :unique t)))
+      ((email :format :email :unique t)))
   (setf *user*
         (make-instance 'user-class
           :class       'test-user1
@@ -31,7 +31,7 @@
 (test login
   (web4r::drop-class-instances 'test-user2)
   (defpclass test-user2 (user)
-      ((email :type :email :unique t)))
+      ((email :format :email :unique t)))
   (setf *user* (make-instance 'user-class :class 'test-user2))
   (let ((i (make-instance 'test-user2 :id "user1" :pass :pass1)))
     (defpage login-test1 ()

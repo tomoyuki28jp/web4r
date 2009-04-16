@@ -15,7 +15,7 @@
 (open-store '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
 
 (defpclass blog-user (user)
-  ((email :type :email :unique t)
+  ((email :format :email :unique t)
    (blog-title :length 256)))
 
 (defpclass blog-post ()

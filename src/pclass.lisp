@@ -31,7 +31,7 @@
       (input    :accessor slot-input    :initarg :input    :initform nil
                 :documentation "form input type - :text, :textarea, :radio, 
 :checkbox, :select, :password or :file")
-      (type     :accessor slot-type     :initarg :type     :initform nil
+      (format   :accessor slot-format   :initarg :format   :initform nil
                 :documentation "validation type - :integer, :date, :alpha, 
 :alnum, :regex, :email, :image or :member"))
     (:documentation "Extended slot options")))
@@ -63,10 +63,10 @@
   (remove-if-not fn (get-excluded-slots class)))
 
 (defun file-slots (class)
-  (get-slots-if #'(lambda (s) (eq (slot-input s) :file)) class))
+  (get-slots-if #'(lambda (s) (eq (slot-input s)  :file)) class))
 
 (defun date-slots (class)
-  (get-slots-if #'(lambda (s) (eq (slot-type s)  :date)) class))
+  (get-slots-if #'(lambda (s) (eq (slot-format s) :date)) class))
 
 (defun unique-slots (class) (get-slots-if #'slot-unique class))
 
@@ -83,7 +83,8 @@
                :input    (or (opt :input)
                              (aand (opt :length) (< 256 (if (atom it) it (car it)))
                                    :textarea))
-               :type     (or (opt :type) (awhen (opt :options) (list :member it)))
+               :format   (or (opt :format)
+                             (aand (opt :type) (eq it 'integer) :integer))
                :hide     (or (opt :hide)
                              (aand (opt :initform) (equal it '(ele:make-pset)) t))
                :required (aif (member :required slot) (nth 1 it) t)))
@@ -91,25 +92,33 @@
              (op '(:unique :length :size :rows :cols :comment :options)))
          (apply #'append (remove nil (mapcar fn op))))))))
 
+(defun split-date (date)
+  "split 8 digits date like 19830928 into list like '(\"1983\" \"09\" \"28\")"
+  (aand (->string date)
+        (when (= (length it) 8)
+          (list (subseq it 0 4) (subseq it 4 6) (subseq it 6 8)))))
+
 (defgeneric slot-display-value (instance slot &key nl->br))
 (defmethod slot-display-value (instance (slot slot-options) &key (nl->br nil))
   (aif (ignore-errors (slot-value instance (slot-symbol slot)))
     (let ((input (slot-input slot)))
       (cond ((and nl->br (eq input :textarea)) (safe (nl->br (escape it))))
-            ((eq (slot-type slot) :image)
+            ((eq (slot-format slot) :image)
              (load-sml-path "form/display/image.sml"))
+            ((eq (slot-format slot) :date)
+             (aand (split-date it) (apply #'join "-" it)))
             ((eq input :checkbox) (apply #'join (append '(", ") it)))
             (t it)))
     ""))
 
 (defgeneric slot-save-value (slot &optional value))
 (defmethod slot-save-value ((slot slot-options) &optional value)
-  (with-slots (type id input options) slot
+  (with-slots (format id input options) slot
     (let ((value (or value (post-parameter id))))
-      (cond ((eq type :date)
-             (multiple-value-bind (y m d) (posted-date id)
-               (unless (and (null y) (null m) (null d))
-                 (join "-" y m d))))
+      (cond ((eq format :date)
+             (destructuring-bind (&optional y m d) (posted-date id)
+               (when y (->int (format nil "~4,'0d~2,'0d~2,'0d"
+                                      (->int y) (->int m) (->int d))))))
             ((eq input :file)
              (awhen (cont-session slot)
                (rem-cont-session slot)
@@ -120,27 +129,27 @@
 
 ; --- Forms for slots -------------------------------------------
 
-(defgeneric form-valid-attr (class slot))
-(defmethod form-valid-attr (class (slot slot-options))
+(defgeneric form-valid-attr (class slot &optional ins))
+(defmethod form-valid-attr (class (slot slot-options) &optional ins)
   "attributes of form input for jquery validation
 http://docs.jquery.com/Plugins/Validation"
-  (with-slots (required type length input unique) slot
-    (let ((regexp? (and (listp type) (eq (car type) :regex))))
-      (append (awhen (append (when required '("required"))
-                             (when (eq type :email)   '("email"))
-                             (when (eq type :integer) '("number"))
-                             (when regexp?            '("regexp")))
-                `(:class ,(apply #'join " " it)))
-              (awhen (and (not (eq input :file)) length)
-                (append (aand (when (listp it) (car it))   `(:minlength ,it))
-                        (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it))))
-              (when regexp? `(:regexp ,(cadr type)))
-              (when unique
-                `(:remote ,(concat "/" (->string-down class) "/unique")))))))
+  (with-slots (required format length input unique) slot
+    (append (awhen (append (when required '("required"))
+                           (when (eq format :email)   '("email"))
+                           (when (eq format :integer) '("number"))
+                           (when (stringp format)     '("format")))
+              `(:class ,(apply #'join " " it)))
+            (awhen (and (not (eq input :file)) length)
+              (append (aand (when (listp it) (car it))   `(:minlength ,it))
+                      (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it))))
+            (when (stringp format) `(:format ,format))
+            (when unique
+              `(:remote ,(concat "/" (->string-down class) "/unique"
+                                 (awhen ins (concat "/" (oid it)))))))))
 
 (defgeneric form-input (class slot &optional ins))
 (defmethod form-input (class (slot slot-options) &optional ins)
-  (with-slots (input type label id length symbol options size) slot
+  (with-slots (input format label id length symbol options size) slot
     (let* ((saved (aand ins (ignore-errors (slot-value it symbol))))
            (value (or (post-parameter id) saved)))
       (cond ((eq input :select)
@@ -150,11 +159,10 @@ http://docs.jquery.com/Plugins/Validation"
                    do (if (eq input :checkbox)
                           (load-sml-path "form/input/checkbox.sml")
                           (load-sml-path "form/input/radio.sml"))))
-           ((eq type :date)
-            (let ((date (when (stringp value) (split "-" value))))
-              (multiple-value-bind (y m d) (posted-date id)
-                (select-date id :y (or y (nth 0 date)) :m (or m (nth 1 date))
-                                 :d (or d (nth 2 date))))))
+           ((eq format :date)
+            (destructuring-bind (&optional y* m* d*) (split-date value)
+              (destructuring-bind (&optional y m d) (posted-date id)
+                (select-date id :y (or y y*) :m (or m m*) :d (or d d*)))))
            ((eq input :textarea)
             (with-slots (rows cols) slot
               (load-sml-path "form/input/textarea.sml")))
@@ -168,9 +176,8 @@ http://docs.jquery.com/Plugins/Validation"
 
 (defgeneric form-label (slot))
 (defmethod form-label ((slot slot-options))
-  (with-slots (type label id input) slot
-    (let ((type* (if (listp type) (car type) type)))
-      (load-sml-path "form/input/label.sml"))))
+  (with-slots (format label id input) slot
+    (load-sml-path "form/input/label.sml")))
 
 (defgeneric required-mark (slot))
 (defmethod required-mark ((slot slot-options))
@@ -206,7 +213,7 @@ http://docs.jquery.com/Plugins/Validation"
 
 (defun posted-date (id)
   (flet ((date (x) (post-parameter (concat id "_" x))))
-    (values (date "y") (date "m") (date "d"))))
+    (list (date "y") (date "m") (date "d"))))
 
 (defun posted-checkbox (id)
   (mapcar #'cdr
@@ -216,20 +223,20 @@ http://docs.jquery.com/Plugins/Validation"
 ; --- Validations -----------------------------------------------
 
 (defun slot-validation-errors (class slot &optional ins)
-  (with-slots (symbol id type required length unique options input) slot
+  (with-slots (symbol id format required length unique options input) slot
     (validation-errors
      (slot-label slot)
-     (cond ((eq type :date)
-            (multiple-value-bind (y m d) (posted-date id)
-              (list y m d)))
+     (cond ((eq format :date) (posted-date id))
            ((eq input :checkbox) (posted-checkbox id))
            ((eq input :file)
             (or (image-path (cont-session slot) "tmp")
                 (awhen (aand ins (ignore-errors (slot-value it symbol)))
                   (image-path it "upload"))))
            (t (post-parameter id)))
-     (append (list :required required :length length :type type)
-             (when unique `(:unique ,(list class symbol ins)))))))
+     (append (list :required required :length length)
+             (awhen format  `(:format ,it))
+             (awhen options `(:member ,it))
+             (when  unique  `(:unique ,(list class symbol ins)))))))
 
 (defun class-validation-errors (class &optional ins)
   (edit-upload-file class ins)
@@ -254,9 +261,12 @@ http://docs.jquery.com/Plugins/Validation"
                     :accessor ,(aif (member :accessor s) (nth 1 it) (car s))
                     :initarg  ,(aif (member :initarg s)
                                     (nth 1 it) (->keyword (car s)))
-                    ,@(awhen (member :allocation s) `(:allocation ,(nth 1 it)))
+                    ,@(awhen (member :allocation s)    `(:allocation ,(nth 1 it)))
                     ,@(awhen (member :documentation s) `(:documentation ,(nth 1 it)))
-                    ,@(awhen (member :initform s) `(:initform ,(nth 1 it)))
+                    ,@(awhen (member :initform s)      `(:initform ,(nth 1 it)))
+                    ,@(acond ((member :type s) `(:type ,(nth 1 it)))
+                             ((aand (member :format s) (eq (nth 1 it) :date)
+                                    '(:type integer))))
                     ,@(when  (or (aand (member :index  s) (nth 1 it))
                                  (aand (member :unique s) (nth 1 it)))
                              '(:index t))))
@@ -269,14 +279,15 @@ http://docs.jquery.com/Plugins/Validation"
 (defmacro defpage-unique? (class)
   (with-gensyms (u r p)
     `(when-let (,u (unique-slots ',class))
-       (defpage ,(concat class "/unique") ()
+       (defpage ,(concat class "/unique") (oid)
          (let ((,r "false")
                (,p (get-parameters*)))
            (awhen (and (= 1 (length ,p))
                        (find-if #'(lambda (x)
                                     (equal (slot-id x) (caar ,p)))
                                 ,u))
-             (when (unique-p ',class (slot-symbol it) (cdar ,p))
+             (when (unique-p ',class (slot-symbol it) (cdar ,p)
+                             (get-instance-by-oid ',class oid))
                (setf ,r "true")))
            (p ,r))))))
 

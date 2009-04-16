@@ -15,6 +15,7 @@
                    :*image-public-dirs*
                    :*debug-log-file*
                    :*debug-mode*
+                   :*valid-email-format*
                    :*page-param*
                    :*with-slots*
                    :*without-slots*
@@ -93,7 +94,7 @@
                    :slot-options
                    :slot-comment
                    :slot-input
-                   :slot-type
+                   :slot-format
                    :get-slots
                    :get-slot
                    :get-excluded-slots

@@ -21,14 +21,6 @@
     (when (and y m d)
       (aand (days-of y m) (<= d it) t))))
 
-(defun valid-email-p (email)
-  (scan-to-strings #.(regex-replace-all #\Newline
-"^(?:(?:(?:(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+)
-(?:\.(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+))*)|
-(?:\"(?:\\[^\r\n]|[^\\\"])*\")))\@
-(?:(?:(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+)
-(?:\.(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+))*))$" "") email))
-
 (defun empty (x)
   (let ((x (if (listp x) (remove nil x) x)))
     (when (or (null x) (equal x ""))
@@ -59,22 +51,25 @@
         (cond ((and max (> len max)) (error-msg :too-long  label max))
               ((and min (< len min)) (error-msg :too-short label min)))))))
 
-(define-validator type (label value args)
+(define-validator format (label value args)
   (unless (empty value)
     (macrolet ((is (fn error) `(unless ,fn (error-msg ,error label))))
-      (let ((type (if (listp args) (car args) args)))
-        (case type
-          (:date    (is (apply #'valid-date-p value)  :invalid))
-          (:alpha   (is (scan "^[a-zA-Z]+$" value)    :not-alpha))
-          (:alnum   (is (scan "^[a-zA-Z0-9]+$" value) :not-alnum))
-          (:integer (is (scan "^[0-9]+$" value)       :not-a-number))
-          (:email   (is (valid-email-p value)         :invalid))
-          (:regex   (is (scan (nth 1 args) value)     :invalid))
-          (:image   (is (image-file-p value)          :not-a-image))
-          (:member  (loop for v in (remove nil (->list value))
-                          unless (member v (cadr args) :test #'equal)
-                          return (error-msg :invalid label)))
-          (otherwise (awhen type (error "invalid type: ~A" it))))))))
+      (case args
+        (:alpha   (is (scan "^[a-zA-Z]+$"        value) :not-alpha))
+        (:alnum   (is (scan "^[a-zA-Z0-9]+$"     value) :not-alnum))
+        (:integer (is (scan "^[0-9]+$"           value) :not-a-number))
+        (:email   (is (scan *valid-email-format* value) :invalid))
+        (:date    (is (apply #'valid-date-p value)      :invalid))
+        (:image   (is (image-file-p value)              :not-a-image))
+        (otherwise (cond ((stringp args) (is (scan args value) :invalid))
+                         ((functionp args) (funcall args value))
+                         (t (error "invalid format: ~A" args))))))))
+
+(define-validator member (label value args)
+  (unless (empty value)
+    (loop for v in (remove nil (->list value))
+          unless (member v args :test #'equal)
+          return (error-msg :invalid label))))
 
 (define-validator required (label value args)
   (when (and args (empty value))
