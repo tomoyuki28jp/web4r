@@ -1,6 +1,6 @@
 Version 0.1.9
 2009-04-17
-Renamed slot-type to slot-format and enabled to set the real slot type
+Renamed slot-type to slot-format and made it possible to set the real slot type
 Bug fix in the asynchronous uniquness validation
 
 Version 0.1.8
