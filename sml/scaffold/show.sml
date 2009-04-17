@@ -2,7 +2,7 @@
   (replace title [title "Show " cname])
   (replace body  [body (aif ins
                            (progn
-                             [table
+                             [table :id "table_show"
                               (loop for s in slots do
                                     [tr [th (slot-label s)]
                                         [td (slot-display-value it s :nl->br t)]])])

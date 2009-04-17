@@ -7,7 +7,7 @@
                       (progn
                         (page-summary pager)
                         (page-links pager)
-                        [table
+                        [table :id "table_list"
                          [tr (loop for s in slots do [th (slot-label s)]
                                    finally (dotimes (x 3) [th (safe "&nbsp;")]))]
                          (mapcar
