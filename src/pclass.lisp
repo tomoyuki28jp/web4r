@@ -280,9 +280,8 @@ http://docs.jquery.com/Plugins/Validation"
                     ,@(when  (or (aand (member :index  s) (nth 1 it))
                                  (aand (member :unique s) (nth 1 it)))
                              '(:index t))))
-           '((created-at :accessor created-at :initform (get-universal-time))
-             (updated-at :accessor updated-at :initform (get-universal-time)
-              :index t)))
+           '((created-at :accessor created-at :initform (get-universal-time) :index t)
+             (updated-at :accessor updated-at :initform (get-universal-time) :index t)))
          ,@class-opts)
        (defpage-unique? ,name))))
 
