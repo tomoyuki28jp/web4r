@@ -99,6 +99,8 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *slots* (make-hash-table)))
 
+(defvar *unique-slots* (make-hash-table :test 'equal))
+
 (defvar *with-slots* nil)
 
 (defvar *without-slots* nil)
