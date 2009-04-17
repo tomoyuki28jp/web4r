@@ -95,6 +95,7 @@
                    :slot-comment
                    :slot-input
                    :slot-format
+                   :slot-type
                    :get-slots
                    :get-slot
                    :get-excluded-slots

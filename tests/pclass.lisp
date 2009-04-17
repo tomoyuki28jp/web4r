@@ -241,6 +241,20 @@
   (is (eq nil      (web4r::slot-format (get-slot 'testdb1 'note))))
   (is (eq :image   (web4r::slot-format (get-slot 'testdb1 'image)))))
 
+(test slot-type
+  (is (eq 'string  (web4r::slot-type (get-slot 'testdb1 'name))))
+  (is (eq 'string  (web4r::slot-type (get-slot 'testdb1 'password))))
+  (is (eq 'string  (web4r::slot-type (get-slot 'testdb1 'email))))
+  (is (eq 'list    (web4r::slot-type (get-slot 'testdb1 'sex))))
+  (is (eq 'list    (web4r::slot-type (get-slot 'testdb1 'marriage))))
+  (is (eq 'list    (web4r::slot-type (get-slot 'testdb1 'hobbies))))
+  (is (eq 'integer (web4r::slot-type (get-slot 'testdb1 'birth-date))))
+  (is (eq 'string  (web4r::slot-type (get-slot 'testdb1 'nickname))))
+  (is (eq 'string  (web4r::slot-type (get-slot 'testdb1 'phone-number))))
+  (is (eq 'integer (web4r::slot-type (get-slot 'testdb1 'zip-code))))
+  (is (eq 'string (web4r::slot-type (get-slot 'testdb1 'note))))
+  (is (eq 'string (web4r::slot-type (get-slot 'testdb1 'image)))))
+
 (defun safe= (html safe)
   (equal html (rem-newline (slot-value safe 'sml::obj))))
 

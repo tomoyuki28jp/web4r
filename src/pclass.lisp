@@ -33,7 +33,9 @@
 :checkbox, :select, :password or :file")
       (format   :accessor slot-format   :initarg :format   :initform nil
                 :documentation "validation type - :alpha, :alnum, :integer, :email
-:date, :image ,regexp in string or a function"))
+:date, :image ,regexp in string or a function")
+      (type     :accessor slot-type     :initarg :type    :initform nil :type symbol
+                :documentation "slot definition type"))
     (:documentation "Extended slot options")))
 
 (defun set-slots (name slots &optional parent)
@@ -85,12 +87,22 @@
                                    :textarea))
                :format   (or (opt :format)
                              (aand (opt :type) (eq it 'integer) :integer))
+               :type     (slot-type* slot)
                :hide     (or (opt :hide)
                              (aand (opt :initform) (equal it '(ele:make-pset)) t))
                :required (aif (member :required slot) (nth 1 it) t)))
        (let ((fn (lambda (x) (awhen (opt x) (list x it))))
              (op '(:unique :length :size :rows :cols :comment :options)))
          (apply #'append (remove nil (mapcar fn op))))))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun slot-type* (slot-def)
+    (acond ((member :type slot-def) (nth 1 it))
+           ((aand (member :format slot-def)
+                  (member (nth 1 it) '(:date :integer integer)))
+            'integer)
+           ((member :options slot-def) 'list)
+           (t 'string))))
 
 (defun split-date (date)
   "split 8 digits date like 19830928 into list like '(\"1983\" \"09\" \"28\")"
@@ -258,15 +270,13 @@ http://docs.jquery.com/Plugins/Validation"
            (loop for slot in slot-defs
                  as s = (->list slot) collect
                  `(,(car s)
+                    :type ,(slot-type* s)
                     :accessor ,(aif (member :accessor s) (nth 1 it) (car s))
                     :initarg  ,(aif (member :initarg s)
                                     (nth 1 it) (->keyword (car s)))
                     ,@(awhen (member :allocation s)    `(:allocation ,(nth 1 it)))
                     ,@(awhen (member :documentation s) `(:documentation ,(nth 1 it)))
                     ,@(awhen (member :initform s)      `(:initform ,(nth 1 it)))
-                    ,@(acond ((member :type s) `(:type ,(nth 1 it)))
-                             ((aand (member :format s) (eq (nth 1 it) :date)
-                                    '(:type integer))))
                     ,@(when  (or (aand (member :index  s) (nth 1 it))
                                  (aand (member :unique s) (nth 1 it)))
                              '(:index t))))
