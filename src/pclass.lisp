@@ -32,8 +32,8 @@
                 :documentation "form input type - :text, :textarea, :radio, 
 :checkbox, :select, :password or :file")
       (format   :accessor slot-format   :initarg :format   :initform nil
-                :documentation "validation type - :integer, :date, :alpha, 
-:alnum, :regex, :email, :image or :member"))
+                :documentation "validation type - :alpha, :alnum, :integer, :email
+:date, :image ,regexp in string or a function"))
     (:documentation "Extended slot options")))
 
 (defun set-slots (name slots &optional parent)
