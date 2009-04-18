@@ -19,8 +19,9 @@ label.error  {
 
 input, textarea     { font-size:   12pt; color: #000000; }
 h1                  { font-size:   30px; color: #150517; }
-ul.msgs             { font-weight: bold; color: #0000FF; }
-ul.errors           { font-weight: bold; color: #F60; }
+ul                  { font-weight: bold; }
+ul.msgs             { color: #0000FF; }
+ul.errors           { color: #F60; }
 span.required_mark  { font-weight: bold; color: #F60; }
 span.arrow          { font-size:    1px; }
 div.page_links span { font-weight: bold; }
