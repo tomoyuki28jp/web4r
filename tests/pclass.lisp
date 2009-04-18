@@ -340,7 +340,7 @@ world")
                (slot-save-value (get-slot 'testdb1 'nickname))))
     (is (equal "408-644-6198"
                (slot-save-value (get-slot 'testdb1 'phone-number))))
-    (is (equal "95129"
+    (is (equal 95129
                (slot-save-value (get-slot 'testdb1 'zip-code))))
     (is (equal "hello
 world"         (slot-save-value (get-slot 'testdb1 'note))))))
@@ -551,7 +551,7 @@ world"))
                  (slot-display-value i (get-slot 'testdb1 'nickname))))
       (is (equal "408-644-6198"
                  (slot-display-value i (get-slot 'testdb1 'phone-number))))
-      (is (equal "95129"
+      (is (equal 95129
                  (slot-display-value i (get-slot 'testdb1 'zip-code))))
       (is (equal (format nil "hello~%world")
                  (slot-display-value i (get-slot 'testdb1 'note))))
@@ -606,7 +606,7 @@ World2"))
                  (slot-display-value i (get-slot 'testdb1 'nickname))))
       (is (equal "408-644-6197"
                  (slot-display-value i (get-slot 'testdb1 'phone-number))))
-      (is (equal "95128"
+      (is (equal 95128
                  (slot-display-value i (get-slot 'testdb1 'zip-code))))
       (is (equal (format nil "Hello~%World2")
                  (slot-display-value i (get-slot 'testdb1 'note))))
