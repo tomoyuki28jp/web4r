@@ -87,15 +87,10 @@
   (defun parse-slot (class slot)
     (setf slot (->list slot))
     (flet ((opt (x) (awhen (member x slot) (nth 1 it))))
-      (let* ((id  (regex-replace-all "-" (->string-down (car slot)) "_"))
-             (id* (concat (->string-down class) "_" id)))
-        (when (opt :unique)
-          (setf (gethash id* *unique-slots*) (car slot)))
-        (when (or (opt :unique) (opt :index))
-          (setf (gethash id* *slot-indices*) (car slot)))
+      (let* ((id  (regex-replace-all "-" (->string-down (car slot)) "_")))
         (append
          (list :symbol   (car slot)
-               :id       id*
+               :id       (concat (->string-down class) "_" id)
                :label    (or (opt :label)
                              (string-capitalize (regex-replace-all "_" id " ")))
                :input    (or (opt :input)
