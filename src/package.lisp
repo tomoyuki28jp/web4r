@@ -121,7 +121,7 @@
                    :oid
                    :get-instance-by-oid
                    :drop-instance
-                   :drop-class-instances
+                   :drop-instances-by-class
                    :edit-upload-file
                    ; --- scaffold ---
                    :scaffold

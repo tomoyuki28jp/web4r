@@ -379,7 +379,7 @@ world"         (slot-save-value (get-slot 'testdb1 'note))))))
        (null (set-difference y x :test #'equal))))
 
 (test class-validation-errors
-  (web4r::drop-class-instances 'testdb1)
+  (drop-instances-by-class 'testdb1)
   (with-post-parameters
       '(("testdb1_name" . "tomoyuki matsumoto")
         ("testdb1_password" . "password")
@@ -494,7 +494,7 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
         do (is (eq i (slot-value (get-instance-by-oid 'testdb1 (oid oid)) 'name)))))
 
 (test per-page
-  (web4r::drop-class-instances 'testdb1)
+  (drop-instances-by-class 'testdb1)
   (loop for n from 1 to 26
         as i = (make-instance 'testdb1 :name n :updated-at n)
         do (setf (slot-value i 'updated-at) n))
@@ -514,7 +514,7 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
     (is-false (per-page (ele:get-instances-by-class 'testdb1)))))
 
 (test make-pinstance
-  (web4r::drop-class-instances 'testdb1)
+  (drop-instances-by-class 'testdb1)
   (with-post-parameters 
       '(("testdb1_name" . "tomoyuki matsumoto")
         ("testdb1_email" . "tomo@tomo.com")
@@ -559,7 +559,7 @@ world"))
                  (slot-display-value i (get-slot 'testdb1 'note) :nl->br t))))))
 
 (test update-pinstance
-  (web4r::drop-class-instances 'testdb1)
+  (drop-instances-by-class 'testdb1)
   (with-post-parameters
       '(("testdb1_name" . "tomoyuki matsumoto")
         ("testdb1_email" . "tomo@tomo.com")

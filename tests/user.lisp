@@ -17,7 +17,7 @@
   (is (eq (user-pass-slot) 'pass))
   (is (equal (user-id-label) "ID1"))
   (is (equal (user-pass-label) "Password1"))
-  (web4r::drop-class-instances 'test-user1)
+  (drop-instances-by-class 'test-user1)
   (let ((i (make-instance 'test-user1 :id "id1" :pass "pass1")))
     (let ((user-id   (user-id   i))
           (user-pass (user-pass i)))
@@ -29,7 +29,7 @@
       (is (eq (get-user-oid user-id) (oid i))))))
 
 (test login
-  (web4r::drop-class-instances 'test-user2)
+  (drop-instances-by-class 'test-user2)
   (defpclass test-user2 (user)
       ((email :format :email :unique t)))
   (setf *user* (make-instance 'user-class :class 'test-user2))
