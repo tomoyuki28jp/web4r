@@ -72,14 +72,26 @@
 
 (defun unique-slots (class) (get-slots-if #'slot-unique class))
 
+(defun indexed-slot-p (class slot)
+  (map-indices #'(lambda (k v)
+                   (declare (ignore v))
+                   (when (eq k slot)
+                     (return-from indexed-slot-p t)))
+               (find-class-index class)))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun parse-slot (class slot)
     (setf slot (->list slot))
     (flet ((opt (x) (awhen (member x slot) (nth 1 it))))
-      (append
-       (let ((id (regex-replace-all "-" (->string-down (car slot)) "_")))
+      (let* ((id  (regex-replace-all "-" (->string-down (car slot)) "_"))
+             (id* (concat (->string-down class) "_" id)))
+        (when (opt :unique)
+          (setf (gethash id* *unique-slots*) (car slot)))
+        (when (or (opt :unique) (opt :index))
+          (setf (gethash id* *slot-indices*) (car slot)))
+        (append
          (list :symbol   (car slot)
-               :id       (concat (->string-down class) "_" id)
+               :id       id*
                :label    (or (opt :label)
                              (string-capitalize (regex-replace-all "_" id " ")))
                :input    (or (opt :input)
@@ -90,10 +102,10 @@
                :type     (slot-type* slot)
                :hide     (or (opt :hide)
                              (aand (opt :initform) (equal it '(ele:make-pset)) t))
-               :required (aif (member :required slot) (nth 1 it) t)))
-       (let ((fn (lambda (x) (awhen (opt x) (list x it))))
-             (op '(:unique :length :size :rows :cols :comment :options)))
-         (apply #'append (remove nil (mapcar fn op))))))))
+               :required (aif (member :required slot) (nth 1 it) t))
+         (let ((fn (lambda (x) (awhen (opt x) (list x it))))
+               (op '(:unique :length :size :rows :cols :comment :options)))
+           (apply #'append (remove nil (mapcar fn op)))))))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun slot-type* (slot-def)
@@ -257,6 +269,17 @@ http://docs.jquery.com/Plugins/Validation"
         when (and e (eq (slot-input s) :file)) do (rem-cont-session s)
         when e collect (car e)))
 
+(defpage ajax/unique (oid)
+  (let* ((result "false")
+         (slot  (caar (get-parameters*)))
+         (symb  (aand slot (gethash it *unique-slots*)))
+         (class (aand symb (find-symbol (->string-up (car (split "_" slot)))
+                                        (symbol-package it)))))
+    (when (aand class (unique-p it symb (cdar (get-parameters*))
+                                (get-instance-by-oid class oid)))
+      (setf result "true"))
+    (p result)))
+
 ; --- Elephant wrapper functions --------------------------------
 
 (defmacro defpclass (name parent slot-defs &rest class-opts)
@@ -282,22 +305,7 @@ http://docs.jquery.com/Plugins/Validation"
                              '(:index t))))
            '((created-at :accessor created-at :initform (get-universal-time) :index t)
              (updated-at :accessor updated-at :initform (get-universal-time) :index t)))
-         ,@class-opts)
-       (mapcar #'(lambda (s)
-                   (setf (gethash (slot-id s) *unique-slots*)
-                         (slot-symbol s)))
-               (unique-slots ',name)))))
-
-(defpage ajax/unique (oid)
-  (let* ((result "false")
-         (slot  (caar (get-parameters*)))
-         (symb  (aand slot (gethash it *unique-slots*)))
-         (class (aand symb (find-symbol (->string-up (car (split "_" slot)))
-                                        (symbol-package it)))))
-    (when (unique-p class symb (cdar (get-parameters*))
-                    (get-instance-by-oid class oid))
-      (setf result "true"))
-    (p result)))
+         ,@class-opts))))
 
 (defun oid (instance)
   (handler-case (ele::oid instance)

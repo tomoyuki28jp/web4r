@@ -103,6 +103,7 @@
                    :file-slots
                    :date-slots
                    :unique-slots
+                   :indexed-slot-p
                    :slot-display-value
                    :slot-save-value
                    :form-valid-attr
