@@ -137,12 +137,13 @@
 
 (defgeneric slot-save-value (slot &optional value))
 (defmethod slot-save-value ((slot slot-options) &optional value)
-  (with-slots (format id input options) slot
+  (with-slots (format id input options type) slot
     (let ((value (or value (post-parameter id))))
       (cond ((eq format :date)
              (destructuring-bind (&optional y m d) (posted-date id)
                (when y (->int (format nil "~4,'0d~2,'0d~2,'0d"
                                       (->int y) (->int m) (->int d))))))
+            ((eq type 'integer) (->int value))
             ((eq input :file)
              (awhen (cont-session slot)
                (rem-cont-session slot)
