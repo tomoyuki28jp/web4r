@@ -38,11 +38,15 @@
                 :documentation "slot definition type"))
     (:documentation "Extended slot options")))
 
-(defun set-slots (name slots &optional parent)
-  (setf (gethash name *slots*)
-        (append (get-slots parent)
-                (loop for s in slots as s* = (parse-slot name s)
-                      collect (apply #'make-instance 'slot-options s*)))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun slot-type* (slot-def)
+    "returns a type specifier from a slot definition"
+    (acond ((member :type slot-def) (nth 1 it))
+           ((aand (member :format slot-def)
+                  (member (nth 1 it) '(:date :integer integer)))
+            'integer)
+           ((member :options slot-def) 'list)
+           (t 'string))))
 
 (defun get-slots (class)
   (gethash class *slots*))
@@ -107,21 +111,6 @@
                (op '(:unique :length :size :rows :cols :comment :options)))
            (apply #'append (remove nil (mapcar fn op)))))))))
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun slot-type* (slot-def)
-    (acond ((member :type slot-def) (nth 1 it))
-           ((aand (member :format slot-def)
-                  (member (nth 1 it) '(:date :integer integer)))
-            'integer)
-           ((member :options slot-def) 'list)
-           (t 'string))))
-
-(defun split-date (date)
-  "split 8 digits date like 19830928 into list like '(\"1983\" \"09\" \"28\")"
-  (aand (->string date)
-        (when (= (length it) 8)
-          (list (subseq it 0 4) (subseq it 4 6) (subseq it 6 8)))))
-
 (defgeneric slot-display-value (instance slot &key nl->br))
 (defmethod slot-display-value (instance (slot slot-options) &key (nl->br nil))
   (aif (ignore-errors (slot-value instance (slot-symbol slot)))
@@ -151,6 +140,12 @@
                 (save-file (image-path it "tmp") *upload-save-dir*))))
             ((eq input :checkbox) (posted-checkbox id))
             (t value)))))
+
+(defun split-date (date)
+  "split a date in 8 digits like 19830928 into a list like '(\"1983\" \"09\" \"28\")"
+  (aand (->string date)
+        (when (= (length it) 8)
+          (list (subseq it 0 4) (subseq it 4 6) (subseq it 6 8)))))
 
 ; --- Forms for slots -------------------------------------------
 
@@ -270,18 +265,15 @@ http://docs.jquery.com/Plugins/Validation"
         when (and e (eq (slot-input s) :file)) do (rem-cont-session s)
         when e collect (car e)))
 
-(defpage ajax/unique (oid)
-  (let* ((result "false")
-         (slot  (caar (get-parameters*)))
-         (symb  (aand slot (gethash it *unique-slots*)))
-         (class (aand symb (find-symbol (->string-up (car (split "_" slot)))
-                                        (symbol-package it)))))
-    (when (aand class (unique-p it symb (cdar (get-parameters*))
-                                (get-instance-by-oid class oid)))
-      (setf result "true"))
-    (p result)))
-
 ; --- Elephant wrapper functions --------------------------------
+
+(defun set-slots (name slots &optional parent)
+  (setf (gethash name *slots*)
+        (append (get-slots parent)
+                (mapcar #'(lambda (s)
+                            (apply #'make-instance 'slot-options
+                                   (parse-slot name s)))
+                        slots))))
 
 (defmacro defpclass (name parent slot-defs &rest class-opts)
   (let ((parent* (when (listp parent) (car parent))))
