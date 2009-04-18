@@ -33,5 +33,8 @@ th.sort img         { margin: 5px; vertical-align: middle; }
 #table_list th      { padding: 10px 8px; border-bottom: 2px solid #6678b1; }
 #table_list td      { border-bottom: 1px solid #ccc; padding: 6px 8px; }
 #table_list tbody tr:hover td { color: #009; }
-#table_show th      { padding: 12px 15px; color: #039; background: #e8edff; }
+#table_show         { margin: 0px 1px; }
+#table_show th      { padding: 12px 15px; color: #039;
+		      border-top: 1px solid #e8edff;
+		      border-right: 1px solid #ccc; }
 #table_show td      { padding: 10px 15px; border-top: 1px solid #e8edff; }
