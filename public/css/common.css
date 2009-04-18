@@ -25,9 +25,11 @@ span.required_mark  { font-weight: bold; color: #F60; }
 span.arrow          { font-size:    1px; }
 div.page_links span { font-weight: bold; }
 div                 { margin:       8px; }
-table               { border-collapse: collapse; text-align: left; }
+table               { border-collapse:collapse; text-align:left; }
 th                  { font-weight: normal; }
-#table_list th      { color: #039; padding: 10px 8px; border-bottom: 2px solid #6678b1; }
+th.sort             { font-weight: bold; color: #039; cursor:pointer; cursor:hand; }
+th.sort img         { margin: 5px; vertical-align: middle; }
+#table_list th      { padding: 10px 8px; border-bottom: 2px solid #6678b1; }
 #table_list td      { border-bottom: 1px solid #ccc; padding: 6px 8px; }
 #table_list tbody tr:hover td { color: #009; }
 #table_show th      { padding: 12px 15px; color: #039; background: #e8edff; }
