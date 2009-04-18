@@ -1,10 +1,11 @@
 body  {
-    font-size: 12pt;
+    font-size: 16px;
     font-family: Verdana,Sans-Serif,Arial;
     line-height: 1.6em;
 }
 
 label.error  { 
+    font-size: 14px;
     border: solid #BBB 1px;
     border-top: none;
     border-left: none;
@@ -17,7 +18,7 @@ label.error  {
     margin-left: 5px;
 }
 
-input, textarea     { font-size:   12pt; color: #000000; }
+input, textarea     { font-size:   15px; color: #000000; }
 h1                  { font-size:   30px; color: #150517; }
 ul                  { font-weight: bold; }
 ul.msgs             { color: #0000FF; }
