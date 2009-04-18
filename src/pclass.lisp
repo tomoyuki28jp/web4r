@@ -296,8 +296,7 @@ http://docs.jquery.com/Plugins/Validation"
          ,@class-opts))))
 
 (defun oid (instance)
-  (handler-case (ele::oid instance)
-    (error () nil)))
+  (ignore-errors (ele::oid instance)))
 
 (defun get-instance-by-oid (class oid)
   (get-value (->int oid) (find-class-index class)))
