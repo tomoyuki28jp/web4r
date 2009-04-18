@@ -32,7 +32,7 @@
                           (:file "valid")
                           (:file "pager")
                           (:file "pclass")
-                          (:file "scaffold")
+                          (:file "pages")
                           (:file "user")
                           (:file "image")
                           ))))

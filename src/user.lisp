@@ -90,7 +90,7 @@
 (defun regist-page (&optional (redirect-uri (host-uri)))
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
-      (scaffold-edit (user-class) :redirect-uri redirect-uri)))
+      (edit-page (user-class) :redirect-uri redirect-uri)))
 
 (defun owner-p (class slot oid)
   (aand (awhen oid (get-instance-by-oid class it))

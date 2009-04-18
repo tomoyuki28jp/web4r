@@ -42,12 +42,12 @@
 
 (defpage blog/edit (oid :auth)
   (when oid (blog-owner-check oid))
-  (scaffold-edit 'blog-post :oid oid :slot-values `((user-oid ,(login-user-oid)))
-                 :redirect-uri (page-uri "blog" "index" (login-user-id))))
+  (edit-page 'blog-post :oid oid :slot-values `((user-oid ,(login-user-oid)))
+             :redirect-uri (page-uri "blog" "index" (login-user-id))))
 
 (defpage blog/delete (oid :auth)
   (blog-owner-check oid)
-  (scaffold-delete 'blog-post oid (my-page-uri)))
+  (delete-page 'blog-post oid (my-page-uri)))
 
 (defpage blog/show (oid)
   (let ((ins (get-instance-by-oid 'blog-post oid)))

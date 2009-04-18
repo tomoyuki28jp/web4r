@@ -13,7 +13,7 @@
 
 (ele:open-store '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
 (defpclass bbs () ((title :length 256) (body  :length 3000)))
-(scaffold bbs)
+(defpages bbs)
 
 (defparameter *srv* (start-server))
 ;(stop-server *srv*)

@@ -1,27 +1,27 @@
 (in-package :web4r)
 
-(defmacro scaffold (class &key (index 'updated-at))
+(defmacro defpages (class &key (index 'updated-at))
   `(progn
-     (defpage ,class () (scaffold-index ',class :index ',index))
-     (defpage ,(join "/" class 'show) (oid) (scaffold-show ',class oid))
-     (defpage ,(join "/" class 'edit) (oid) (scaffold-edit ',class :oid oid))
-     (defpage ,(join "/" class 'delete) (oid) (scaffold-delete ',class oid))))
+     (defpage ,class () (index-page ',class :index ',index))
+     (defpage ,(join "/" class 'show) (oid) (show-page ',class oid))
+     (defpage ,(join "/" class 'edit) (oid) (edit-page ',class :oid oid))
+     (defpage ,(join "/" class 'delete) (oid) (delete-page ',class oid))))
 
-(defun scaffold-index (class &key (index 'updated-at) (maxlength 20) plural)
+(defun index-page (class &key (index 'updated-at) (maxlength 20) plural)
   (let* ((cname    (->string-down class))
          (plural   (or plural (pluralize cname)))
          (slots    (get-excluded-slots class)))
     (multiple-value-bind (items pager)
         (per-page (get-instances-by-class class) :index index)
-      (load-sml-path "scaffold/index.sml"))))
+      (load-sml-path "pages/index.sml"))))
 
-(defun scaffold-show (class oid)
+(defun show-page (class oid)
   (let ((cname (->string-down class))
         (slots (get-excluded-slots class))
         (ins   (get-instance-by-oid class oid)))
-    (load-sml-path "scaffold/show.sml")))
+    (load-sml-path "pages/show.sml")))
 
-(defun scaffold-edit (class &key oid slot-values redirect-uri)
+(defun edit-page (class &key oid slot-values redirect-uri)
   (let* ((cname (->string-down class))
          (redirect-uri (or redirect-uri (page-uri cname)))
          (ins (awhen oid (get-instance-by-oid class it)))
@@ -31,9 +31,9 @@
                                            :with-slots with-slots
                                            :without-slots without-slots
                                            :slot-values slot-values))))
-    (load-sml-path "scaffold/edit.sml")))
+    (load-sml-path "pages/edit.sml")))
 
-(defun scaffold-delete (class oid &optional
+(defun delete-page (class oid &optional
                         (redirect-uri
                          (page-uri (->string-down (join "/" class "index")))))
   (redirect/msgs (rem-parameter redirect-uri "page")

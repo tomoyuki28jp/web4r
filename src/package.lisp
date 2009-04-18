@@ -123,12 +123,12 @@
                    :drop-instance
                    :drop-instances-by-class
                    :edit-upload-file
-                   ; --- scaffold ---
-                   :scaffold
-                   :scaffold-index
-                   :scaffold-show
-                   :scaffold-edit
-                   :scaffold-delete
+                   ; --- pages ---
+                   :defpages
+                   :index-page
+                   :show-page
+                   :edit-page
+                   :delete-page
                    :per-page
                    :edit/cont
                    :make-pinstance
