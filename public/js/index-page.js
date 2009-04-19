@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var class = $('h1').attr('class');
+    var class = $('#title').attr('class');
     var per_page = $('.page_summary').attr('per_page');
     var total = $('.page_summary #total_items').text();
 

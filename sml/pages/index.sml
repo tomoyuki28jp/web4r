@@ -4,7 +4,7 @@
   (append  head  [script :type "text/javascript" :src "/js/index-page.js"])
   (replace body  [body
                   (msgs)
-                  [h1 :class cname "Listing " plural]
+                  [h1 :id "title" :class cname "Listing " plural]
                   (aif items
                       (progn
                         (page-summary pager)
