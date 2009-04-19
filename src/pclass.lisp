@@ -55,6 +55,9 @@
   (find-if #'(lambda (s) (eq (slot-symbol s) symbol))
            (get-slots class)))
 
+(defun get-slot-by-id (class id)
+  (car (get-slots-if #'(lambda (s) (equal id (slot-id* class s))) class)))
+
 (defun get-excluded-slots (class)
   (if (eq *with-slots* :all)
       (get-slots class)
@@ -76,12 +79,20 @@
 
 (defun unique-slots (class) (get-slots-if #'slot-unique class))
 
+(defun indexed-slots (class)
+  (get-slots-if #'(lambda (s) (indexed-slot-p class (slot-symbol s)))
+                class))
+
 (defun indexed-slot-p (class slot)
   (map-indices #'(lambda (k v)
                    (declare (ignore v))
                    (when (eq k slot)
                      (return-from indexed-slot-p t)))
                (find-class-index class)))
+
+(defun slot-id* (class slot)
+  (concat (->string-down class) "_"
+          (regex-replace-all "-" (->string-down (slot-symbol slot)) "_")))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun parse-slot (class slot)
@@ -159,8 +170,8 @@ http://docs.jquery.com/Plugins/Validation"
                       (aand (if (atom it) it (nth 1 it)) `(:maxlength ,it))))
             (when (stringp format) `(:format ,format))
             (when unique
-              `(:remote ,(concat "/ajax/unique"
-                                 (awhen ins (concat "/" (oid it)))))))))
+              `(:remote ,(concat "/ajax/" (->string-down class)  "/unique/"
+                                 (awhen ins (oid it))))))))
 
 (defgeneric form-input (class slot &optional ins))
 (defmethod form-input (class (slot slot-options) &optional ins)

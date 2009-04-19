@@ -7,7 +7,7 @@
         var img = $(this).children('img');
         var order = (img.attr('src') == '/images/order_asc.gif') ? 'desc' : 'asc';
         $('thead th.sort img').attr('src', '/images/order_no.gif');
-        $.get('/ajax/list/?item='+$(this).attr('id')+'&order='+order, function(x) { 
+        $.get('/ajax/" cname "/list/?item='+$(this).attr('id')+'&order='+order, function(x) { 
             $('#table_list tbody').html(x);
         })
         img.attr('src', '/images/order_'+order+'.gif');

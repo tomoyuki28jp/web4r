@@ -27,7 +27,6 @@
    (zip-code     :type integer :length (5 5) :comment "5 digit" :index t)
    (note         :length 3000 :rows 5 :cols 30)
    (image        :input :file :format :image :length (1000 500000) :required nil)))
-
 (defpages customer)
 
 (defparameter *srv* (start-server))
