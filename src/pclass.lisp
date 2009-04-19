@@ -315,6 +315,11 @@ http://docs.jquery.com/Plugins/Validation"
 (defun drop-instance (instance)
   (drop-instances (list instance)))
 
+(defun drop-instance-by-oid (class oid)
+  (aand (get-instance-by-oid class oid)
+        (progn (drop-instance it)
+               t)))
+
 (defun drop-instances-by-class (class)
   (when (find-class class nil)
     (drop-instances (get-instances-by-class class))))

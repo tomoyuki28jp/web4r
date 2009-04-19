@@ -9,7 +9,9 @@
      (defpage ,(join "/" 'ajax class 'unique) (oid)
        (p (unique? ',class (get-parameters*) oid)))
      (defpage ,(join "/" 'ajax class 'list) (:get item order)
-       (ajax-list ',class item order))))
+       (ajax-list ',class item order))
+     (defpage ,(join "/" 'ajax class 'delete) (oid)
+       (p (drop-instance-by-oid* ',class oid)))))
 
 (defun index-page (class &key (index 'updated-at) (maxlength 20) plural)
   (let* ((cname    (->string-down class))
@@ -37,14 +39,15 @@
                                            :slot-values slot-values))))
     (load-sml-path "pages/edit.sml")))
 
-(defun delete-page (class oid &optional
-                        (redirect-uri
-                         (page-uri (->string-down (join "/" class "index")))))
+(defun drop-instance-by-oid* (class oid)
+  (aif (drop-instance-by-oid class oid)
+       (concat (->string-down class) " was successfully deleted")
+       "No such item"))
+
+(defun delete-page (class oid &optional (redirect-uri
+                                         (page-uri (->string-down class))))
   (redirect/msgs (rem-parameter redirect-uri "page")
-    (aif (aand oid (get-instance-by-oid class it))
-         (progn (drop-instance it)
-                (concat (->string-down class) " was successfully deleted"))
-         "No such item")))
+                 (drop-instance-by-oid* class oid)))
 
 (defun edit/cont (class ins page &key with-slots without-slots slot-values)
   (let ((*with-slots* (or with-slots *with-slots*))

@@ -2,8 +2,10 @@ $(document).ready(function() {
     var class = $('#title').attr('class');
     var per_page = $('.page_summary').attr('per_page');
     var total = $('.page_summary #total_items').text();
+    var removeMsgs = function() { $('ul.errors, ul.msgs').remove(); }
 
     $('.sort').click(function() {
+        removeMsgs();
         // page summary
         $('.page_summary #item_start').text(1);
         $('.page_summary #item_end').text(Math.min(total, per_page));
@@ -24,7 +26,29 @@ $(document).ready(function() {
         })
     })
 
+    $('.delete').live('click', function() {
+        removeMsgs();
+        // page summary
+        $('.page_summary #item_start').text(1);
+        $('.page_summary #item_end').text(Math.min(total, per_page));
+        // page links
+        var p = $('.page_links span').text();
+        $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
+        $('.page_links :first').replaceWith('<span>1</span>');
+        // delete an item and replace the list
+	var oid = $(this).attr('href').split('/'); var oid = oid[oid.length - 2];
+        $.get('/ajax/'+class+'/delete/'+oid, function(r) {
+            $('body').prepend('<ul class="msgs"><li>'+r+'</li></ul>');
+            var cp = $('thead').attr('class').split(' ');
+            $.get('/ajax/'+class+'/list/?item='+cp[0]+'&order='+cp[1], function(x) { 
+                $('#table_list tbody').html(x);
+            })
+        })
+        return false;
+    })
+
     $('.page_links a').live('click', function() {
+        removeMsgs();
         // page summary
         var new_page = $(this).text();
         $('.page_summary #item_start').text((1 + (new_page - 1) * per_page));
