@@ -3,17 +3,20 @@ $(document).ready(function() {
     var per_page = $('.page_summary').attr('per_page');
     var total = $('.page_summary #total_items').text();
     var removeMsgs = function() { $('ul.errors, ul.msgs').remove(); }
-
-    $('.sort').click(function() {
-        removeMsgs();
-        // page summary
-        $('.page_summary #item_start').text(1);
-        $('.page_summary #item_end').text(Math.min(total, per_page));
-        // page links
+    var pageOffset = function(start, end) {
+        $('.page_summary #item_start').text(start);
+        $('.page_summary #item_end').text(end);
+    }
+    var topPage = function() {
+        pageOffset(1, Math.min(total, per_page));
         var p = $('.page_links span').text();
         $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
         $('.page_links :first').replaceWith('<span>1</span>');
-        // replace the list
+    }
+
+    $('.sort').click(function() {
+        removeMsgs();
+        topPage();
         var cp = $('thead').attr('class').split(' ');
         var order = (cp[0] == $(this).attr('id') && cp[1] == 'asc') ? 'desc' : 'asc';
         if (cp[0] !== 'updated-at' && cp[0] !== 'created-at') {
@@ -27,14 +30,8 @@ $(document).ready(function() {
     })
 
     $('.delete').live('click', function() {
-        // page summary
-        $('.page_summary #item_start').text(1);
-        $('.page_summary #item_end').text(Math.min(total, per_page));
-        // page links
-        var p = $('.page_links span').text();
-        $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
-        $('.page_links :first').replaceWith('<span>1</span>');
-        // delete an item and replace the list
+        $('.page_summary #total_items').text(total = total - 1);
+        topPage();
         var oid = $(this).attr('href').split('/'); var oid = oid[oid.length - 2];
         $.get('/ajax/'+class+'/delete/'+oid, function(r) {
             var msg = '<ul class="msgs"><li>'+r+'</li></ul>';
@@ -49,15 +46,11 @@ $(document).ready(function() {
 
     $('.page_links a').live('click', function() {
         removeMsgs();
-        // page summary
-        var new_page = $(this).text();
-        $('.page_summary #item_start').text((1 + (new_page - 1) * per_page));
-        $('.page_summary #item_end').text(Math.min(total, (new_page * per_page)));
-        // page links
+        var np = $(this).text();
+        pageOffset(1 + (np - 1) * per_page, Math.min(total, (np * per_page)));
         var p = $('.page_links span').text();
         $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
-        $(this).replaceWith('<span>'+new_page+'</span>');
-        // replace the list
+        $(this).replaceWith('<span>'+np+'</span>');
         var cp = $('thead').attr('class').split(' ');
         var pp = $(this).attr('href').substring(1);
         $.get('/ajax/'+class+'/list/?item='+cp[0]+'&order='+cp[1]+'&'+pp, function(x) { 
