@@ -16,12 +16,20 @@
         })
     })
     $('.page_links a').live('click', function() {
-        var page = $(this).attr('href').substring(1);
-        var c = $('thead').attr('class').split(' ');
+        // page summary
+        var np = $(this).text();
+        var ti = $('.page_summary #total_items').text();
+        var per = $('.page_summary').attr('per_page');
+        $('.page_summary #item_start').text((1 + (np - 1) * per));
+        $('.page_summary #item_end').text(Math.min(ti, (np * per)));
+        // page links
         var p = $('.page_links span').text();
         $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
-        $(this).replaceWith('<span>'+$(this).text()+'</span>');
-        $.get('/ajax/" cname  "/list/?item='+c[0]+'&order='+c[1]+'&'+page, function(x) { 
+        $(this).replaceWith('<span>'+np+'</span>');
+        // replace the list
+        var cp = $('thead').attr('class').split(' ');
+        var pp = $(this).attr('href').substring(1);
+        $.get('/ajax/" cname  "/list/?item='+cp[0]+'&order='+cp[1]+'&'+pp, function(x) { 
             $('#table_list tbody').html(x);
         })
         return false;

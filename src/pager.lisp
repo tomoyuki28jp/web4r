@@ -21,8 +21,7 @@
   (with-slots (total-items total-pages items-per-page current-page) p
     (setf total-pages    (ceiling (/ total-items items-per-page))
           (item-start p) (* (1- current-page) items-per-page)
-          (item-end   p) (let ((e (* current-page items-per-page)))
-                             (if (> e total-items) total-items e)))
+          (item-end   p) (min (* current-page items-per-page) total-items))
     (multiple-value-bind (link-start link-end) (link-limit p)
       (setf (link-start p) link-start
             (link-end   p) link-end))))
@@ -45,7 +44,7 @@
       (load-sml-path "paging/page_links.sml"))))
 
 (defun page-summary (pager)
-  (with-slots (total-items item-start item-end) pager
+  (with-slots (total-items item-start item-end items-per-page) pager
     (let ((item-start (1+ item-start)))
       (load-sml-path "paging/page_summary.sml"))))
 
