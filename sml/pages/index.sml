@@ -4,13 +4,24 @@
   (append  head  [script :type "text/javascript" (safe 
 "$(document).ready(function() {
     $('.sort').click(function() {
-        var img = $(this).children('img');
-        var order = (img.attr('src') == '/images/order_asc.gif') ? 'desc' : 'asc';
-        $('thead th.sort img').attr('src', '/images/order_no.gif');
+        var c = $('thead').attr('class').split(' ');
+        var order = (c[0] == $(this).attr('id') && c[1] == 'asc') ? 'desc' : 'asc';
+        if (c[0] !== 'updated-at' && c[0] !== 'created-at') {
+            $('#'+c[0]+' img').attr('src', '/images/order_no.gif');
+        }
+        $(this).children('img').attr('src', '/images/order_'+order+'.gif');
+        $('thead').attr('class', $(this).attr('id')+' '+order);
         $.get('/ajax/" cname "/list/?item='+$(this).attr('id')+'&order='+order, function(x) { 
             $('#table_list tbody').html(x);
         })
-        img.attr('src', '/images/order_'+order+'.gif');
+    })
+    $('.page_links a').click(function() {
+        var page = $(this).attr('href').substring(1);
+        var c = $('thead').attr('class').split(' ');
+        $.get('/ajax/" cname  "/list/?item='+c[0]+'&order='+c[1]+'&'+page, function(x) { 
+            $('#table_list tbody').html(x);
+        })
+        return false;
     })
 })")])
   (replace body  [body
@@ -21,7 +32,7 @@
                         (page-summary pager)
                         (page-links pager)
                         [table :id "table_list"
-                          [thead
+                          [thead :class (concat cname "_updated-at desc")
                            [tr (loop for s in slots
                                      as c  = (when (indexed-slot-p class (slot-symbol s)) "sort")
                                      do [th :class c :id (when c (slot-id s))
