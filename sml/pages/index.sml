@@ -15,9 +15,12 @@
             $('#table_list tbody').html(x);
         })
     })
-    $('.page_links a').click(function() {
+    $('.page_links a').live('click', function() {
         var page = $(this).attr('href').substring(1);
         var c = $('thead').attr('class').split(' ');
+        var p = $('.page_links span').text();
+        $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
+        $(this).replaceWith('<span>'+$(this).text()+'</span>');
         $.get('/ajax/" cname  "/list/?item='+c[0]+'&order='+c[1]+'&'+page, function(x) { 
             $('#table_list tbody').html(x);
         })
