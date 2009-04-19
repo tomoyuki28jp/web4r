@@ -27,7 +27,6 @@ $(document).ready(function() {
     })
 
     $('.delete').live('click', function() {
-        removeMsgs();
         // page summary
         $('.page_summary #item_start').text(1);
         $('.page_summary #item_end').text(Math.min(total, per_page));
@@ -36,9 +35,10 @@ $(document).ready(function() {
         $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
         $('.page_links :first').replaceWith('<span>1</span>');
         // delete an item and replace the list
-	var oid = $(this).attr('href').split('/'); var oid = oid[oid.length - 2];
+        var oid = $(this).attr('href').split('/'); var oid = oid[oid.length - 2];
         $.get('/ajax/'+class+'/delete/'+oid, function(r) {
-            $('body').prepend('<ul class="msgs"><li>'+r+'</li></ul>');
+            var msg = '<ul class="msgs"><li>'+r+'</li></ul>';
+            ($('ul.msgs').length) ? $('ul.msgs').replaceWith(msg) : $('body').prepend(msg);
             var cp = $('thead').attr('class').split(' ');
             $.get('/ajax/'+class+'/list/?item='+cp[0]+'&order='+cp[1], function(x) { 
                 $('#table_list tbody').html(x);
