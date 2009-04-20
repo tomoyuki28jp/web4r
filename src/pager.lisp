@@ -34,7 +34,7 @@
                     (right (- links-per-page left)))
                (cond ((<= current-page left) (values 1 links-per-page))
                      ((> (+ current-page right) total-pages)
-                      (values (- total-pages links-per-page) total-pages))
+                      (values (1+ (- total-pages links-per-page)) total-pages))
                      (t (values (- current-page left)
                                 (+ current-page right)))))))))
 
