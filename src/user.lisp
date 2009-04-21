@@ -16,7 +16,11 @@
 (defmethod initialize-instance :after ((user user-class) &key)
   (set-page (slot-value user 'login-page)  (lambda () (login-page)))
   (set-page (slot-value user 'logout-page) (lambda () (logout-page)))
-  (set-page (slot-value user 'regist-page) (lambda () (regist-page))))
+  (set-page (slot-value user 'regist-page) (lambda () (regist-page)))
+  (let ((class (slot-value user 'class)))
+    (set-page (->string-down (join "/" 'ajax class 'unique))
+              (page-lambda (oid)
+                (p (unique? class (get-parameters*) oid))))))
 
 (defvar *user* (make-instance 'user-class))
 

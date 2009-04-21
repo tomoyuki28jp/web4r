@@ -57,7 +57,11 @@ hide it only on pages where the request uri matches to the regexp")
            (get-slots class)))
 
 (defun get-slot-by-id (class id)
-  (car (get-slots-if #'(lambda (s) (equal id (slot-id* class s))) class)))
+  (car (get-slots-if
+        #'(lambda (s)
+            (or (equal id (slot-id* class s))
+                (equal id (slot-id s)))) ; for a inherited slot
+        class)))
 
 (defun get-excluded-slots (class)
   (if (eq *with-slots* :all)
