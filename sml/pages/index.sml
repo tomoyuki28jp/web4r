@@ -1,6 +1,7 @@
 (with-sml-file (sml-path "template.sml")
   (replace title [title "Listing " plural])
   (append  head  [script :type "text/javascript" :src "/js/jquery-1.3.2.min.js"])
+  (append  head  [script :type "text/javascript" :src "/js/jquery.pager.js"])
   (append  head  [script :type "text/javascript" :src "/js/index-page.js"])
   (replace body  [body
                   (msgs)

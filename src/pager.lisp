@@ -44,7 +44,8 @@
       (load-sml-path "paging/page_links.sml"))))
 
 (defun page-summary (pager)
-  (with-slots (total-items item-start item-end items-per-page) pager
+  (with-slots
+        (total-items item-start item-end items-per-page links-per-page) pager
     (let ((item-start (1+ item-start)))
       (load-sml-path "paging/page_summary.sml"))))
 

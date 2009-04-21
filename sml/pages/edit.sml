@@ -2,7 +2,7 @@
   (replace title [title (if oid "Editing " "New ") cname])
   (append  head  [script :type "text/javascript" :src "/js/jquery-1.3.2.min.js"])
   (append  head  [script :type "text/javascript" :src "/js/jquery.validate.js"])
-  (append  head  [script :type "text/javascript" :src "/js/jquery.date.js"])
+  (append  head  [script :type "text/javascript" :src "/js/select_date.js"])
   (append  head  [script :type "text/javascript" :src "/js/edit-page.js"])
   (replace body  [body
                   (if (and oid (not ins))

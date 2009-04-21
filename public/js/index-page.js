@@ -1,22 +1,12 @@
 $(document).ready(function() {
     var class = $('#title').attr('class');
-    var per_page = $('.page_summary').attr('per_page');
+    var pager = new $.pager();
     var total = $('.page_summary #total_items').text();
     var removeMsgs = function() { $('ul.errors, ul.msgs').remove(); }
-    var pageOffset = function(start, end) {
-        $('.page_summary #item_start').text(start);
-        $('.page_summary #item_end').text(end);
-    }
-    var topPage = function() {
-        pageOffset(1, Math.min(total, per_page));
-        var p = $('.page_links span').text();
-        $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
-        $('.page_links :first').replaceWith('<span>1</span>');
-    }
 
     $('.sort').click(function() {
         removeMsgs();
-        topPage();
+        pager.goto_page(1);
         var cp = $('thead').attr('class').split(' ');
         var order = (cp[0] == $(this).attr('id') && cp[1] == 'asc') ? 'desc' : 'asc';
         if (cp[0] !== 'updated-at' && cp[0] !== 'created-at') {
@@ -30,8 +20,8 @@ $(document).ready(function() {
     })
 
     $('.delete').live('click', function() {
-        $('.page_summary #total_items').text(total = total - 1);
-        topPage();
+        pager.remove_item(1);
+        pager.goto_page(1);
         var oid = $(this).attr('href').split('/'); var oid = oid[oid.length - 2];
         $.get('/ajax/'+class+'/delete/'+oid, function(r) {
             var msg = '<ul class="msgs"><li>'+r+'</li></ul>';
@@ -46,11 +36,7 @@ $(document).ready(function() {
 
     $('.page_links a').live('click', function() {
         removeMsgs();
-        var np = $(this).text();
-        pageOffset(1 + (np - 1) * per_page, Math.min(total, (np * per_page)));
-        var p = $('.page_links span').text();
-        $('.page_links span').replaceWith('<a href=\"?page='+p+'\">'+p+'</a>');
-        $(this).replaceWith('<span>'+np+'</span>');
+        pager.goto_page($(this).text());
         var cp = $('thead').attr('class').split(' ');
         var pp = $(this).attr('href').substring(1);
         $.get('/ajax/'+class+'/list/?item='+cp[0]+'&order='+cp[1]+'&'+pp, function(x) { 

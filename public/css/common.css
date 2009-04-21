@@ -1,4 +1,5 @@
 body  {
+    float:left;
     font-size: 16px;
     font-family: Verdana,Sans-Serif,Arial;
     line-height: 1.6em;
@@ -24,8 +25,7 @@ ul                  { font-weight: bold; }
 ul.msgs             { color: #0000FF; }
 ul.errors           { color: #F60; }
 span.required_mark  { font-weight: bold; color: #F60; }
-div.page_links span { font-weight: bold; }
-div                 { margin:       8px; }
+div                 { margin:8px; }
 table               { text-align:left; }
 th                  { font-weight: normal; }
 th.sort             { font-weight: bold; color: #039; cursor:pointer; cursor:hand; }
@@ -38,3 +38,31 @@ th.sort img         { margin: 5px; vertical-align: middle; }
 #table_show th, #table_show td { border-top: 1px solid #e8edff; padding: 6px 12px; }
 #table_show th      { color: #039; border-right: 1px solid #ccc; }
 
+.page_links ul {
+display:block;
+border:none;
+text-transform:uppercase;
+font-size:13px;
+margin:20px 0 20px;
+padding:0;
+}
+
+.page_links ul li {
+list-style:none;
+float:left;
+border:1px solid #ccc;
+text-decoration:none;
+margin:0 6px 0 0;
+padding:5px;
+}
+
+.page_links ul li:hover {
+border:1px solid #003f7e;
+}
+
+.page_links ul li span {
+border:1px solid #003f7e;
+color:#000;
+font-weight:700;
+background-color:#eee;
+}

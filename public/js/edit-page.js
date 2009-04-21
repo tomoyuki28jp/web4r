@@ -9,5 +9,4 @@ $(document).ready(function() {
             error.appendTo( element.parent() )
         },
     })
-    $(this).changeSelectDate();
 })
