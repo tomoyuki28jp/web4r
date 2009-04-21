@@ -3,6 +3,17 @@ $(document).ready(function() {
     var pager = new $.pager();
     var total = $('.page_summary #total_items').text();
     var removeMsgs = function() { $('ul.errors, ul.msgs').remove(); }
+    var updateList = function(item, order, add) {
+        var c = $('thead').attr('class').split(' ');
+	var item  = item  || c[0];
+	var order = order || c[1];
+	var add   = add   || "";
+	add += "&items_per_page="+pager.items_per_page;
+	add += "&links_per_page="+pager.links_per_page;
+        $.get('/ajax/'+class+'/list/?item='+item+'&order='+order+add, function(list) { 
+            $('#table_list tbody').html(list);
+        });
+    };
 
     $('.sort').click(function() {
         removeMsgs();
@@ -14,9 +25,7 @@ $(document).ready(function() {
         }
         $(this).children('img').attr('src', '/images/order_'+order+'.gif');
         $('thead').attr('class', $(this).attr('id')+' '+order);
-        $.get('/ajax/'+class+'/list/?item='+$(this).attr('id')+'&order='+order, function(x) { 
-            $('#table_list tbody').html(x);
-        })
+	updateList($(this).attr('id'), order);
     })
 
     $('.delete').live('click', function() {
@@ -26,10 +35,7 @@ $(document).ready(function() {
         $.get('/ajax/'+class+'/delete/'+oid, function(r) {
             var msg = '<ul class="msgs"><li>'+r+'</li></ul>';
             ($('ul.msgs').length) ? $('ul.msgs').replaceWith(msg) : $('body').prepend(msg);
-            var cp = $('thead').attr('class').split(' ');
-            $.get('/ajax/'+class+'/list/?item='+cp[0]+'&order='+cp[1], function(x) { 
-                $('#table_list tbody').html(x);
-            })
+	    updateList();
         })
         return false;
     })
@@ -37,11 +43,7 @@ $(document).ready(function() {
     $('.page_links a').live('click', function() {
         removeMsgs();
         pager.goto_page($(this).text());
-        var cp = $('thead').attr('class').split(' ');
-        var pp = $(this).attr('href').substring(1);
-        $.get('/ajax/'+class+'/list/?item='+cp[0]+'&order='+cp[1]+'&'+pp, function(x) { 
-            $('#table_list tbody').html(x);
-        })
+	updateList(null, null, '&'+$(this).attr('href').substring(1));
         return false;
     })
 })

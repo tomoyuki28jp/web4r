@@ -1,8 +1,8 @@
 (in-package :web4r)
 
 (defclass pager ()
-  ((items-per-page :type integer :initform 10 :initarg :items-per-page)
-   (links-per-page :type integer :initform 10 :initarg :links-per-page)
+  ((items-per-page :type integer :initform *items-per-page* :initarg :items-per-page)
+   (links-per-page :type integer :initform *links-per-page* :initarg :links-per-page)
    (total-items    :type integer :initarg :total-items
                    :initform (error "Must supply total-items"))
    (current-page   :type integer :initarg :current-page

@@ -96,6 +96,9 @@
 (defvar *page-param* "page"
   "Name of a page get parameter")
 
+(defvar *items-per-page* 10)
+(defvar *links-per-page* 10)
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *slots* (make-hash-table)))
 

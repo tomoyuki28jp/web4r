@@ -17,6 +17,8 @@
                    :*debug-mode*
                    :*valid-email-format*
                    :*page-param*
+                   :*items-per-page*
+                   :*links-per-page*
                    :*with-slots*
                    :*without-slots*
                    :*login-msgs*

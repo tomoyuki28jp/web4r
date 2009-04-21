@@ -13,12 +13,15 @@
      (defpage ,(join "/" 'ajax class 'delete) (oid)
        (p (drop-instance-by-oid* ',class oid)))))
 
-(defun index-page (class &key (index 'updated-at) (maxlength 20) plural)
+(defun index-page (class &key (index 'updated-at) (maxlength 20)
+                   plural items-per-page links-per-page)
   (let* ((cname    (->string-down class))
          (plural   (or plural (pluralize cname)))
          (slots    (get-excluded-slots class)))
     (multiple-value-bind (items pager)
-        (per-page (get-instances-by-class class) :index index)
+        (per-page (get-instances-by-class class) :index index
+                  :items-per-page items-per-page
+                  :links-per-page links-per-page)
       (load-sml-path "pages/index.sml"))))
 
 (defun show-page (class oid)
@@ -33,10 +36,11 @@
          (ins (awhen oid (get-instance-by-oid class it)))
          (with-slots *with-slots*)
          (without-slots *without-slots*)
-         (edit/cont* (lambda () (edit/cont class ins redirect-uri
-                                           :with-slots with-slots
-                                           :without-slots without-slots
-                                           :slot-values slot-values))))
+         (edit/cont* (lambda ()
+                       (edit/cont class ins redirect-uri
+                            :with-slots with-slots
+                            :without-slots without-slots
+                            :slot-values slot-values))))
     (load-sml-path "pages/edit.sml")))
 
 (defun drop-instance-by-oid* (class oid)
@@ -66,9 +70,13 @@
                  (funcall page msg)
                  (redirect/msgs page msg)))))))
 
-(defun per-page (items &key (index 'updated-at) (sort #'>))
+(defun per-page (items &key (index 'updated-at) (sort #'>)
+                 items-per-page links-per-page)
   (let* ((total (length items))
-         (pager (make-instance 'pager :total-items total))
+         (pager (apply #'make-instance 'pager
+                       (append `(:total-items ,total)
+                               (awhen items-per-page `(:items-per-page ,it))
+                               (awhen links-per-page `(:links-per-page ,it)))))
          (items (with-slots (item-start item-end items-per-page) pager
                   (when (<= (current-page pager) (total-pages pager))
                     (subseq (sort items sort :key index) item-start item-end)))))
@@ -84,7 +92,9 @@
 (defun ajax-list (class id order)
   (let ((slots (get-excluded-slots class))
         (cname (->string-down class))
-        (type  'integer))
+        (type  'integer)
+        (items-per-page (get-parameter "items_per_page"))
+        (links-per-page (get-parameter "links_per_page")))
     (aand (or (aand (get-slot-by-id class id)
                     (setf type (slot-type it))
                     (slot-symbol it))
@@ -95,5 +105,7 @@
                           (if (eq type 'integer) #'> #'string>)
                           (if (eq type 'integer) #'< #'string<))))
             (when-let (items (per-page (get-instances-by-class class)
-                                       :index it :sort sort))
+                                  :index it :sort sort
+                                  :items-per-page (->int items-per-page)
+                                  :links-per-page (->int links-per-page)))
               (load-sml-path "ajax/list.sml"))))))
