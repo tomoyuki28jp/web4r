@@ -16,7 +16,8 @@
 
 (defpclass customer ()
   ((name         :length 50 :label "Full Name" :size 30 :index t)
-   (password     :input :password :length (8 12) :hide t :comment "8-12 characters")
+   (password     :input :password :length (8 12) :comment "8-12 characters"
+                 :hide-for "^(?!/customer/edit/)")
    (email        :format :email :unique t)
    (sex          :input :radio :options ("Male" "Female"))
    (marriage     :input :select :options ("single" "married" "divorced"))

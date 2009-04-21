@@ -22,8 +22,9 @@
                 :documentation "int size for text input")
       (length   :accessor slot-length   :initarg :length   :initform nil
                 :documentation "int max or list '(min max) for length validation")
-      (hide     :accessor slot-hide     :initarg :hide     :initform nil
-                :documentation "treats the slot as excluded slots")
+      (hide-for :accessor slot-hide-for :initarg :hide-for :initform nil
+                :documentation "where to hide the slot. :all for all or regexp to
+hide it only on pages where the request uri matches to the regexp")
       (options  :accessor slot-options  :initarg :options  :initform '() :type list
                 :documentation "form input options (also used for validation)")
       (comment  :accessor slot-comment  :initarg :comment  :initform ""  :type string
@@ -63,7 +64,8 @@
       (get-slots class)
       (loop for s in (get-slots class)
             as symbol = (slot-symbol s)
-            unless (or (slot-hide s)
+            unless (or (aand (slot-hide-for s)
+                             (or (eq it :all) (scan it (request-uri*))))
                        (member symbol *without-slots*)
                        (aand *with-slots* (not (member symbol it))))
             collect s)))
@@ -110,8 +112,8 @@
                :format   (or (opt :format)
                              (aand (opt :type) (eq it 'integer) :integer))
                :type     (slot-type* slot)
-               :hide     (or (opt :hide)
-                             (aand (opt :initform) (equal it '(ele:make-pset)) t))
+               :hide-for (or (opt :hide-for)
+                             (aand (opt :initform) (equal it '(ele:make-pset)) :all))
                :required (aif (member :required slot) (nth 1 it) t))
          (let ((fn (lambda (x) (awhen (opt x) (list x it))))
                (op '(:unique :length :size :rows :cols :comment :options)))

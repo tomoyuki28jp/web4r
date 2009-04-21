@@ -19,12 +19,12 @@
    (blog-title :length 256)))
 
 (defpclass blog-post ()
-  ((user-oid :index t :hide t)
+  ((user-oid :index t :hide-for :all)
    (title :length 50   :size 40)
    (body  :length 3000 :rows 25 :cols 70)))
 
 (defpclass comment ()
-  ((blog-oid :index t :hide t)
+  ((blog-oid :index t :hide-for :all)
    (name    :length 50)
    (comment :length 3000 :rows 5 :cols 50)))
 
