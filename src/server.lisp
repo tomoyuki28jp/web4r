@@ -1,5 +1,8 @@
 (in-package :web4r)
 
+(setf *hunchentoot-default-external-format* hunchentoot::+utf-8+
+      *default-content-type* "text/html; charset=utf-8")
+
 ; --- Util ------------------------------------------------------
 
 (defun uri-path (n &optional (request *request*))
