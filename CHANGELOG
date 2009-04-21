@@ -1,3 +1,15 @@
+Version 0.2.0
+2009-04-21
+Bug fix in calculating page links offset
+Implemented asynchronous item deletion
+Separated js written in sml files into js files
+Implemented js pager
+Renamed scaffold to page(s)
+Implemented asynchronous updating a list of instances with ajax
+Updated CSS for better design
+Added the "slot-type" slot in "slot-options" class
+Added a default value support of parameters for page-lambda
+
 Version 0.1.9
 2009-04-17
 Renamed slot-type to slot-format and made it possible to set the real slot type
