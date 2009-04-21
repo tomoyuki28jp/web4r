@@ -35,12 +35,12 @@
   (with-post-parameters nil
     (let ((i (make-instance
               'pager :total-items  80 :items-per-page 10
-              :current-page  3 :links-per-page 10)))
+              :current-page 3  :links-per-page 10)))
       (is (eq 1 (slot-value i 'web4r::link-start))))
     (let ((i (make-instance
               'pager :total-items 130 :items-per-page 10
               :current-page 10 :links-per-page 10)))
-      (is (eq 3 (slot-value i 'web4r::link-start))))
+      (is (eq 4 (slot-value i 'web4r::link-start))))
     (let ((i (make-instance
               'pager :total-items 200 :items-per-page 10
               :current-page 10 :links-per-page 10)))
