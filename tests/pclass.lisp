@@ -9,7 +9,7 @@
 
 (defpclass testdb1 ()
     ((name         :length 50 :label "full name" :size 30)
-     (password     :input :password :length (8 12) :hide t :comment "8-12 characters")
+     (password     :input :password :length (8 12) :hide-for :all :comment "8-12 characters")
      (email        :format :email :unique t)
      (sex          :input :radio :options ("male" "female"))
      (marriage     :input :select :options ("single" "married" "divorced"))
@@ -167,19 +167,19 @@
   (is (eq 300               (web4r::slot-length (get-slot 'testdb1 'note))))
   (is (equal '(1000 500000) (web4r::slot-length (get-slot 'testdb1 'image)))))
 
-(test slot-hide
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'name))))
-  (is (eq t   (web4r::slot-hide (get-slot 'testdb1 'password))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'email))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'sex))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'marriage))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'hobbies))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'birth-date))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'nickname))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'phone-number))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'zip-code))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'note))))
-  (is (eq nil (web4r::slot-hide (get-slot 'testdb1 'image)))))
+(test slot-hide-for
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'name))))
+  (is (eq :all (web4r::slot-hide-for (get-slot 'testdb1 'password))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'email))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'sex))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'marriage))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'hobbies))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'birth-date))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'nickname))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'phone-number))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'zip-code))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'note))))
+  (is (eq nil  (web4r::slot-hide-for (get-slot 'testdb1 'image)))))
 
 (test slot-options
   (is (eq nil (web4r::slot-options (get-slot 'testdb1 'name))))
