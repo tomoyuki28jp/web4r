@@ -1,3 +1,11 @@
+Version 0.2.1
+2009-04-22
+Bug fix: asynchronous uniquness validation of a user id
+Bug fix: get-slot-by-id for a inherited slot
+Renamed slot-hide to slot-hide-for. Now we can use regexp to specify which pages to hide a slot.
+Implemented a way to set/change links-per-page and items_per_page
+Changed the default encoding from latin1 to utf-8
+
 Version 0.2.0
 2009-04-21
 Bug fix in calculating page links offset
