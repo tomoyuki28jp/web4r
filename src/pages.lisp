@@ -15,9 +15,9 @@
 
 (defun index-page (class &key (index 'updated-at) (maxlength 20)
                    plural items-per-page links-per-page)
-  (let* ((cname    (->string-down class))
-         (plural   (or plural (pluralize cname)))
-         (slots    (get-excluded-slots class)))
+  (let* ((cname  (->string-down class))
+         (plural (or plural (pluralize cname)))
+         (slots  (get-excluded-slots class)))
     (multiple-value-bind (items pager)
         (per-page (get-instances-by-class class) :index index
                   :items-per-page items-per-page
