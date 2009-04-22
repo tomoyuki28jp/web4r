@@ -11,7 +11,11 @@
     "Pathname of the public directory")
 
   (defvar *sml-dir*    (merge-pathnames "sml/"    *web4r-dir*)
-    "Pathname of the sml directory"))
+    "Pathname of the sml directory")
+
+  (defvar *web4r-package* (find-package :web4r)
+    "the web4r package designator"))
+
 
 (defvar *upload-save-dir* "/tmp/web4r/upload/"
   "Directory path to save upload files")

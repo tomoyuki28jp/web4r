@@ -13,35 +13,43 @@
      (defpage ,(join "/" 'ajax class 'delete) (oid)
        (p (drop-instance-by-oid* ',class oid)))))
 
-(defun index-page (class &key (index 'updated-at) (maxlength 20)
-                   plural items-per-page links-per-page)
-  (let* ((cname  (->string-down class))
-         (plural (or plural (pluralize cname)))
-         (slots  (get-excluded-slots class)))
-    (multiple-value-bind (items pager)
-        (per-page (get-instances-by-class class) :index index
-                  :items-per-page items-per-page
-                  :links-per-page links-per-page)
-      (load-sml-path "pages/index.sml"))))
+(defmacro index-page (class &key (index 'updated-at) (maxlength 20)
+                      plural items-per-page links-per-page sml)
+  (declare (ignorable maxlength))
+  `(let* ((class  ',class)
+          (cname  (->string-down ',class))
+          (plural (or ,plural (pluralize cname)))
+          (slots  (get-excluded-slots ',class))
+          (maxlength ,maxlength))
+     (multiple-value-bind (items pager)
+         (per-page (get-instances-by-class ',class) :index ',index
+                   :items-per-page ,items-per-page
+                   :links-per-page ,links-per-page)
+       (load-sml (or ,sml (sml-path "pages/index.sml"))
+                 ,*web4r-package*))))
 
-(defun show-page (class oid)
-  (let ((cname (->string-down class))
-        (slots (get-excluded-slots class))
-        (ins   (get-instance-by-oid class oid)))
-    (load-sml-path "pages/show.sml")))
+(defmacro show-page (class oid &key sml)
+  `(let ((cname (->string-down ',class))
+         (slots (get-excluded-slots ',class))
+         (ins   (get-instance-by-oid ',class ,oid)))
+     (load-sml (or ,sml (sml-path "pages/show.sml"))
+               ,*web4r-package*)))
 
-(defun edit-page (class &key oid slot-values redirect-uri)
-  (let* ((cname (->string-down class))
-         (redirect-uri (or redirect-uri (page-uri cname)))
-         (ins (awhen oid (get-instance-by-oid class it)))
-         (with-slots *with-slots*)
-         (without-slots *without-slots*)
-         (edit/cont* (lambda ()
-                       (edit/cont class ins redirect-uri
-                            :with-slots with-slots
-                            :without-slots without-slots
-                            :slot-values slot-values))))
-    (load-sml-path "pages/edit.sml")))
+(defmacro edit-page (class &key oid slot-values redirect-uri sml)
+  `(let* ((class  ',class)
+          (oid ,oid)
+          (cname (->string-down ',class))
+          (redirect-uri (or ,redirect-uri (page-uri cname)))
+          (ins (awhen oid (get-instance-by-oid ',class it)))
+          (with-slots *with-slots*)
+          (without-slots *without-slots*)
+          (edit/cont* (lambda ()
+                        (edit/cont ',class ins redirect-uri
+                                   :with-slots with-slots
+                                   :without-slots without-slots
+                                   :slot-values ,slot-values))))
+     (load-sml (or ,sml (sml-path "pages/edit.sml"))
+               ,*web4r-package*)))
 
 (defun drop-instance-by-oid* (class oid)
   (aif (drop-instance-by-oid class oid)
