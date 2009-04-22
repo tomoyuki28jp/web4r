@@ -50,11 +50,17 @@ $.pager.prototype.goto_page = function(page) {
     }
     this.link_start = link_offset[0];
     this.link_end   = link_offset[1];
-    $('.page_summary #item_start').text(this.item_start);
-    $('.page_summary #item_end').text(this.item_end);
+    if (this.item_end === 0) {
+	$('.page_summary').empty();
+    } else {
+	$('.page_summary #item_start').text(this.item_start);
+	$('.page_summary #item_end').text(this.item_end);
+    }
 };
 
 $.pager.prototype.set_page_links = function(start, end) {
+    if (end <= 1) { return $('.page_links ul').replaceWith('<ul></ul>'); }
+
     var links = '<ul>';
     for (var p=start; p<=end; p++) {
         links += (p == this.current_page)
@@ -68,4 +74,6 @@ $.pager.prototype.remove_item = function(n) {
     this.total_items = this.total_items - n;
     $('.page_summary #total_items').text(this.total_items);
     this.set_total_pages();
+    this.goto_page( (this.current_page > this.total_pages)
+		    ? this.total_pages : this.current_page );
 }
