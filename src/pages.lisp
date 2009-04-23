@@ -52,6 +52,7 @@
                                    :with-slots with-slots
                                    :without-slots without-slots
                                    :slot-values ,slot-values))))
+     (declare (ignorable class))
      (load-sml (or ,sml (sml-path "pages/edit.sml"))
                ,*web4r-package*)))
 
