@@ -11,8 +11,7 @@
 (defpackage :customer (:use :cl :web4r))
 (in-package :customer)
 
-(ele:open-store
- '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
+(ele:open-store *example-bdb*)
 
 (defpclass customer ()
   ((name         :length 50 :label "Full Name" :size 30 :index t)

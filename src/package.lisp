@@ -8,6 +8,7 @@
                    :*web4r-dir*
                    :*public-dir*
                    :*sml-dir*
+                   :*example-bdb*
                    :*upload-save-dir*
                    :*tmp-save-dir*
                    :*tmp-files-gc-lifetime*

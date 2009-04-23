@@ -12,7 +12,7 @@
                   (:shadowing-import-from :web4r :defpclass))
 (in-package :blog)
 
-(open-store '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
+(ele:open-store *example-bdb*)
 
 (defpclass blog-user (user)
   ((email :format :email :unique t)

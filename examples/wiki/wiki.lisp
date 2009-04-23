@@ -11,12 +11,12 @@
 (defpackage :wiki (:use :cl :web4r))
 (in-package :wiki)
 
-(ele:open-store
- '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
+(open-store *example-bdb*)
 
 (defpclass wiki ()
   ((title :length 256 :index t)
    (body  :length 3000)))
+
 (defpages wiki :edit-sml (example-path "wiki/sml/edit.sml")
                :show-sml (example-path "wiki/sml/show.sml"))
 
