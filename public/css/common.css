@@ -1,5 +1,5 @@
 body {
-    float:left;
+    float: left;
     font-size: 16px;
     font-family: Verdana,Sans-Serif,Arial;
     line-height: 1.6em;
@@ -40,18 +40,23 @@ label.error {
     margin-left: 5px;
 }
 
+div.page_links {
+    float:left;
+    width:750px;
+}
+
 .page_links ul {
     display:block;
     border:none;
     text-transform:uppercase;
     font-size:13px;
-    margin:20px 0 20px;
+    margin:5px 0 20px;
     padding:0;
 }
 
 .page_links ul li {
-    list-style:none;
     float:left;
+    list-style:none;
     border:1px solid #ccc;
     text-decoration:none;
     margin:0 6px 0 0;
