@@ -1,8 +1,10 @@
 ; To run:
-; 1. replace the parameter of open-store
+; 1. Configure elephant
+; 2. Replace the parameter of open-store if you don't have Elephant configured 
+;    to work with the Berkeley DB
 ;    http://common-lisp.net/project/elephant/doc/elephant.html#Getting-Started
-; 2. compile and load this file
-; 3. go to http://localhost:8080/customer
+; 3. Compile and load this file
+; 4. Go to http://localhost:8080/customer
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (asdf:oos 'asdf:load-op :web4r))

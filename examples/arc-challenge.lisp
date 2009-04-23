@@ -2,8 +2,8 @@
 ; http://www.paulgraham.com/arcchallenge.html
 ; 
 ; To run:
-; 1. compile and load this file
-; 2. go to http://localhost:8080/said
+; 1. Compile and load this file
+; 2. Go to http://localhost:8080/said
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (asdf:oos 'asdf:load-op :web4r))
