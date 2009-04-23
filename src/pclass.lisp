@@ -179,6 +179,10 @@ http://docs.jquery.com/Plugins/Validation"
               `(:remote ,(concat "/ajax/" (->string-down class)  "/unique/"
                                  (awhen ins (oid it))))))))
 
+(defun form-value (slot-id slot-symbol &optional ins)
+  (or (post-parameter slot-id)
+      (aand ins (ignore-errors (slot-value it slot-symbol)))))
+
 (defgeneric form-input (class slot &optional ins))
 (defmethod form-input (class (slot slot-options) &optional ins)
   (with-slots (input format label id length symbol options size) slot
