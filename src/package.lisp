@@ -28,6 +28,7 @@
                    :web4r-path
                    :public-path
                    :sml-path
+                   :example-path
                    :load-sml-path
                    :nl->br
                    :assoc*

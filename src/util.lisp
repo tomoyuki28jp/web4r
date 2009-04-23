@@ -1,9 +1,11 @@
 (in-package :web4r)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun web4r-path  (file) (merge-pathnames file *web4r-dir*))
-  (defun public-path (file) (merge-pathnames file *public-dir*))
-  (defun sml-path    (file) (merge-pathnames file *sml-dir*)))
+  (defun web4r-path   (file) (merge-pathnames file *web4r-dir*))
+  (defun public-path  (file) (merge-pathnames file *public-dir*))
+  (defun sml-path     (file) (merge-pathnames file *sml-dir*))
+  (defun example-path (file)
+    (merge-pathnames file (merge-pathnames "examples/" *web4r-dir*))))
 
 (defmacro load-sml-path (path)
   `(load-sml (sml-path ,path)))
