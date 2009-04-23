@@ -8,11 +8,15 @@ window.onload = function() {
     body.innerHTML = converter.makeHtml(body.innerHTML);
 }
 ")])
+  (append  head  [style :type "text/css" "
+#table_show { width:750px; }
+"])
+
   (replace body
            [body (aif ins
                      [table :id "table_show"
                             (loop for s in slots do
-                                  [tr [th (slot-label s)]
+                                  [tr [th :width "50" (slot-label s)]
                                       [td :id (slot-id s)
                                           (slot-display-value it s)]])]
                    [p "That page doesn't exist"])]))
