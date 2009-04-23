@@ -3,7 +3,6 @@
 
 (in-package :web4r-tests)
 
-(ele:open-store
- '(:clsql (:postgresql "localhost" "test" "postgres" "pgpass")))
+(ele:open-store *example-bdb*)
 (defvar *srv* (start-server))
 ;(5am:run! 'web4r)
