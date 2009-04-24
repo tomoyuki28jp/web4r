@@ -2,9 +2,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *web4r-dir*
-    (awhen (load-time-value #.*compile-file-pathname*)
-      (truename (merge-pathnames
-                 "../" (directory-namestring it))))
+    (asdf:component-pathname (asdf:find-system 'web4r))
     "Pathname of the web4r directory")
 
   (defvar *public-dir* (merge-pathnames "public/" *web4r-dir*)
