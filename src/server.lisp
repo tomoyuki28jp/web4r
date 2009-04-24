@@ -15,7 +15,7 @@
     (concat "http://" host "/")))
 
 (defun page-uri (&rest args)
-  (concat "/" (apply #'join "/" args) "/"))
+  (concat (host-uri) (apply #'join "/" args) "/"))
 
 (defun file-data (name n)
   (aand (post-parameter name) (listp it) (nth n it)))
