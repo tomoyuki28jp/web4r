@@ -1,5 +1,4 @@
 body {
-    float: left;
     font-size: 16px;
     font-family: Verdana,Sans-Serif,Arial;
     line-height: 1.6em;
@@ -41,35 +40,52 @@ label.error {
 }
 
 div.page_links {
-    float:left;
     width:750px;
 }
 
+.page_links {
+    padding: 4px;
+}
+
 .page_links ul {
-    display:block;
-    border:none;
-    text-transform:uppercase;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+}
+
+.page_links li {
     font-size:13px;
-    margin:5px 0 20px;
-    padding:0;
+    list-style-type: none;
+    display: inline;
+    padding-bottom: 1px;
+    padding: 0px  0px  5px 1px;
 }
 
-.page_links ul li {
-    float:left;
-    list-style:none;
-    border:1px solid #ccc;
-    text-decoration:none;
-    margin:0 6px 0 0;
-    padding:5px;
+.page_links a:link, .page_links a:visited {
+    padding: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+    
+    border: 1px solid #a1c0d8;
+    text-decoration: none; 
+    color: #0066aa;
+    background-color: #ffffff;
 }
 
-.page_links ul li:hover {
-    border:1px solid #003f7e;
+.page_links a:hover, .page_links a:active {
+    border: 1px solid #2f9ae1;
+    color: #ffffff;
+    background-color: #2f9ae1;
 }
 
-.page_links ul li span {
-    border:1px solid #003f7e;
-    color:#000;
-    font-weight:700;
-    background-color:#eee;
+.page_links span {
+    padding: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+
+    background-color: #1a9ad8; 
+    color: #ffffff;
+    border-color: #1a9ad8;
+    font-weight: bold;
+    cursor: default;
 }
