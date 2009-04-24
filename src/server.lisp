@@ -10,7 +10,9 @@
        (split #\/ (car (split #\? (request-uri* request))))))
 
 (defun host-uri ()
-  (concat "http://" (host) "/"))
+  (let ((host (or (header-in "X-FORWARDED-HOST" *request*)
+                  (host))))
+    (concat "http://" host "/")))
 
 (defun page-uri (&rest args)
   (concat (host-uri) (apply #'join "/" args) "/"))
