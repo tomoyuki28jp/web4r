@@ -2,7 +2,8 @@
   (append  head  [script :type "text/javascript" :src "/js/jquery-1.3.2.min.js"])
   (append  head  [script :type "text/javascript" :src "/js/jquery.validate.js"])
   (append  head  [script :type "text/javascript" (safe 
-"$(document).ready(function() {
+"$.validator.addMethod('remote', function(value, element) {return true;}, '');
+$(document).ready(function() {
     $('#user_form').validate({
         errorPlacement: function(error, element) {
             error.appendTo( element.parent() )
