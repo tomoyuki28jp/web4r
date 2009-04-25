@@ -65,6 +65,45 @@
               :current-page 10 :links-per-page 10)))
       (is (eq 15 (slot-value i 'web4r::link-end))))))
 
+(defmacro page-link= (page x)
+  (with-gensyms (match regs)
+    `(multiple-value-bind (,match ,regs)
+         (scan-to-strings "\"\?page=([0-9]+)\"" (sml->ml ,x))
+       (declare (ignore ,match))
+       (eq ,page (aand ,regs (->int (elt it 0)))))))
+
+(test prev-link
+  (let ((i (make-instance
+            'pager :total-items 90 :items-per-page 10
+            :current-page  1 :links-per-page 10)))
+    (is (page-link= nil (prev-link* i))))
+  (let ((i (make-instance
+            'pager :total-items 90 :items-per-page 10
+            :current-page  6 :links-per-page 10)))
+    (is (page-link= nil (prev-link* i))))
+  (let ((i (make-instance
+            'pager :total-items 120 :items-per-page 10
+            :current-page  7 :links-per-page 10)))
+    (is-true (page-link= 1 (prev-link* i))))
+  (let ((i (make-instance
+            'pager :total-items 240 :items-per-page 10
+            :current-page  12 :links-per-page 10)))
+    (is-true (page-link= 2 (prev-link* i)))))
+
+(test next-link
+  (let ((i (make-instance
+            'pager :total-items 200 :items-per-page 10
+            :current-page  15 :links-per-page 10)))
+    (is (page-link= nil (next-link* i))))
+  (let ((i (make-instance
+            'pager :total-items 200 :items-per-page 10
+            :current-page  14 :links-per-page 10)))
+    (is-true (page-link= 20 (next-link* i))))
+  (let ((i (make-instance
+            'pager :total-items 120 :items-per-page 10
+            :current-page  3 :links-per-page 10)))
+    (is-true (page-link= 12 (next-link* i)))))
+
 (test get-current-page
   (with-get-parameters (list (cons *page-param* "3"))
     (is (eq 3 (get-current-page))))

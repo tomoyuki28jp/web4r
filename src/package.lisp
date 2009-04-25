@@ -81,6 +81,10 @@
                    :pager
                    :total-pages
                    :get-current-page
+                   :prev-link
+                   :next-link
+                   :prev-link*
+                   :next-link*
                    :page-links
                    :page-summary
                    :w/p

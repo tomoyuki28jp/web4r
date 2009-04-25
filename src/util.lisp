@@ -7,8 +7,8 @@
   (defun example-path (file)
     (merge-pathnames file (merge-pathnames "examples/" *web4r-dir*))))
 
-(defmacro load-sml-path (path)
-  `(load-sml (sml-path ,path)))
+(defmacro load-sml-path (path &rest args)
+  `(load-sml (sml-path ,path) ,@args))
 
 (defun nl->br (x)
   (regex-replace-all #\Newline x (format nil "<br>~%")))

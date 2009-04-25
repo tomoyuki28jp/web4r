@@ -11,7 +11,9 @@
    (item-start     :type integer :accessor item-start)
    (item-end       :type integer :accessor item-end)
    (link-start     :type integer :accessor link-start)
-   (link-end       :type integer :accessor link-end)))
+   (link-end       :type integer :accessor link-end)
+   (next-link      :type string  :accessor next-link :initform ">>")
+   (prev-link      :type string  :accessor prev-link :initform "<<")))
 
 (defun get-current-page ()
   (let ((page (->int (get-parameter *page-param*))))
@@ -38,9 +40,23 @@
                      (t (values (- current-page left)
                                 (+ current-page right)))))))))
 
+(defmacro prev-link* (pager)
+  `(with-slots (links-per-page current-page prev-link) ,pager
+     (let ((page (max 1 (- current-page links-per-page)))
+           (link (prev-link ,pager)))
+       (when (< 1 (link-start ,pager))
+         (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
+
+(defmacro next-link* (pager)
+  `(with-slots (links-per-page current-page next-link total-pages) ,pager
+     (let ((page (min total-pages (+ current-page links-per-page)))
+           (link (next-link ,pager)))
+       (when (< (link-end ,pager) total-pages)
+         (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
+
 (defun page-links (pager)
   (with-slots (total-pages link-start link-end current-page) pager
-    (when (> total-pages 1)
+    (when (plusp total-pages)
       (load-sml-path "paging/page_links.sml"))))
 
 (defun page-summary (pager)
