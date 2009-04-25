@@ -41,7 +41,7 @@ $(document).ready(function() {
 
     $('.page_links a').live('click', function() {
         removeMsgs();
-        pager.goto_page($(this).text());
+        pager.goto_page( $(this).attr('href').split('=')[1] );
         updateList(null, null, '&'+$(this).attr('href').substring(1));
         return false;
     })
