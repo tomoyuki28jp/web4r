@@ -25,8 +25,8 @@
 (defvar *user* (make-instance 'user-class))
 
 (defpclass user ()
-  ((id    :format :alnum  :length (4 12) :unique t)
-   (pass  :format :alnum  :length (4 12) :input :password)))
+  ((id   :format :alnum :length (4 12) :unique t)
+   (pass :format :alnum :length (4 12) :input :password)))
 
 (defun user-class ()      (slot-value *user* 'class))
 (defun user-id-slot ()    (slot-value *user* 'id-slot))
