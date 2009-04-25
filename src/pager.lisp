@@ -58,7 +58,7 @@
 
 (defun page-links (pager &optional params)
   (with-slots (total-pages link-start link-end current-page) pager
-    (when (plusp total-pages)
+    (when (> total-pages 1)
       (load-sml-path "paging/page_links.sml"))))
 
 (defun page-summary (pager)
