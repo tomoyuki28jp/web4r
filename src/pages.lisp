@@ -4,54 +4,54 @@
                     items-per-page links-per-page)
   `(progn
      (defpage ,class (:get (slot ,slot))
-       (index-page ,class :slot slot :sml ,index-sml
+       (index-page ',class :slot slot :sml ,index-sml
                    :items-per-page ,items-per-page
                    :links-per-page ,links-per-page))
      (defpage ,(join "/" class 'show) (oid)
-       (show-page ,class oid :sml ,show-sml))
+       (show-page ',class oid :sml ,show-sml))
      (defpage ,(join "/" class 'edit) (oid)
-       (edit-page ,class :oid oid :sml ,edit-sml))
+       (edit-page ',class :oid oid :sml ,edit-sml))
      (defpage ,(join "/" class 'delete) (oid)
        (delete-page ',class oid))
      (defpage ,(join "/" 'ajax class 'unique) (oid)
        (p (unique? ',class (get-parameters*) oid)))
      (defpage ,(join "/" 'ajax class 'list) (:get slot)
-       (ajax-list ,class :slot slot))
+       (ajax-list ',class :slot slot))
      (defpage ,(join "/" 'ajax class 'delete) (oid)
        (p (drop-instance-by-oid* ',class oid)))))
 
 (defmacro index-page (class &key slot (maxlength 20)
                       plural items-per-page links-per-page sml)
-  `(let* ((class  ',class)
-          (cname  (->string-down ',class))
+  `(let* ((class  ,class)
+          (cname  (->string-down ,class))
           (plural (or ,plural (pluralize cname)))
           (maxlength ,maxlength)
           (per-page (param-per-page* ,items-per-page ,links-per-page)))
      (declare (ignorable web4r::maxlength web4r::per-page))
      (multiple-value-bind (items pager slots)
-         (items-per-page ',class ,slot
+         (items-per-page ,class ,slot
                         :items-per-page ,items-per-page
                         :links-per-page ,links-per-page)
        (load-sml (or ,sml (sml-path "pages/index.sml"))
                  ,*web4r-package*))))
 
 (defmacro show-page (class oid &key sml)
-  `(let ((cname (->string-down ',class))
-         (slots (get-excluded-slots ',class))
-         (ins   (get-instance-by-oid ',class ,oid)))
+  `(let ((cname (->string-down ,class))
+         (slots (get-excluded-slots ,class))
+         (ins   (get-instance-by-oid ,class ,oid)))
      (load-sml (or ,sml (sml-path "pages/show.sml"))
                ,*web4r-package*)))
 
 (defmacro edit-page (class &key oid slot-values redirect-uri sml)
-  `(let* ((class  ',class)
+  `(let* ((class ,class)
           (oid ,oid)
-          (cname (->string-down ',class))
+          (cname (->string-down class))
           (redirect-uri (or ,redirect-uri (page-uri cname)))
-          (ins (awhen oid (get-instance-by-oid ',class it)))
+          (ins (awhen oid (get-instance-by-oid class it)))
           (with-slots *with-slots*)
           (without-slots *without-slots*)
           (edit/cont* (lambda ()
-                        (edit/cont ',class ins redirect-uri
+                        (edit/cont ,class ins redirect-uri
                                    :with-slots with-slots
                                    :without-slots without-slots
                                    :slot-values ,slot-values))))
@@ -172,8 +172,8 @@
 
 (defmacro ajax-list (class &key slot sml)
   `(multiple-value-bind (items pager slots)
-       (items-per-page ',class ,slot)
+       (items-per-page ,class ,slot)
      (declare (ignorable web4r::pager))
-     (let ((cname (->string-down ',class)))
+     (let ((cname (->string-down ,class)))
        (load-sml (or ,sml (sml-path "pages/list.sml"))
                  ,*web4r-package*))))
