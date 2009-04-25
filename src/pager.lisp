@@ -40,21 +40,23 @@
                      (t (values (- current-page left)
                                 (+ current-page right)))))))))
 
-(defmacro prev-link* (pager)
+(defmacro prev-link* (pager &optional params)
   `(with-slots (links-per-page current-page prev-link) ,pager
-     (let ((page (max 1 (- current-page links-per-page)))
-           (link (prev-link ,pager)))
+     (let ((page   (max 1 (- current-page links-per-page)))
+           (link   (prev-link ,pager))
+           (params ,params))
        (when (< 1 (link-start ,pager))
          (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
 
-(defmacro next-link* (pager)
+(defmacro next-link* (pager &optional params)
   `(with-slots (links-per-page current-page next-link total-pages) ,pager
-     (let ((page (min total-pages (+ current-page links-per-page)))
-           (link (next-link ,pager)))
+     (let ((page   (min total-pages (+ current-page links-per-page)))
+           (link   (next-link ,pager))
+           (params ,params))
        (when (< (link-end ,pager) total-pages)
          (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
 
-(defun page-links (pager)
+(defun page-links (pager &optional params)
   (with-slots (total-pages link-start link-end current-page) pager
     (when (plusp total-pages)
       (load-sml-path "paging/page_links.sml"))))

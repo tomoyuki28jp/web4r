@@ -9,26 +9,31 @@
                   (aif items
                       (progn
                         (page-summary pager)
-                        (page-links pager)
+                        (page-links pager
+                                    (concat "&slot=" (order-slot-id class)
+                                            "&order=" (list-order)
+                                            per-page))
                         [table :id "table_list"
-                          [thead :class (concat cname "_updated-at desc")
+                          [thead :class (concat (order-slot-id class) " " (list-order))
                            [tr (loop for s in slots
-                                     as c  = (when (indexed-slot-p class (slot-symbol s)) "sort")
-                                     do [th :class c :id (when c (slot-id s))
-                                            (slot-label s) (when c [img :src "/images/order_no.gif" :alt "order"])]
+                                     as id = (slot-id s)
+                                     as order = (order-param id)
+                                     if (indexed-slot-p class (slot-symbol s))
+                                          do [th :id id :class "sort"
+                                                 [a :href (safe (concat "?slot=" id
+                                                                        "&order=" order
+                                                                        per-page))
+                                                    (slot-label s)]
+                                                 [img :src
+                                                      (if (string= id (get-parameter "slot"))
+                                                          (if (string= (list-order) "asc")
+                                                              "/images/order_asc.gif"
+                                                              "/images/order_desc.gif")
+                                                          "/images/order_no.gif")
+                                                      :alt "order"]]
+                                     else do [th (slot-label s)]
                                      finally (dotimes (x 3) [th (safe "&nbsp;")]))]]
                           [tbody
-                           (mapcar
-                            #'(lambda (x)
-                                [tr
-                                 (loop for s in slots do
-                                       [td (omit (slot-display-value x s) maxlength)]
-                                       finally
-                                       (progn
-                                         [td [a :href (w/p (page-uri cname "show" (oid x))) "Show"]]
-                                         [td [a :href (w/p (page-uri cname "edit" (oid x))) "Edit"]]
-                                         [td [a :href (page-uri cname "delete" (oid x))
-                                                :class "delete" "Delete"]]))])
-                            it)]])
+                           (load-sml-path "pages/list.sml" #.*web4r-package*)]])
                     [p "There is no " cname])
                   [div [a :href (w/p (page-uri cname "edit")) "New " cname]]]))

@@ -3,14 +3,13 @@ $(document).ready(function() {
     var pager = new $.pager();
     var total = $('.page_summary #total_items').text();
     var removeMsgs = function() { $('ul.errors, ul.msgs').remove(); }
-    var updateList = function(item, order, add) {
+    var updateList = function(slot, order, add) {
         var c = $('thead').attr('class').split(' ');
-        var item  = item  || c[0];
+        var slot  = slot  || c[0];
         var order = order || c[1];
         var add   = add   || "";
         add += "&items_per_page="+pager.items_per_page;
-        add += "&links_per_page="+pager.links_per_page;
-        $.get('/ajax/'+class+'/list/?item='+item+'&order='+order+add, function(list) { 
+        $.get('/ajax/'+class+'/list/?slot='+slot+'&order='+order+add, function(list) { 
             $('#table_list tbody').html(list);
         });
     };
@@ -26,6 +25,7 @@ $(document).ready(function() {
         $(this).children('img').attr('src', '/images/order_'+order+'.gif');
         $('thead').attr('class', $(this).attr('id')+' '+order);
         updateList($(this).attr('id'), order);
+	return false;
     })
 
     $('.delete').live('click', function() {
@@ -40,9 +40,10 @@ $(document).ready(function() {
     })
 
     $('.page_links a').live('click', function() {
+	var page = $(this).attr('href').split('page=')[1].split('&')[0];
         removeMsgs();
-        pager.goto_page( $(this).attr('href').split('=')[1] );
-        updateList(null, null, '&'+$(this).attr('href').substring(1));
+        pager.goto_page( page );
+        updateList( null, null, '&'+'page='+page );
         return false;
     })
 })

@@ -1,9 +1,12 @@
 (in-package :web4r)
 
-(defmacro defpages (class &key (index 'updated-at) index-sml show-sml edit-sml)
+(defmacro defpages (class &key slot index-sml show-sml edit-sml
+                    items-per-page links-per-page)
   `(progn
-     (defpage ,class ()
-       (index-page ,class :index ,index :sml ,index-sml))
+     (defpage ,class (:get (slot ,slot))
+       (index-page ,class :slot slot :sml ,index-sml
+                   :items-per-page ,items-per-page
+                   :links-per-page ,links-per-page))
      (defpage ,(join "/" class 'show) (oid)
        (show-page ,class oid :sml ,show-sml))
      (defpage ,(join "/" class 'edit) (oid)
@@ -12,23 +15,23 @@
        (delete-page ',class oid))
      (defpage ,(join "/" 'ajax class 'unique) (oid)
        (p (unique? ',class (get-parameters*) oid)))
-     (defpage ,(join "/" 'ajax class 'list) (:get item order)
-       (ajax-list ',class item order))
+     (defpage ,(join "/" 'ajax class 'list) (:get slot)
+       (ajax-list ,class :slot slot))
      (defpage ,(join "/" 'ajax class 'delete) (oid)
        (p (drop-instance-by-oid* ',class oid)))))
 
-(defmacro index-page (class &key (index 'updated-at) (maxlength 20)
+(defmacro index-page (class &key slot (maxlength 20)
                       plural items-per-page links-per-page sml)
-  (declare (ignorable maxlength))
   `(let* ((class  ',class)
           (cname  (->string-down ',class))
           (plural (or ,plural (pluralize cname)))
-          (slots  (get-excluded-slots ',class))
-          (maxlength ,maxlength))
-     (multiple-value-bind (items pager)
-         (per-page (get-instances-by-class ',class) :index ',index
-                   :items-per-page ,items-per-page
-                   :links-per-page ,links-per-page)
+          (maxlength ,maxlength)
+          (per-page (param-per-page* ,items-per-page ,links-per-page)))
+     (declare (ignorable web4r::maxlength web4r::per-page))
+     (multiple-value-bind (items pager slots)
+         (items-per-page ',class ,slot
+                        :items-per-page ,items-per-page
+                        :links-per-page ,links-per-page)
        (load-sml (or ,sml (sml-path "pages/index.sml"))
                  ,*web4r-package*))))
 
@@ -83,7 +86,7 @@
                  (funcall page msg)
                  (redirect/msgs page msg)))))))
 
-(defun per-page (items &key (index 'updated-at) (sort #'>)
+(defun per-page (items &key (index 'updated-at) (order #'>)
                  items-per-page links-per-page)
   (let* ((total (length items))
          (pager (apply #'make-instance 'pager
@@ -92,8 +95,73 @@
                                (awhen links-per-page `(:links-per-page ,it)))))
          (items (with-slots (item-start item-end items-per-page) pager
                   (when (<= (current-page pager) (total-pages pager))
-                    (subseq (sort items sort :key index) item-start item-end)))))
+                    (subseq (sort items order :key index) item-start item-end)))))
     (values items pager)))
+
+(defun order-slot-id (class &optional slot)
+  (or (awhen (member (get-parameter "slot")
+                     '("updated-at" "created-at") :test #'equal)
+        (car it))
+      (aand (get-parameter "slot")
+            (aand (get-slot-by-id class it)
+                  (indexed-slot-p class (slot-symbol it)))
+            it)
+      slot
+      "updated-at"))
+
+(defun order-slot-symbol (class &optional slot)
+  (let ((id (order-slot-id class slot)))
+    (or (when (string= id "created-at") 'created-at)
+        (aand (get-slot-by-id class id) (slot-symbol it))
+        'updated-at)))
+
+(defun list-order ()
+  (if (string= "asc"
+               (->string-down (get-parameter "order")))
+      "asc" "desc"))
+
+(defun order-param (slot-id)
+  (if (string= slot-id (get-parameter "slot"))
+      (if (string= (list-order) "desc")
+          "asc" "desc")
+      "desc"))
+
+(defun order-fn (slot-type)
+  (if (string= (list-order) "desc")
+      (if (eq slot-type 'integer) #'> #'string>)
+      (if (eq slot-type 'integer) #'< #'string<)))
+
+(defun param-per-page (&optional items-per-page links-per-page)
+  (values (or (aand (->int (get-parameter "items_per_page"))
+                    (min *max-items-per-page* it))
+              items-per-page
+              *items-per-page*)
+          (or (aand (->int (get-parameter "links_per_page"))
+                    (min *max-links-per-page* it))
+              links-per-page
+              *links-per-page*)))
+
+(defun param-per-page* (&optional items-per-page links-per-page)
+  (multiple-value-bind (items-per-page links-per-page)
+      (param-per-page items-per-page links-per-page)
+    (concat "&items_per_page=" items-per-page
+            "&links_per_page=" links-per-page)))
+
+(defun items-per-page (class index &key items-per-page links-per-page)
+  (let* ((index (order-slot-symbol class index))
+         (slots (get-excluded-slots class))
+         (type  (if (member index '(updated-at created-at))
+                    'integer
+                    (aand (get-slot class index) (slot-type it)))))
+    (when type
+      (multiple-value-bind (items-per-page links-per-page)
+          (param-per-page items-per-page links-per-page)
+        (multiple-value-bind (items pager)
+            (per-page (get-instances-by-class class)
+                      :index index :order (order-fn type)
+                      :items-per-page items-per-page
+                      :links-per-page links-per-page)
+          (values items pager slots))))))
 
 (defun unique? (class param oid)
   (if (aand (get-slot-by-id class (caar param))
@@ -102,23 +170,10 @@
                       (get-instance-by-oid class oid)))
       "true" "false"))
 
-(defun ajax-list (class id order)
-  (let ((slots (get-excluded-slots class))
-        (cname (->string-down class))
-        (type  'integer)
-        (items-per-page (get-parameter "items_per_page"))
-        (links-per-page (get-parameter "links_per_page")))
-    (aand (or (aand (get-slot-by-id class id)
-                    (setf type (slot-type it))
-                    (slot-symbol it))
-              (aand (cadr (split "_" id))
-                    (if (equal it "updated-at") 'updated-at
-                         (when (equal it "created-at") 'created-at))))
-          (let ((sort (if (string= "desc" (->string-down order))
-                          (if (eq type 'integer) #'> #'string>)
-                          (if (eq type 'integer) #'< #'string<))))
-            (when-let (items (per-page (get-instances-by-class class)
-                                  :index it :sort sort
-                                  :items-per-page (->int items-per-page)
-                                  :links-per-page (->int links-per-page)))
-              (load-sml-path "ajax/list.sml"))))))
+(defmacro ajax-list (class &key slot sml)
+  `(multiple-value-bind (items pager slots)
+       (items-per-page ',class ,slot)
+     (declare (ignorable web4r::pager))
+     (let ((cname (->string-down ',class)))
+       (load-sml (or ,sml (sml-path "pages/list.sml"))
+                 ,*web4r-package*))))

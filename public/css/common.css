@@ -13,7 +13,8 @@ span.required_mark  { font-weight: bold; color: #F60; }
 div                 { margin:8px; }
 table               { text-align:left; }
 th                  { font-weight: normal; }
-th.sort             { font-weight: bold; color: #039; cursor:pointer; cursor:hand; }
+th.sort a           { text-decoration: none; cursor:pointer; cursor:hand;
+		      font-weight: bold; color: #039; }
 th.sort img         { margin: 5px; vertical-align: middle; }
 #table_list         { border-collapse:collapse; }
 #table_list th      { padding: 10px 8px; border-bottom: 2px solid #6678b1; }

@@ -22,6 +22,8 @@
                    :*links-per-page*
                    :*with-slots*
                    :*without-slots*
+                   :*max-items-per-page*
+                   :*max-links-per-page*
                    :*login-msgs*
                    :*thumbnail-width*
                    :*thumbnail-height*

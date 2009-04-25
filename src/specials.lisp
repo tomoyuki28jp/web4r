@@ -111,6 +111,12 @@
 
 (defvar *without-slots* nil)
 
+(defvar *max-items-per-page* 50
+  "Maximum number to display items per page")
+
+(defvar *max-links-per-page* 30
+  "Maximum number to display links per page")
+
 (defvar *login-msgs*
   '((:login-failed      . "Wrong username and password combination")
     (:login-succeeded   . "Logged in")

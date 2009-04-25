@@ -81,6 +81,7 @@
             'pager :total-items 90 :items-per-page 10
             :current-page  6 :links-per-page 10)))
     (is (page-link= nil (prev-link* i))))
+
   (let ((i (make-instance
             'pager :total-items 120 :items-per-page 10
             :current-page  7 :links-per-page 10)))

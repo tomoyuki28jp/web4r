@@ -499,15 +499,15 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
         as i = (make-instance 'testdb1 :name n :updated-at n)
         do (setf (slot-value i 'updated-at) n))
   (with-get-parameters '(("page" . "1"))
-    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
+    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :order #'<)
           for n from 1 to 10
           do (is (eq n (slot-value i 'name)))))
   (with-get-parameters '(("page" . "2"))
-    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
+    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :order #'<)
           for n from 11 to 20
           do (is (eq n (slot-value i 'name)))))
   (with-get-parameters '(("page" . "3"))
-    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :sort #'<)
+    (loop for i in (per-page (ele:get-instances-by-class 'testdb1) :order #'<)
           for n from 21 to 26
           do (is (eq n (slot-value i 'name)))))
   (with-get-parameters '(("page" . "4"))

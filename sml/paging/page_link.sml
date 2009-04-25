@@ -1,1 +1,2 @@
-[li [a :href (concat "?" *page-param* "=" page) link]]
+[li [a :href (safe (concat "?" *page-param* "=" page params))
+       link]]
