@@ -1,3 +1,12 @@
+Version 0.2.2
+2009-04-27
+Bug fixes
+Implemented list sorting which works without js
+Added prev-link like "<<" and next-link like ">>" in pager
+Change the data store type in examples and tests from postgresql with clsql to BDB
+Added wiki example
+Redefined (index|show|edit)-page as macros. Now we can pass a sml file to load.
+
 Version 0.2.1
 2009-04-22
 Bug fix: asynchronous uniquness validation of a user id
