@@ -12,10 +12,10 @@ ul.errors           { color: #F60; }
 span.required_mark  { font-weight: bold; color: #F60; }
 div                 { margin:8px; }
 table               { text-align:left; }
-th                  { font-weight: normal; }
+th                  { font-weight: normal; vertical-align: middle; }
 th.sort a           { text-decoration: none; cursor:pointer; cursor:hand;
-		      font-weight: bold; color: #039; }
-th.sort img         { margin: 5px; vertical-align: middle; }
+                      font-weight: bold; color: #039; }
+th.sort img         { margin: 5px; }
 #table_list         { border-collapse:collapse; }
 #table_list th      { padding: 10px 8px; border-bottom: 2px solid #6678b1; }
 #table_list td      { border-bottom: 1px solid #ccc; padding: 6px 8px; }
