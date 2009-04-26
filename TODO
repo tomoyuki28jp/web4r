@@ -1,9 +1,11 @@
 -*- Mode: Outline -*-
 
 * TODO
+- Support more browsers (only tested with Firefox 3)
+- Support elephant v1.0
+
 - Write tests for GC
 - Integration testing
 - Support more lisp implementations
 - Performance testing
 - Write documents
-- Support elephant v1.0
