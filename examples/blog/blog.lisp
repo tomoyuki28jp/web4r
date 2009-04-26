@@ -33,14 +33,14 @@
 (defpage blog (:default)
   (multiple-value-bind (items pager)
       (per-page (get-instances-by-class 'blog-user))
-    (load-sml (web4r-path "examples/blog/sml/blog.sml"))))
+    (load-sml (example-path "blog/sml/blog.sml"))))
 
 (defpage blog/index (user-id)
   (let ((slots (get-excluded-slots 'blog-post))
         (owner-p (aand user-id (equal it (login-user-id)))))
     (multiple-value-bind (items pager)
         (per-page (get-instances-by-value 'blog-post 'user-oid (get-user-oid user-id)))
-      (load-sml (web4r-path "examples/blog/sml/blog_index.sml")))))
+      (load-sml (example-path "blog/sml/blog_index.sml")))))
 
 (defpage blog/edit (oid :auth)
   (when oid (blog-owner-check oid))
@@ -55,7 +55,7 @@
   (let ((ins (get-instance-by-oid 'blog-post oid)))
     (multiple-value-bind (comments pager)
         (per-page (get-instances-by-value 'comment 'blog-oid oid))
-      (load-sml (web4r-path "examples/blog/sml/blog_show.sml")))))
+      (load-sml (example-path "blog/sml/blog_show.sml")))))
 
 (defun blog-owner-check (oid)
   (unless (owner-p 'blog-post 'user-oid oid)
