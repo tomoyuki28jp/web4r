@@ -130,7 +130,6 @@
                    :updated-at
                    :oid
                    :get-instance-by-oid
-                   :drop-instance
                    :drop-instance-by-oid
                    :drop-instances-by-class
                    :edit-upload-file

@@ -90,11 +90,7 @@ hide it only on pages where the request uri matches to the regexp")
                 class))
 
 (defun indexed-slot-p (class slot)
-  (map-indices #'(lambda (k v)
-                   (declare (ignore v))
-                   (when (eq k slot)
-                     (return-from indexed-slot-p t)))
-               (find-class-index class)))
+  (ignore-errors (find-inverted-index class slot)))
 
 (defun slot-id* (class slot)
   (concat (->string-down class) "_"
@@ -320,10 +316,9 @@ http://docs.jquery.com/Plugins/Validation"
   (ignore-errors (ele::oid instance)))
 
 (defun get-instance-by-oid (class oid)
-  (get-value (->int oid) (find-class-index class)))
-
-(defun drop-instance (instance)
-  (drop-instances (list instance)))
+  (awhen (ele::controller-recreate-instance *store-controller* oid)
+    (when (typep it class)
+      it)))
 
 (defun drop-instance-by-oid (class oid)
   (aand (get-instance-by-oid class oid)
