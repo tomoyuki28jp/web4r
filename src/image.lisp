@@ -6,7 +6,7 @@
   (let* ((file  (namestring file))
          (type  (trivial-shell:shell-command (concat "file " file)))
          (s (split #\Space (string-trim '(#\Newline) type))))
-    (cond ((equalp "image" (nth 2 s))
+    (cond ((equalp "image" (ignore-errors (subseq (nth 2 s) 0 5)))
            (cond ((equalp "PNG"  (nth 1 s)) "image/png")
                  ((equalp "JPEG" (nth 1 s)) "image/jpeg")
                  ((equalp "GIF"  (nth 1 s)) "image/gif")))
