@@ -1,7 +1,7 @@
 $.pager = function(total_items, current_page) {
     this.total_items = total_items || parseInt($('.page_summary #total_items').text());
-    this.items_per_page = parseInt($('.page_summary').attr('items_per_page')) || 10;
-    this.links_per_page = parseInt($('.page_summary').attr('links_per_page')) || 10;
+    this.items_per_page = parseInt($('#items_per_page').attr('class')) || 10;
+    this.links_per_page = parseInt($('#links_per_page').attr('class')) || 10;
     this.current_page = current_page || 1;
     this.set_total_pages();
     this.set_item_start();

@@ -1,5 +1,6 @@
-[div :class "page_summary" :items_per_page items-per-page
-                           :links_per_page links-per-page
+[div :class "page_summary"
+     [span :id "items_per_page" :class items-per-page]
+     [span :id "links_per_page" :class links-per-page]
      "Results "
      [span :id "item_start" item-start]
      " - "
