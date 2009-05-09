@@ -196,11 +196,10 @@
           (:shadow :defpclass))))
   (define-web4r-package))
 
-(flet ((int (x) (parse-integer (remove #\. x))))
-  (loop for v in '((:hunchentoot . "1.0.0")
-                   (:my-util     . "0.0.2")
-                   (:sml         . "0.1.2")
-                   (:inflector   . "0.1.0"))
-        as ver = (asdf:component-version (asdf:find-system (car v)))
-        unless (>= (int ver) (int (cdr v)))
-        do (error "~S must be version ~S or higher" (car v) (cdr v))))
+(in-package :web4r)
+
+(asdf-version<= :hunchentoot "1.0.0")
+(asdf-version<= :my-util     "0.0.3")
+(asdf-version<= :sml         "0.1.2")
+(asdf-version<= :inflector   "0.1.0")
+(asdf-version=  :elephant    "0.9")
