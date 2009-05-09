@@ -56,6 +56,12 @@ hide it only on pages where the request uri matches to the regexp")
   (find-if #'(lambda (s) (eq (slot-symbol s) symbol))
            (get-slots class)))
 
+(defun get-slots-if (fn class)
+  (remove-if-not fn (get-slots class)))
+
+(defun get-excluded-slots-if (fn class)
+  (remove-if-not fn (get-excluded-slots class)))
+
 (defun get-slot-by-id (class id)
   (car (get-slots-if
         #'(lambda (s)
@@ -74,20 +80,11 @@ hide it only on pages where the request uri matches to the regexp")
                        (aand *with-slots* (not (member symbol it))))
             collect s)))
 
-(defun get-slots-if (fn class)
-  (remove-if-not fn (get-excluded-slots class)))
+(defun get-file-slots (class)
+  (get-slots-if #'(lambda (s) (eq (slot-input s) :file)) class))
 
-(defun file-slots (class)
-  (get-slots-if #'(lambda (s) (eq (slot-input s)  :file)) class))
-
-(defun date-slots (class)
-  (get-slots-if #'(lambda (s) (eq (slot-format s) :date)) class))
-
-(defun unique-slots (class) (get-slots-if #'slot-unique class))
-
-(defun indexed-slots (class)
-  (get-slots-if #'(lambda (s) (indexed-slot-p class (slot-symbol s)))
-                class))
+(defun get-excluded-file-slots (class)
+  (get-excluded-slots-if #'(lambda (s) (eq (slot-input s) :file)) class))
 
 (defun indexed-slot-p (class slot)
   (map-indices #'(lambda (k v)
@@ -226,7 +223,7 @@ http://docs.jquery.com/Plugins/Validation"
     (load-sml-path "form/input/comment.sml")))
 
 (defmacro form-for/cont (cont &key class instance (submit "submit"))
-  `(%form/cont (file-slots ,class) ,cont
+  `(%form/cont (get-excluded-file-slots ,class) ,cont
      :id (concat (->string-down ,class) "_form")
      [table
       (loop for s in (get-excluded-slots ,class)
@@ -327,7 +324,8 @@ http://docs.jquery.com/Plugins/Validation"
 
 (defun drop-instance-by-oid (class oid)
   (aand (get-instance-by-oid class oid)
-        (progn (drop-instance it)
+        (progn (delete-saved-files class it)
+               (drop-instance it)
                t)))
 
 (defun drop-instances-by-class (class)
@@ -369,7 +367,7 @@ http://docs.jquery.com/Plugins/Validation"
   (when (= (random *tmp-files-gc-probability*) 0)
     (bordeaux-threads:make-thread
      (lambda () (tmp-files-gc))))
-  (loop for s in (file-slots class)
+  (loop for s in (get-excluded-file-slots class)
         as new-file = (file-path (slot-id s))
         as tmp-file = (cont-session s)
         as saved-file = (aand ins (ignore-errors (slot-value it (slot-symbol s))))
@@ -402,6 +400,11 @@ http://docs.jquery.com/Plugins/Validation"
 (defun delete-saved-file (file)
   (ignore-errors
     (delete-file (merge-pathnames file *upload-save-dir*))))
+
+(defun delete-saved-files (class ins)
+  (loop for s in (get-file-slots class)
+        as file = (ignore-errors (slot-value ins (slot-symbol s)))
+        when file do (delete-saved-file file)))
 
 (defun delete-tmp-file (file)
   (ignore-errors

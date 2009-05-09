@@ -110,9 +110,9 @@
                    :get-slot
                    :get-excluded-slots
                    :get-slots-if
-                   :file-slots
-                   :date-slots
-                   :unique-slots
+                   :get-excluded-slots-if
+                   :get-file-slots
+                   :get-excluded-file-slots
                    :indexed-slot-p
                    :slot-display-value
                    :slot-save-value

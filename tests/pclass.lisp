@@ -484,8 +484,8 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
                  (list (web4r::error-msg :not-a-unique (web4r::slot-label (get-slot 'testdb1 'email))))))
       (is-false (class-validation-errors 'testdb1 i))))))
 
-(test file-slots
-  (is (equal (web4r::file-slots 'testdb1)
+(test get-file-slots
+  (is (equal (get-file-slots 'testdb1)
              (list (get-slot 'testdb1 'image)))))
 
 (test oid
