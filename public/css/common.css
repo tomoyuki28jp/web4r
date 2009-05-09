@@ -9,6 +9,7 @@ h1                  { font-size: 30px; color: #150517; }
 ul                  { font-weight: bold; }
 ul.msgs             { color: #0000FF; }
 ul.errors           { color: #F60; }
+span.form_comment   { color: #888888; margin-left: 5px; }
 span.required_mark  { font-weight: bold; color: #F60; }
 div                 { margin:8px; }
 table               { text-align:left; }

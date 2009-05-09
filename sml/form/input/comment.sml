@@ -1,1 +1,1 @@
-[span :id "form_comment" "(" comment ")"]
+[span :class "form_comment" "(" comment ")"]
