@@ -20,9 +20,9 @@
                                      as order = (order-param id)
                                      if (indexed-slot-p class (slot-symbol s))
                                           do [th :id id :class "sort"
-                                                 [a :href (safe (concat "?slot=" id
-                                                                        "&order=" order
-                                                                        per-page))
+                                                 [a :href (concat "?slot=" id
+                                                                  "&order=" order
+                                                                  per-page)
                                                     (slot-label s)]
                                                  [img :src
                                                       (if (string= id (get-parameter "slot"))
