@@ -1,3 +1,12 @@
+Version 0.2.3
+2009-05-11
+Renamed defpages to genpages
+Updated to use my-util version 0.0.3 (asdf-version)
+Updated to delete uploaded files when dropping an instance
+Bug fix in labels for radio and checkbox input forms
+Fixed to generate valid (x)html except js validation attributes. Now works with IE and Safari.
+Bug fix in mime-type function for image types
+
 Version 0.2.2
 2009-04-27
 Bug fixes

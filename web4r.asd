@@ -5,7 +5,7 @@
 (in-package :web4r-asd)
 
 (defsystem :web4r
-  :version "0.2.2"
+  :version "0.2.3"
   :name    "web4r"
   :author  "Tomoyuki Matsumoto <tomoyuki28jp@gmail.com>"
   :licence "BSD"
