@@ -297,8 +297,8 @@
     (is (safe= "hello<br>world"
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
     (is (string=* "<a href=\"http://localhost:8080/upload/test.gif\">
-<img src=\"http://localhost:8080/thumbnail/?file=test.gif&type=upload&width=&height=\"
- alt=\"testdb1_image\" /></a>"
+<img src=\"http://localhost:8080/thumbnail/?file=test.gif&amp;type=upload&amp;width=&amp;height=\"
+ alt=\"testdb1_image\" /></a>" 
                   (sml->ml (slot-display-value i (get-slot 'testdb1 'image)))))))
 
 (test slot-save-value
@@ -355,11 +355,11 @@ world"         (slot-save-value (get-slot 'testdb1 'note))))))
                 (sml->ml (form-label (get-slot 'testdb1 'password)))))
   (is (string=* "<label for=\"testdb1_email\">Email</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'email)))))
-  (is (string=* "<label for=\"testdb1_sex\">Sex</label>"
+  (is (string=* "<label for=\"testdb1_sex_male\">Sex</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'sex)))))
   (is (string=* "<label for=\"testdb1_marriage\">Marriage</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'marriage)))))
-  (is (string=* "<label for=\"testdb1_hobbies\">Hobbies</label>"
+  (is (string=* "<label for=\"testdb1_hobbies_sports\">Hobbies</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'hobbies)))))
   (is (string=* "<label for=\"testdb1_birth_date_y\">Birth Date</label>"
                 (sml->ml (form-label (get-slot 'testdb1 'birth-date)))))
