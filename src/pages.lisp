@@ -1,6 +1,6 @@
 (in-package :web4r)
 
-(defmacro defpages (class &key slot index-sml show-sml edit-sml
+(defmacro genpages (class &key slot index-sml show-sml edit-sml
                     items-per-page links-per-page)
   `(progn
      (defpage ,class (:get (slot ,slot))

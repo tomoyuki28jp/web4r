@@ -135,7 +135,7 @@
                    :drop-instances-by-class
                    :edit-upload-file
                    ; --- pages ---
-                   :defpages
+                   :genpages
                    :index-page
                    :show-page
                    :edit-page

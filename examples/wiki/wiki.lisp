@@ -19,7 +19,7 @@
   ((title :length 256 :index t)
    (body  :length 3000)))
 
-(defpages wiki :edit-sml (example-path "wiki/sml/edit.sml")
+(genpages wiki :edit-sml (example-path "wiki/sml/edit.sml")
                :show-sml (example-path "wiki/sml/show.sml"))
 
 (defparameter *srv* (start-server))
