@@ -52,6 +52,7 @@
                    :debug-mode-off
                    ; --- cont ---
                    :cont-session
+                   :renew-cont-lifetime
                    :rem-cont-session
                    :sid
                    :a/cont
