@@ -44,7 +44,7 @@
   "Debug mode flag")
 
 (defvar *sid->cid*  (make-hash-table)
-  "sid(session-id) -> cid(continuation-id) : mapping index")
+  "sid(session-id) -> cid(continuation-id) : mapping table")
 
 (defvar *cid->cont* (make-hash-table :test 'equal)
   "cid(continuation-id) -> instance of the cont structure")
@@ -52,7 +52,7 @@
 (defvar *cid-generated-order*
   (make-array 0 :fill-pointer 0 :adjustable t)
   "cids by the order of their generated time.
-   this will be used to destroy expired continuations")
+   this is used to destroy expired continuations")
 
 (defvar *cont-gc-lifetime* 1440
   "continuation lifetime")

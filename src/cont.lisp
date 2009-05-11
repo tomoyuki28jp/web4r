@@ -56,9 +56,8 @@
         (destroy-cont (elt *cid-generated-order* 0))
         (let ((mid (round (/ end 2))))
           (if (cont-expired-p (elt *cid-generated-order* mid))
-              (progn
-                (destroy-conts 0 mid)
-                (cont-gc))
+              (progn (destroy-conts 0 mid)
+                     (cont-gc))
               (cont-gc (1- mid)))))))
 
 (defun cont-expired-p (cid)
@@ -88,6 +87,14 @@
       (remhash sid *sid->cid*)
       (dolist (cid cids) (destroy-cont cid))
       (remhash sid *sid->cid*))))
+
+(defun renew-cont-lifetime (cid)
+  (when (get-cont cid)
+    (let ((cont (gethash cid *cid->cont*)))
+      (setf (cont-generated-time cont) (get-universal-time))
+            (gethash cid *cid->cont*) cont)
+    (vector-push-extend
+     cid (delete cid *cid-generated-order* :test #'equal))))
 
 (setf *session-removal-hook*
       #'(lambda (session)
