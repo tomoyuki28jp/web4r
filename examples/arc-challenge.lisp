@@ -9,7 +9,7 @@
   (asdf:oos 'asdf:load-op :web4r))
 
 (in-package :cl-user)
-(defpackage :arc (:use :cl :web4r))
+(defpackage :arc (:use :cl :web4r :sml))
 (in-package :arc)
 
 ; Arc:   codetree of 23 nodes: 15 leaves/tokens + 8 interior nodes

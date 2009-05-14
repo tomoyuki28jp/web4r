@@ -10,11 +10,12 @@
   (asdf:oos 'asdf:load-op :web4r))
 
 (in-package :cl-user)
-(defpackage :blog (:use :cl :web4r :elephant)
-                  (:shadowing-import-from :web4r :defpclass))
+(defpackage :blog
+  (:use :cl :web4r :elephant :my-util :sml :hunchentoot)
+  (:shadowing-import-from :web4r :defpclass))
 (in-package :blog)
 
-(ele:open-store *example-bdb*)
+(open-store *example-bdb*)
 
 (defpclass blog-user (user)
   ((email :format :email :unique t)

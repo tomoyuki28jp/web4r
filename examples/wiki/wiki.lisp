@@ -13,7 +13,7 @@
 (defpackage :wiki (:use :cl :web4r))
 (in-package :wiki)
 
-(open-store *example-bdb*)
+(ele:open-store *example-bdb*)
 
 (defpclass wiki ()
   ((title :length 256 :index t)
