@@ -14,6 +14,9 @@
            :*image-public-dirs*
            :*debug-log-file*
            :*debug-mode*
+           :*cont-gc-lifetime*
+           :*cont-gc-probability*
+           :*error-formats*
            :*valid-email-format*
            :*page-param*
            :*items-per-page*
