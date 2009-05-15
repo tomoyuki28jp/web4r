@@ -1,17 +1,26 @@
 (in-package :web4r)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun web4r-path   (file) (merge-pathnames file *web4r-dir*))
-  (defun public-path  (file) (merge-pathnames file *public-dir*))
-  (defun sml-path     (file) (merge-pathnames file *sml-dir*))
+  (defun web4r-path (file)
+    "Returns a pathname of the FILE under the web4r directory"
+    (merge-pathnames file *web4r-dir*))
+
+  (defun public-path (file)
+    "Returns a pathname of the FILE under the public directory"
+    (merge-pathnames file *public-dir*))
+
+  (defun sml-path (file)
+    "Returns a pathname of the FILE under the sml directory"
+    (merge-pathnames file *sml-dir*))
+
   (defun example-path (file)
-    (merge-pathnames file (merge-pathnames "examples/" *web4r-dir*))))
+    "Returns a pathname of the FILE under the examples directory"
+    (merge-pathnames
+     file (merge-pathnames "examples/" *web4r-dir*))))
 
 (defmacro load-sml-path (path &rest args)
+  "Loads a sml file placed in the PATH under the sml directory"
   `(load-sml (sml-path ,path) ,@args))
-
-(defun nl->br (x)
-  (regex-replace-all #\Newline x (format nil "<br>~%")))
 
 (defun assoc* (idx alist &key (test #'eql))
   (reduce (lambda (alist idx)
@@ -35,6 +44,9 @@
         alist)))
 
 (defun add-parameter (link key value)
+  "Adds a get parameter named KEY with the VALUE to the LINK
+Example:
+(add-parameter \"http://host/\" \"k1\" \"v1\") ;=> \"http://host/?k1=v1\""
   (let ((param (concat key "=" value)))
     (multiple-value-bind (replaced matchp)
         (regex-replace (concat "(" key  "=[^&]+)") link param)
@@ -48,11 +60,18 @@
                 (concat link "&" param)))))))
 
 (defun add-parameters (link &rest parameters)
+  "Adds get parameters PARAMETERS to the LINK
+Example:
+(add-parameters \"http://host/\" \"k1\" \"v1\" \"k2\" \"v2\")
+;=> \"http://host/?k1=v1&k2=v2\""
   (loop for (k v) on parameters by #'cddr
         as l = (add-parameter link k v) then (add-parameter l k v)
         finally (return l)))
 
 (defun rem-parameter (link key)
+  "Removes a get parameter named KEY from the LINK
+Example:
+(rem-parameter \"http://host/?k1=v1\" \"k1\") ;=> \"http://host/\""
   (let* ((new (regex-replace (concat "(" key  "=[^&]+&?)") link ""))
          (len (length new)))
     (if (member (subseq new (1- len)) '("?" "&") :test #'equal)
@@ -60,6 +79,10 @@
         new)))
 
 (defun omit (obj max &optional (omark "..."))
+  "Returns (concat (subseq (->string OBJ) 0 MAX) OMARK) if the length of 
+OBJ exceeds the MAX and (->string OBJ) otherwise.
+Example: 
+(omit \"12345\" 3) ;=>  \"123...\""
   (let ((str (->string obj)))
     (if (<= (length str) max)
         str
@@ -70,6 +93,20 @@
     (aand s (file-length it))))
 
 (defun time-format (format &optional (time (get-universal-time)))
+  "Returns formatted string time from the universal-time TIME and the 
+control-string FORMAT.
++ -------+-----------------+
+| format |   description   |
++--------+-----------------+
+| ~y     | year   (~4,'0d) |
+| ~m     | month  (~2,'0d) |
+| ~d     | date   (~2,'0d) |
+| ~h     | hour   (~2,'0d) |
+| ~i     | minute (~2,'0d) |
+| ~s     | second (~2,'0d) |
++--------+-----------------+
+Example: 
+(time-format \"~y-~m-~d ~h:~i:~s\" 3443621047) ;=> \"2009-02-15 02:24:07\""
   (multiple-value-bind (s i h d m y) (decode-universal-time time)
     (let ((y (format nil "~4,'0d" y))
           (m (format nil "~2,'0d" m))

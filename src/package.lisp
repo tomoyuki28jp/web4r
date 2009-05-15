@@ -34,14 +34,10 @@
            :sml-path
            :example-path
            :load-sml-path
-           :nl->br
-           :assoc*
-           :replace-assoc*
            :add-parameter
            :add-parameters
            :rem-parameter
            :omit
-           :file-length*
            :time-format
            ; --- debug ---
            :ps
