@@ -13,7 +13,6 @@
            :*tmp-files-gc-probability*
            :*image-public-dirs*
            :*debug-log-file*
-           :*debug-mode*
            :*cont-gc-lifetime*
            :*cont-gc-probability*
            :*error-formats*
@@ -44,7 +43,6 @@
            :with-post-parameters
            :with-get-parameters
            :debug-log
-           :backtrace-log
            :debug-mode-on
            :debug-mode-off
            ; --- cont ---
