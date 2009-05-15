@@ -61,9 +61,12 @@
       (with-output-to-string (*sml-output*)
         (if (get-cont (cid))
             (call-cont (cid))
-            (multiple-value-bind (fn paths) (get-page (request-uri* request))
-              (if fn (let ((*page-uri-paths* paths)) (funcall fn))
-                     (hunchentoot::list-request-dispatcher request))))))))
+            (multiple-value-bind (fn paths)
+                (get-page (request-uri* request))
+              (if fn
+                  (let ((*page-uri-paths* paths))
+                    (funcall fn))
+                  (hunchentoot::list-request-dispatcher request))))))))
 
 (defun get-page (uri)
   (labels ((get-page* (idx alist &optional (path 0))
@@ -107,8 +110,10 @@
 
 (defun page (page &rest args)
   (multiple-value-bind (fn paths) (get-page page)
-    (aif fn (let ((*page-uri-paths* paths)) (apply it args))
-            (setf (return-code *reply*) +http-not-found+))))
+    (aif fn
+         (let ((*page-uri-paths* paths))
+           (apply it args))
+         (setf (return-code *reply*) +http-not-found+))))
 
 ; --- Messages --------------------------------------------------
 
