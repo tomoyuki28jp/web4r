@@ -186,6 +186,6 @@
 
 (asdf-version<= :hunchentoot "1.0.0")
 (asdf-version<= :my-util     "0.0.3")
-(asdf-version<= :sml         "0.1.2")
+(asdf-version<= :sml         "0.1.4")
 (asdf-version<= :inflector   "0.1.0")
 (asdf-version=  :elephant    "0.9")
