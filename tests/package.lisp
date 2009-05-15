@@ -1,8 +1,8 @@
 (in-package :cl-user)
 
 (defpackage :web4r-tests
-  (:use :cl :web4r :5am :drakma)
-  (:import-from :web4r :set-page :get-page)
+  (:use :cl :web4r :5am :drakma :my-util :sml)
+  (:import-from :web4r :set-page :get-page :assoc* :replace-assoc*)
   (:shadowing-import-from
    :hunchentoot :*header-stream* :cookie-path :cookie-expires
    :cookie-domain :parameter-error :cookie-name :cookie-value)

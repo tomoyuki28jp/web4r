@@ -294,7 +294,7 @@
                (slot-display-value i (get-slot 'testdb1 'zip-code))))
     (is (equal (format nil "hello~%world")
                (slot-display-value i (get-slot 'testdb1 'note))))
-    (is (safe= "hello<br>world"
+    (is (safe= "hello<br />world"
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
     (is (string=* "<a href=\"http://localhost:8080/upload/test.gif\">
 <img src=\"http://localhost:8080/thumbnail/?file=test.gif&amp;type=upload&amp;width=&amp;height=\"
@@ -555,7 +555,7 @@ world"))
                  (slot-display-value i (get-slot 'testdb1 'zip-code))))
       (is (equal (format nil "hello~%world")
                  (slot-display-value i (get-slot 'testdb1 'note))))
-      (is (safe= "hello<br>world"
+      (is (safe= "hello<br />world"
                  (slot-display-value i (get-slot 'testdb1 'note) :nl->br t))))))
 
 (test update-pinstance
@@ -610,5 +610,6 @@ World2"))
                  (slot-display-value i (get-slot 'testdb1 'zip-code))))
       (is (equal (format nil "Hello~%World2")
                  (slot-display-value i (get-slot 'testdb1 'note))))
-      (is (safe= "Hello<br>World2"
+      (is (safe= "Hello<br />World2"
                  (slot-display-value i (get-slot 'testdb1 'note) :nl->br t))))))
+
