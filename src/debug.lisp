@@ -12,7 +12,7 @@
                             :unbound)))))
 
 (defmacro with-post-parameters (parameters &rest body)
-  "Executes the BODY with the alist of post parameters PARAMETERS"
+  "Executes the BODY with the alist of post PARAMETERS"
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
@@ -20,7 +20,7 @@
      ,@body))
 
 (defmacro with-get-parameters (parameters &rest body)
-  "Executes the BODY with the alist of get parameters PARAMETERS"
+  "Executes the BODY with the alist of get PARAMETERS"
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
