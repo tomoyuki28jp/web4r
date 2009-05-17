@@ -136,7 +136,8 @@
                 (t x)))))
 
 (defmacro cont/lambda (cont)
-  (let (*last-posts* (expanded (->lambda (cont-expand cont))))
+  (let* (*last-posts*
+         (expanded (->lambda (cont-expand cont))))
     (if *last-posts*
         (append (subseq expanded 0 2)
                 `((let (,@(loop for (s p) in *last-posts* collect

@@ -612,4 +612,3 @@ World2"))
                  (slot-display-value i (get-slot 'testdb1 'note))))
       (is (safe= "Hello<br />World2"
                  (slot-display-value i (get-slot 'testdb1 'note) :nl->br t))))))
-
