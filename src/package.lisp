@@ -24,6 +24,7 @@
            :*without-slots*
            :*max-items-per-page*
            :*max-links-per-page*
+           :*user*
            :*login-msgs*
            :*thumbnail-width*
            :*thumbnail-height*
@@ -136,17 +137,17 @@
            :show-page
            :edit-page
            :delete-page
-           :per-page
            :edit/cont
+           :per-page
            :make-pinstance
            :update-pinstance
+           :item-list
            ; --- user.lisp ---
            :login-msg
-           :*user*
            :id
            :pass
            :user
-           :user-class
+           :user*
            :user-id-slot
            :user-pass-slot
            :user-id-label
@@ -161,7 +162,6 @@
            :login-user
            :login-user-id
            :login-user-oid
-           :login/cont
            :login-page
            :logout-page
            :regist-page
