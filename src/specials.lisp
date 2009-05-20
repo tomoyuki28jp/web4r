@@ -56,8 +56,8 @@ public directory")
 
 (defvar *cid-generated-order*
   (make-array 0 :fill-pointer 0 :adjustable t)
-  "cids(continuation-ids) by the order of their generated time. 
-This is used to destroy expired continuations.")
+  "cids(continuation-ids) order by their generated time. This is used to destroy 
+expired continuations.")
 
 (defvar *cont-gc-lifetime* 1440
   "The lifetime of continuations in number of seconds. 
@@ -99,7 +99,7 @@ and nil otherwise")
     (:not-alnum    . "~A must contains only alphabetic and digit characters")
     (:not-a-unique . "The same ~A has already been registered")
     (:not-a-image  . "~A must be a jpeg, png or gif image file."))
-  "An alist of validation error messages: a keyword key -> a string error message")
+  "An alist of validation error messages: a key -> a string error message")
 
 (defvar *validators* (make-hash-table)
   "A hash table: a keyword name of validator -> a validator function")
@@ -114,14 +114,14 @@ and nil otherwise")
   "The regular expression used to validate a email address")
 
 (defvar *page-param* "page"
-  "The name of get parameter denotate the current page number. 
+  "The get parameter name denotate the current page number. 
 The default is 'page'.")
 
 (defvar *items-per-page* 10
   "The default number to display items per page. The default is 10.")
 
 (defvar *links-per-page* 10
-  "The default number to display links per page. The default is 10.")
+  "The default number to display page links per page. The default is 10.")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *slots* (make-hash-table)
@@ -140,9 +140,12 @@ user changes a value of the get parameter named items_per_page and the value
 exceeeds this maximum number. The default is 50.")
 
 (defvar *max-links-per-page* 30
-  "The maximum number to display links per page. This value is only used when a 
-user changes a value of the get parameter named links_per_page and the value 
+  "The maximum number to display page links per page. This value is only used when 
+a user changes a value of the get parameter named links_per_page and the value 
 exceeeds this maximum number. The default is 30.")
+
+(defvar *user* nil
+  "An instance of the user* class used for authentication")
 
 (defvar *login-msgs*
   '((:login-failed      . "Wrong username and password combination")
