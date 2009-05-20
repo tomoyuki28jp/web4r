@@ -3,6 +3,7 @@
 ; --- Util ------------------------------------------------------
 
 (defun mime-type (file)
+  "Returns a string mime type of the FILE."
   (let* ((file  (namestring file))
          (type  (trivial-shell:shell-command (concat "file " file)))
          (s (split #\Space (string-trim '(#\Newline) type))))
@@ -21,6 +22,7 @@
           ((equalp "Zip"   (nth 1 s))       "application/zip"))))
 
 (defun image-file-p (file)
+  "Returns true if the FILE is a image file and nil otherwise."
   (when (image-type (mime-type file)) t))
 
 (defun image-type (mime-type)
@@ -30,6 +32,8 @@
       (->keyword (nth 1 s)))))
 
 (defun image-path (file type)
+  "Returns a pathname of the image FILE. The TYPE must be a key of 
+*image-public-dirs* such as 'upload' or 'tmp'."
   (when-let (dir (cdr (assoc type *image-public-dirs* :test #'equal)))
     (and file (probe-file (merge-pathnames file (symbol-value dir))))))
 
@@ -44,12 +48,15 @@
           height max-height))
   (values width height))
 
-(defun thumbnail (file &key type width (height *thumbnail-height*))
+(defun thumbnail (file &key type (width *thumbnail-width*)
+                                 (height *thumbnail-height*))
+  "Writes a thumbnail of the image FILE with the size of WIDTH and HEIGHT. 
+The TYPE must be a key of *image-public-dirs* such as 'upload' or 'tmp'."
   (let* ((file   (image-path file type))
          (mime   (aand file (mime-type it)))
          (type   (aand mime (image-type it)))
-         (width  (or (aand width  (->int it)) *thumbnail-width*))
-         (height (or (aand height (->int it)) *thumbnail-width*)))
+         (width  (aand width  (->int it)))
+         (height (aand height (->int it))))
     (if (or (null file) (null type))
         (handle-static-file (public-path "images/noimage.gif"))
         (cl-gd:with-image-from-file (im file type)
@@ -69,5 +76,7 @@
   (thumbnail file :type type :width width :height height))
 
 (defun thumbnail-uri (file &key type width height)
+  "Returns a thumbnail uri of the image FILE with the size of WIDTH and HEIGHT. 
+The TYPE must be a key of *image-public-dirs* such as 'upload' or 'tmp'."
   (add-parameters (page-uri "thumbnail")
                   "file" file "type" type  "width" width "height" height))
