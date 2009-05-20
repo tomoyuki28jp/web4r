@@ -144,10 +144,11 @@
            :item-list
            ; --- user.lisp ---
            :login-msg
+           :user*
            :id
            :pass
            :user
-           :user*
+           :user-class
            :user-id-slot
            :user-pass-slot
            :user-id-label

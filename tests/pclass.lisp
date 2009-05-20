@@ -531,7 +531,7 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
         ("testdb1_note" . "hello
 world"))
     (let ((i (progn
-               (make-pinstance 'testdb1 '((password "password")))
+               (make-pinstance 'testdb1 '((password . "password")))
                (car (ele:get-instances-by-class 'testdb1)))))
       (is (equal "tomoyuki matsumoto"
                  (slot-display-value i (get-slot 'testdb1 'name))))
@@ -574,7 +574,7 @@ world"))
         ("testdb1_note" . "hello
 world"))
     (let ((i (progn
-               (make-pinstance 'testdb1 '((password "password")))
+               (make-pinstance 'testdb1 '((password . "password")))
                (car (ele:get-instances-by-class 'testdb1)))))
       (with-post-parameters
           '(("testdb1_name" . "Tomoyuki Matsumoto2")
@@ -589,7 +589,7 @@ world"))
             ("testdb1_zip_code" . "95128")
             ("testdb1_note" . "Hello
 World2"))
-        (update-pinstance 'testdb1 i '((password "password2"))))
+        (update-pinstance 'testdb1 i '((password . "password2"))))
       (is (equal "Tomoyuki Matsumoto2"
                  (slot-display-value i (get-slot 'testdb1 'name))))
       (is (equal "password2"
