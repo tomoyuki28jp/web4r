@@ -56,8 +56,8 @@ if any and nil otherwise"
               (cont-gc (1- mid)))))))
 
 (defun cont-expired-p (cid)
-  "Returns true if the continuation associated with the CID 
-(continuation id) has expired and nil otherwise."
+  "Returns true if the continuation associated with the CID
+ (continuation id) has expired and nil otherwise."
   (awhen (gethash cid *cid->cont*)
     (> (- (get-universal-time) *cont-gc-lifetime*)
        (cont-generated-time it))))
@@ -76,7 +76,7 @@ if any and nil otherwise"
   (remhash cid *cont-sessions*))
 
 (defun destroy-conts (start end)
-  "Destroys the continuations from the START to the END by the order of 
+  "Destroys the continuations from the START to the END order by 
 their generated time."
   (loop for i from start to (1- end)
         do (destroy-cont (elt *cid-generated-order* i) i)))
@@ -120,13 +120,13 @@ it, run this code: (rem-hook 'after-calling-cont #'destroy-cont)."
 ; --- Cont sessions ---------------------------------------------
 
 (defun cont-session (key &optional (cid (cid)))
-  "Returns the entry for the KEY in cont-session 
-(continuation based session) if any."
+  "Returns the entry for the KEY in cont-session
+ (continuation based session) if any."
   (cdr (assoc key (gethash cid *cont-sessions*))))
 
 (defun rem-cont-session (key &optional (cid (cid)))
-  "Removes the entry for the KEY in cont-session 
-(continuation based session) if any."
+  "Removes the entry for the KEY in cont-session
+ (continuation based session) if any."
   (setf (gethash cid *cont-sessions*)
         (remove-if #'(lambda (x) (eq (car x) key))
                    (gethash cid *cont-sessions*))))
