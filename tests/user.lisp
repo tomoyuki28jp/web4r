@@ -1,11 +1,11 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
-(test user-class
+(test user*
   (defpclass test-user1 (user)
       ((email :format :email :unique t)))
   (setf *user*
-        (make-instance 'user-class
+        (make-instance 'user*
           :class       'test-user1
           :id-label    "ID1"
           :pass-label  "Password1"
@@ -32,7 +32,7 @@
   (drop-instances-by-class 'test-user2)
   (defpclass test-user2 (user)
       ((email :format :email :unique t)))
-  (setf *user* (make-instance 'user-class :class 'test-user2))
+  (setf *user* (make-instance 'user* :class 'test-user2))
   (let ((i (make-instance 'test-user2 :id "user1" :pass :pass1)))
     (defpage login-test1 ()
       (login (oid i) (user-id i)))
