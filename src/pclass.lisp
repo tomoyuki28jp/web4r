@@ -293,7 +293,7 @@ http://docs.jquery.com/Plugins/Validation"
     `(progn
        (set-slots ',name ',slot-defs ',parent*)
        ,(when (eq parent* 'user)
-         `(setf *user* (make-instance 'user-class :class ',name)))
+         `(setf *user* (make-instance 'user* :class ',name)))
        (ele:defpclass ,name ,parent
          ,(append
            (loop for slot in slot-defs
