@@ -44,7 +44,7 @@
         alist)))
 
 (defun add-parameter (link key value)
-  "Adds a get parameter named KEY with the VALUE to the LINK
+  "Returns the LINK with a get parameter named KEY with the VALUE
 Example:
 (add-parameter \"http://host/\" \"k1\" \"v1\") ;=> \"http://host/?k1=v1\""
   (let ((param (concat key "=" value)))
@@ -60,7 +60,7 @@ Example:
                 (concat link "&" param)))))))
 
 (defun add-parameters (link &rest parameters)
-  "Adds get parameters PARAMETERS to the LINK
+  "Returns the LINK with get PARAMETERS
 Example:
 (add-parameters \"http://host/\" \"k1\" \"v1\" \"k2\" \"v2\")
 ;=> \"http://host/?k1=v1&k2=v2\""
