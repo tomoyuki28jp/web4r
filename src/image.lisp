@@ -48,10 +48,11 @@
           height max-height))
   (values width height))
 
-(defun thumbnail (file &key type (width *thumbnail-width*)
-                                 (height *thumbnail-height*))
-  "Writes a thumbnail of the image FILE with the size of WIDTH and HEIGHT. 
-The TYPE must be a key of *image-public-dirs* such as 'upload' or 'tmp'."
+(defun thumbnail (file &key type width height)
+  "Displays a thumbnail of the image FILE with the size of WIDTH and HEIGHT.
+ If you don't specify the WIDTH or HEIGHT, the values of *thumbnail-width*
+ or *thumbnail-height* are used. The TYPE must be a key of *image-public-dirs*
+ such as 'upload' or 'tmp'."
   (let* ((file   (image-path file type))
          (mime   (aand file (mime-type it)))
          (type   (aand mime (image-type it)))
