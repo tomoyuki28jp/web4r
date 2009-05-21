@@ -345,7 +345,7 @@ http://docs.jquery.com/Plugins/Validation"
                          collect (->keyword (car s))
                          collect (slot-save-value
                                   (get-slot class (car s))
-                                  (nth 1 s)))))))
+                                  (cdr s)))))))
 
 (defun update-pinstance (class ins &optional slot-values)
   "updates the instance of pclass from posted parameters"
@@ -358,7 +358,7 @@ http://docs.jquery.com/Plugins/Validation"
     (loop for s in slot-values
           do (setf (slot-value ins (car s))
                    (slot-save-value (get-slot class (car s))
-                                    (nth 1 s))))))
+                                    (cdr s))))))
 
 ; --- File upload -----------------------------------------------
 

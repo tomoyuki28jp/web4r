@@ -130,6 +130,8 @@
            :drop-instance
            :drop-instance-by-oid
            :drop-instances-by-class
+           :make-pinstance
+           :update-pinstance
            :edit-upload-file
            ; --- pages ---
            :genpages
@@ -139,8 +141,6 @@
            :delete-page
            :edit/cont
            :per-page
-           :make-pinstance
-           :update-pinstance
            :item-list
            ; --- user.lisp ---
            :login-msg

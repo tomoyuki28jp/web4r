@@ -1,10 +1,18 @@
 (in-package :web4r)
 
-(defmacro genpages (class &key slot index-sml show-sml edit-sml
+(defmacro genpages (class &key index-slot index-sml show-sml edit-sml
                     items-per-page links-per-page)
+  "Generates seven pages for the CLASS. The pages are index, show, edit,
+ delete, uniquness validation, list and dropping an instance pages. The
+ last three pages are used via ajax. You can specify the pathnames of the 
+ sml files for the pages by the INDEX-SML, SHOW-SML and EDIT-SML arguments.
+ INDEX-SLOT is a symbol of the index slot used in the index page to sort
+ instances. You can specify the number to display items per page by the
+ ITEMS-PER-PAGE and the number to display links per page by the LINKS-PER-PAGE
+ argument."
   `(progn
-     (defpage ,class (:get (slot ,slot))
-       (index-page ',class :slot slot :sml ,index-sml
+     (defpage ,class (:get (slot ,index-slot))
+       (index-page ',class :index-slot slot :sml ,index-sml
                    :items-per-page ,items-per-page
                    :links-per-page ,links-per-page))
      (defpage ,(join "/" class 'show) (oid)
@@ -14,14 +22,24 @@
      (defpage ,(join "/" class 'delete) (oid)
        (delete-page ',class oid))
      (defpage ,(join "/" 'ajax class 'unique) (oid)
-       (p (unique? ',class (get-parameters*) oid)))
+       (p (unique-p* ',class (get-parameters*) oid)))
      (defpage ,(join "/" 'ajax class 'list) (:get slot)
-       (ajax-list ',class :slot slot))
+       (item-list ',class :index-slot slot))
      (defpage ,(join "/" 'ajax class 'delete) (oid)
        (p (drop-instance-by-oid* ',class oid)))))
 
-(defmacro index-page (class &key slot (maxlength 20)
-                      plural items-per-page links-per-page sml)
+(defmacro index-page (class &key (index-slot 'updated-at) (maxlength 20)
+                      (items-per-page *items-per-page*)
+                      (links-per-page *links-per-page*) plural sml)
+  "Displays a list of the CLASS instances for the current page as html order
+ by the INDEX-SLOT. You can set the number to display items per page by the
+ ITEMS-PER-PAGE and the number to display links per page by the LINKS-PER-PAGE
+ argument. SML is a pathname of a sml template file. The default title format
+ of the page is like 'Listing pluralized-classname' which the
+ 'pluralized-classname' is created by (pluralize (->string-down class)), and
+ you can change the 'pluralized-classname' part by the PLURAL argument. The
+ MAXLENGTH is a max length of a slot value to display in a table cell, and the
+ exceeded characters are replaced by '...'."
   `(let* ((class  ,class)
           (cname  (->string-down ,class))
           (plural (or ,plural (pluralize cname)))
@@ -29,13 +47,15 @@
           (per-page (param-per-page* ,items-per-page ,links-per-page)))
      (declare (ignorable web4r::maxlength web4r::per-page))
      (multiple-value-bind (items pager slots)
-         (items-per-page ,class ,slot
+         (items-per-page ,class ,index-slot
                         :items-per-page ,items-per-page
                         :links-per-page ,links-per-page)
        (load-sml (or ,sml (sml-path "pages/index.sml"))
-                 ,*web4r-package*))))
+                     ,*web4r-package*))))
 
 (defmacro show-page (class oid &key sml)
+  "Displays the values of the slots in the CLASS for an instance specified by
+ the OID. SML is a pathname of a sml template file."
   `(let ((cname (->string-down ,class))
          (slots (get-excluded-slots ,class))
          (ins   (get-instance-by-oid ,class ,oid)))
@@ -43,6 +63,11 @@
                ,*web4r-package*)))
 
 (defmacro edit-page (class &key oid slot-values redirect-uri sml)
+  "Displays an edit form for the instance specified by the OID in the CLASS.
+ You can specify slot values by the SLOT-VALUES argument which must be an alist
+ of a slot symbol -> a value. Users will be redirected to the REDIRECT-URI
+ after successfully editing the instance. SML is a pathname of a sml template
+ file."
   `(let* ((class ,class)
           (oid ,oid)
           (cname (->string-down class))
@@ -66,37 +91,51 @@
 
 (defun delete-page (class oid &optional (redirect-uri
                                          (page-uri (->string-down class))))
+  "Redirects the user to the REDIRECT-URI after deleting an instance
+ specified by the OID in the CLASS."
   (redirect/msgs (rem-parameter redirect-uri "page")
                  (drop-instance-by-oid* class oid)))
 
-(defun edit/cont (class ins page &key with-slots without-slots slot-values)
+(defun edit/cont (class instance page &key with-slots without-slots slot-values)
+  "Validates posted parameters to edit the CLASS instance. If the INSTANCE is non
+ nil, the INSTANCE is updated, otherwise a new instance is created. Users will
+ be redirected to the PAGE after successfully editing the instance. The WITH-SLOTS
+ and WITHOUT-SLOTS are lists of slot symbols used to specify included/excluded
+ slots for validations and editing. You can specify slot values by the SLOT-VALUES
+ argument which must be an alist of a slot symbol -> a value."
   (let ((*with-slots* (or with-slots *with-slots*))
         (*without-slots* (or without-slots *without-slots*)))
-    (aif (class-validation-errors class ins)
+    (aif (class-validation-errors class instance)
          (apply #'page/error-msgs
                 (append (list (request-uri*) it)
-                        (when ins (list (oid ins)))))
+                        (when instance (list (oid instance)))))
          (progn
-           (if ins
-               (update-pinstance class ins slot-values)
+           (if instance
+               (update-pinstance class instance slot-values)
                (make-pinstance class slot-values))
            (let ((msg (concat (->string-down class) " was successfully "
-                              (if ins "updated" "created"))))
+                              (if instance "updated" "created"))))
              (if (functionp page)
                  (funcall page msg)
                  (redirect/msgs page msg)))))))
 
-(defun per-page (items &key (index 'updated-at) (order #'>)
+(defun per-page (instances &key (index 'updated-at) (order #'>)
                  items-per-page links-per-page)
-  (let* ((total (length items))
+  "Retruns multiple values, a list of instances and a pager instance.
+ The instances is a copy of INSTANCES retrieved by the pager instance.
+ INDEX is a symbol of a index slot used to sort the instances. ORDER
+ is a predicate function to determine the order. You can specify the
+ number to display items per page by the ITEMS-PER-PAGE, and the number
+ to display links per page by the LINKS-PER-PAGE argument."
+  (let* ((total (length instances))
          (pager (apply #'make-instance 'pager
                        (append `(:total-items ,total)
                                (awhen items-per-page `(:items-per-page ,it))
                                (awhen links-per-page `(:links-per-page ,it)))))
-         (items (with-slots (item-start item-end items-per-page) pager
-                  (when (<= (current-page pager) (total-pages pager))
-                    (subseq (sort items order :key index) item-start item-end)))))
-    (values items pager)))
+         (ins (with-slots (item-start item-end items-per-page) pager
+                (when (<= (current-page pager) (total-pages pager))
+                  (subseq (sort instances order :key index) item-start item-end)))))
+    (values ins pager)))
 
 (defun order-slot-id (class &optional slot)
   (or (awhen (member (get-parameter "slot")
@@ -163,16 +202,21 @@
                       :links-per-page links-per-page)
           (values items pager slots))))))
 
-(defun unique? (class param oid)
-  (if (aand (get-slot-by-id class (caar param))
+(defun unique-p* (class get-parameters oid)
+  "GET-PARAMETER must be an alist of a slot-id -> a value. Returns 'false'
+ if the same value has been registered in the slot, specified by the slot-id,
+ in the CLASS except the instance specified by the OID and 'true' otherwise."
+  (if (aand (get-slot-by-id class (caar get-parameters))
             (slot-unique it)
-            (unique-p class (slot-symbol it) (cdar param)
+            (unique-p class (slot-symbol it) (cdar get-parameters)
                       (get-instance-by-oid class oid)))
       "true" "false"))
 
-(defmacro ajax-list (class &key slot sml)
+(defmacro item-list (class &key index-slot sml)
+  "Displays a list of the CLASS instances as html order by the INDEX-SLOT.
+ You can specify the pathname of the sml template file by the SML argument."
   `(multiple-value-bind (items pager slots)
-       (items-per-page ,class ,slot)
+       (items-per-page ,class ,index-slot)
      (declare (ignorable web4r::pager))
      (let ((cname (->string-down ,class)))
        (load-sml (or ,sml (sml-path "pages/list.sml"))
