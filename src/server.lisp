@@ -152,7 +152,7 @@ body---a form"
              (lambda () (page (->string-down ',page)))))))
 
 (defun page (page &rest args)
-  "Calls the procedure for the PAGE with ARGS"
+  "Calls the procedure for the PAGE with ARGS."
   (multiple-value-bind (fn paths) (get-page page)
     (aif fn
          (let ((*page-uri-paths* paths))
@@ -171,11 +171,11 @@ body---a form"
     (add-parameter uri "mid" (set-cont msgs))))
 
 (defun redirect/msgs (uri messages)
-  "Redirects to the URI with the success MESSAGES"
+  "Redirects to the URI with the success MESSAGES."
   (redirect (w/mid uri messages 'msgs)))
 
 (defun redirect/error-msgs (uri messages)
-  "Redirects to the URI with the error MESSAGES"
+  "Redirects to the URI with the error MESSAGES."
   (redirect (w/mid uri messages 'error-msgs)))
 
 (defmacro w/msgs (msgs page args type)
@@ -183,11 +183,11 @@ body---a form"
      (apply #'page ,page ,args)))
 
 (defun page/msgs (page messages &rest args)
-  "Calls the procedure for the PAGE with success MESSAGES and ARGS"
+  "Calls the procedure for the PAGE with success MESSAGES and ARGS."
   (w/msgs messages page args 'msgs))
 
 (defun page/error-msgs (page messages &rest args)
-  "Calls the procedure for the PAGE with error MESSAGES and ARGS"
+  "Calls the procedure for the PAGE with error MESSAGES and ARGS."
   (w/msgs messages page args 'error-msgs))
 
 (defun get-msgs ()

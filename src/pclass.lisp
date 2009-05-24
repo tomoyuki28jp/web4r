@@ -5,41 +5,41 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass slot-options ()
      ((symbol   :accessor slot-symbol   :initarg :symbol   :type symbol
-                :documentation "The symbol of the slot")
+                :documentation "The symbol of the slot.")
       (id       :accessor slot-id       :initarg :id       :type string
-                :documentation "The string id of the slot")
+                :documentation "The string id of the slot.")
       (label    :accessor slot-label    :initarg :label    :type string
-                :documentation "The label of the slot to display")
+                :documentation "The label of the slot to display.")
       (unique   :accessor slot-unique   :initarg :unique   :initform nil
-                :documentation "If this is non nil, the value of the slot is required")
+                :documentation "If this is non nil, the value of the slot is required.")
       (required :accessor slot-required :initarg :required :initform nil
-                :documentation "If this is non nil, the value of the slot is required")
+                :documentation "If this is non nil, the value of the slot is required.")
       (rows     :accessor slot-rows     :initarg :rows     :initform nil
-                :documentation "The size of rows for textarea input form")
+                :documentation "The size of rows for textarea input form.")
       (cols     :accessor slot-cols     :initarg :cols     :initform nil
-                :documentation "The size of cols for textarea input form")
+                :documentation "The size of cols for textarea input form.")
       (size     :accessor slot-size     :initarg :size     :initform nil
-                :documentation "The size of text input form")
+                :documentation "The size of text input form.")
       (length   :accessor slot-length   :initarg :length   :initform nil
                 :documentation "If this is an integer, this is a max length
  of the value otherwise a list of '(min max) length for the validation.")
       (hide-for :accessor slot-hide-for :initarg :hide-for :initform nil
                 :documentation "This specifies where to hide the slot for.
  :all for all or a string regexp to hide it only on pages where the request
- uri matches to the regexp")
+ uri matches to the regexp.")
       (options  :accessor slot-options  :initarg :options  :initform '() :type list
                 :documentation "The select options for a select, radio or checkbox
- input forms")
+ input forms.")
       (comment  :accessor slot-comment  :initarg :comment  :initform ""  :type string
-                :documentation "The comment for the input form to display")
+                :documentation "The comment for the input form to display.")
       (input    :accessor slot-input    :initarg :input    :initform nil
                 :documentation "The type of the input form which must be :text,
- :textarea, :radio, :checkbox, :select, :password or :file")
+ :textarea, :radio, :checkbox, :select, :password or :file.")
       (format   :accessor slot-format   :initarg :format   :initform nil
                 :documentation "The validation type which must be :alpha, :alnum,
- :integer, :email :date, :image ,regexp in string or a function")
+ :integer, :email :date, :image ,regexp in string or a function.")
       (type     :accessor slot-type     :initarg :type    :initform nil :type symbol
-                :documentation "The type specifier of the slot"))
+                :documentation "The type specifier of the slot."))
     (:documentation "The persistent class extended slot options.")))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -100,7 +100,7 @@
   (get-slots-if #'(lambda (s) (eq (slot-input s) :file)) class))
 
 (defun get-excluded-file-slots (class)
-  "Returns a list of excluded file slots in the CLASS"
+  "Returns a list of excluded file slots in the CLASS."
   (get-excluded-slots-if #'(lambda (s) (eq (slot-input s) :file)) class))
 
 (defun indexed-slot-p (class slot)
@@ -174,7 +174,7 @@
 
 (defun split-date (date)
   "Splits the 8 digits DATE like 19830928 into a list like 
- '(\"1983\" \"09\" \"28\") and returns the list"
+ '(\"1983\" \"09\" \"28\") and returns the list."
   (aand (->string date)
         (when (= (length it) 8)
           (list (subseq it 0 4) (subseq it 4 6) (subseq it 6 8)))))
@@ -362,18 +362,18 @@
   (get-value (->int oid) (find-class-index class)))
 
 (defun drop-instance (instance)
-  "Drops the INSTANCE"
+  "Drops the INSTANCE."
   (drop-instances (list instance)))
 
 (defun drop-instance-by-oid (class oid)
-  "Drops an instance of the persistent CLASS specified by the OID"
+  "Drops an instance of the persistent CLASS specified by the OID."
   (aand (get-instance-by-oid class oid)
         (progn (delete-saved-files class it)
                (drop-instance it)
                t)))
 
 (defun drop-instances-by-class (class)
-  "Drops all the instances of the persistent CLASS"
+  "Drops all the instances of the persistent CLASS."
   (when (find-class class nil)
     (drop-instances (get-instances-by-class class))))
 

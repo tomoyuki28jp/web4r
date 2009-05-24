@@ -2,29 +2,29 @@
 
 (defclass pager ()
   ((items-per-page :type integer :initform *items-per-page* :initarg :items-per-page
-                   :documentation "The number to display items per page")
+                   :documentation "The number to display items per page.")
    (links-per-page :type integer :initform *links-per-page* :initarg :links-per-page
-                   :documentation "The number to display page links per page")
+                   :documentation "The number to display page links per page.")
    (total-items    :type integer :initarg :total-items
-                   :initform (error "Must supply total-items")
-                   :documentation "The number of total items")
+                   :initform (error "Must supply total-items.")
+                   :documentation "The number of total items.")
    (current-page   :type integer :initarg :current-page
                    :initform (get-current-page) :accessor current-page
-                   :documentation "The current page number")
+                   :documentation "The current page number.")
    (total-pages    :type integer :accessor total-pages
-                   :documentation "The number of total pages")
+                   :documentation "The number of total pages.")
    (item-start     :type integer :accessor item-start
-                   :documentation "The start number to display items")
+                   :documentation "The start number to display items.")
    (item-end       :type integer :accessor item-end
-                   :documentation "The end number to display items")
+                   :documentation "The end number to display items.")
    (link-start     :type integer :accessor link-start
-                   :documentation "The start number to display page links")
+                   :documentation "The start number to display page links.")
    (link-end       :type integer :accessor link-end
-                   :documentation "The end number to display page links")
+                   :documentation "The end number to display page links.")
    (next-link      :type string  :accessor next-link :initform ">>"
-                   :documentation "The link to next page links")
+                   :documentation "The link to next page links.")
    (prev-link      :type string  :accessor prev-link :initform "<<"
-                   :documentation "The link to previous page links"))
+                   :documentation "The link to previous page links."))
   (:documentation "A pagination class."))
 
 (defun get-current-page ()
@@ -85,5 +85,5 @@
       (load-sml-path "paging/page_summary.sml"))))
 
 (defun w/p (link)
-  "Returns the LINK with a get parameter denotate the current page number"
+  "Returns the LINK with a get parameter denotate the current page number."
   (add-parameter link *page-param* (get-current-page)))

@@ -6,21 +6,21 @@
 
 (defclass user* ()
   ((class       :initform 'user      :initarg :class       :type symbol
-                :documentation "The symbol of the user persistent class name")
+                :documentation "The symbol of the user persistent class name.")
    (id-slot     :initform 'id        :initarg :id-slot     :type symbol
-                :documentation "The symbol of the id slot name")
+                :documentation "The symbol of the id slot name.")
    (pass-slot   :initform 'pass      :initarg :pass-slot   :type symbol
-                :documentation "The symbol of the password slot name")
+                :documentation "The symbol of the password slot name.")
    (id-label    :initform "ID"       :initarg :id-label    :type string
-                :documentation "The label of the id slot")
+                :documentation "The label of the id slot.")
    (pass-label  :initform "Password" :initarg :pass-label  :type string
-                :documentation "The label of the password slot")
+                :documentation "The label of the password slot.")
    (login-page  :initform "login"    :initarg :login-page  :type symbol
-                :documentation "The name of login page")
+                :documentation "The name of login page.")
    (logout-page :initform "logout"   :initarg :logout-page :type symbol
-                :documentation "The name of logout page")
+                :documentation "The name of logout page.")
    (regist-page :initform "regist"   :initarg :regist-page :type symbol
-                :documentation "The name of regist page"))
+                :documentation "The name of regist page."))
   (:documentation "The instance of this class set to *user* is used to
  manage authentication. The default user persistent class used for
  authentication is 'user, and you can simply change it by defining a new
@@ -41,48 +41,48 @@
   ((id   :format :alnum :length (4 12) :unique t
          :documentation "A user login ID.")
    (pass :format :alnum :length (4 12) :input :password
-         :documentation "A user login password"))
+         :documentation "A user login password."))
   (:documentation "This is the default persistent class used for
  authentication. You can change it by overriding this or defining
  a new class with extending this."))
 
 (defun user-class ()
-  "Returns the symbol of the user persistent class name"
+  "Returns the symbol of the user persistent class name."
   (slot-value *user* 'class))
 
 (defun user-id-slot ()
-  "Returns the symbol of the id slot name"
+  "Returns the symbol of the id slot name."
   (slot-value *user* 'id-slot))
 
 (defun user-pass-slot ()
-  "Returns the symbol of the password slot name"
+  "Returns the symbol of the password slot name."
   (slot-value *user* 'pass-slot))
 
 (defun user-id-label ()
-  "Returns the string label of the id slot"
+  "Returns the string label of the id slot."
   (slot-value *user* 'id-label))
 
 (defun user-pass-label ()
-  "Returns the string label of the password slot"
+  "Returns the string label of the password slot."
   (slot-value *user* 'pass-label))
 
 (defun user-login-page ()
-  "Returns the name of login page"
+  "Returns the name of login page."
   (slot-value *user* 'login-page))
 
 (defgeneric user-id (user)
-  (:documentation "Returns a string id of the USER"))
+  (:documentation "Returns a string id of the USER."))
 (defmethod user-id ((user user))
   (slot-value user (user-id-slot)))
 
 (defgeneric user-pass (user)
-  (:documentation "Returns a string password of the USER"))
+  (:documentation "Returns a string password of the USER."))
 (defmethod user-pass ((user user))
   (slot-value user (user-pass-slot)))
 
 (defun get-user (user-id &optional user-pass)
   "Returns an instance of the user persistent class by the USER-ID and
- USER-PASS if any"
+ USER-PASS if any."
   (awhen (get-instances-by-value (user-class) (user-id-slot) user-id)
     (if user-pass
         (find-if #'(lambda (u) (equal (user-pass u) user-pass)) it)
@@ -90,29 +90,29 @@
 
 (defun get-user-oid (user-id)
   "Returns an oid of the user persistent class instance for a user
- by the USER-ID if any"
+ by the USER-ID if any."
   (awhen (get-instances-by-value (user-class) (user-id-slot) user-id)
     (oid (car it))))
 
 (defun login (user-oid user-id)
   "Sets the session data USER-OID and USER-ID so that the current user
- is treated as a login user"
+ is treated as a login user."
   (setf (session-value :user-oid) user-oid
         (session-value :user-id)  user-id))
 
 (defun logout ()
-  "Logs out the current user"
+  "Logs out the current user."
   (destroy-conts-by-session *session*)
   (remove-session *session*))
 
 (defun login-user ()
   "Returns an instance of the user persistent class instance for the
- current user if the user is logged in"
+ current user if the user is logged in."
   (awhen (session-value :user-oid)
     (get-instance-by-oid (user-class) it)))
 
 (defun login-user-id ()
-  "Returns a string id of the current user if the user is logged in"
+  "Returns a string id of the current user if the user is logged in."
   (session-value :user-id))
 
 (defun login-user-oid ()

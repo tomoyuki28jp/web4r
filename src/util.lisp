@@ -2,24 +2,24 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun web4r-path (file)
-    "Returns a pathname of the FILE under the web4r directory"
+    "Returns a pathname of the FILE under the web4r directory."
     (merge-pathnames file *web4r-dir*))
 
   (defun public-path (file)
-    "Returns a pathname of the FILE under the public directory"
+    "Returns a pathname of the FILE under the public directory."
     (merge-pathnames file *public-dir*))
 
   (defun sml-path (file)
-    "Returns a pathname of the FILE under the sml directory"
+    "Returns a pathname of the FILE under the sml directory."
     (merge-pathnames file *sml-dir*))
 
   (defun example-path (file)
-    "Returns a pathname of the FILE under the examples directory"
+    "Returns a pathname of the FILE under the examples directory."
     (merge-pathnames
      file (merge-pathnames "examples/" *web4r-dir*))))
 
 (defmacro load-sml-path (path &rest args)
-  "Loads a sml file placed in the PATH under the sml directory"
+  "Loads a sml file placed in the PATH under the sml directory."
   `(load-sml (sml-path ,path) ,@args))
 
 (defun assoc* (idx alist &key (test #'eql))
@@ -44,7 +44,7 @@
         alist)))
 
 (defun add-parameter (link key value)
-  "Returns the LINK with a get parameter named KEY with the VALUE
+  "Returns the LINK with a get parameter named KEY with the VALUE.
   Example:
   (add-parameter \"http://host/\" \"k1\" \"v1\") ;=> \"http://host/?k1=v1\""
   (let ((param (concat key "=" value)))
@@ -60,7 +60,7 @@
                 (concat link "&" param)))))))
 
 (defun add-parameters (link &rest parameters)
-  "Returns the LINK with get PARAMETERS
+  "Returns the LINK with get PARAMETERS.
   Example:
   (add-parameters \"http://host/\" \"k1\" \"v1\" \"k2\" \"v2\")
   ;=> \"http://host/?k1=v1&k2=v2\""
@@ -69,7 +69,7 @@
         finally (return l)))
 
 (defun rem-parameter (link key)
-  "Removes a get parameter named KEY from the LINK
+  "Removes a get parameter named KEY from the LINK.
   Example:
   (rem-parameter \"http://host/?k1=v1\" \"k1\") ;=> \"http://host/\""
   (let* ((new (regex-replace (concat "(" key  "=[^&]+&?)") link ""))

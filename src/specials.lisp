@@ -3,20 +3,20 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *web4r-dir*
     (asdf:component-pathname (asdf:find-system 'web4r))
-    "A pathname of the web4r directory")
+    "A pathname of the web4r directory.")
 
   (defvar *public-dir* (merge-pathnames "public/" *web4r-dir*)
-    "A pathname of the public directory")
+    "A pathname of the public directory.")
 
   (defvar *sml-dir*    (merge-pathnames "sml/"    *web4r-dir*)
-    "A pathname of the sml directory")
+    "A pathname of the sml directory.")
 
   (defvar *example-bdb*
     `(:BDB ,(merge-pathnames "examples/bdb/" *web4r-dir*))
-    "A pathname of the BDB database directory for example applications")
+    "A pathname of the BDB database directory for example applications.")
 
   (defvar *web4r-package* (find-package :web4r)
-    "The web4r package designator"))
+    "The web4r package designator."))
 
 (defvar *upload-save-dir* #P"/tmp/web4r/upload/"
   "A pathname of the directory to save uploaded files.
@@ -40,7 +40,7 @@
   `(("upload" . *upload-save-dir*)
     ("tmp"    . *tmp-save-dir*))
   "An alist of image public directories: a string name -> a pathname of the
- public directory")
+ public directory.")
 
 (defvar *debug-log-file* #P"/tmp/web4r/debug.log"
   "A pathname of the debug log file. The default is #P\"/tmp/web4r/debug.log\".")
@@ -49,10 +49,10 @@
   "If this is non-nil, debug-mode is turned on and off otherwise.")
 
 (defvar *sid->cid*  (make-hash-table)
-  "A mapping hash table: sid(session-id) -> cid(continuation-id)")
+  "A mapping hash table: sid(session-id) -> cid(continuation-id).")
 
 (defvar *cid->cont* (make-hash-table :test 'equal)
-  "A mapping hash table: cid(continuation-id) -> an instance of the cont structure")
+  "A mapping hash table: cid(continuation-id) -> an instance of the cont structure.")
 
 (defvar *cid-generated-order*
   (make-array 0 :fill-pointer 0 :adjustable t)
@@ -73,7 +73,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *last-posts* nil
-    "This is only used on the process to expand last-post inside a continuation"))
+    "This is only used on the process to expand last-post inside a continuation."))
 
 (defvar *page-uri-paths* 0
   "The number of the current page uri paths.
@@ -85,7 +85,7 @@
 
 (defvar *msgs* nil
   "This is an instance of msgs/error-msgs if there are messages to display
- and nil otherwise")
+ and nil otherwise.")
 
 (defvar *error-formats*
   '((:invalid      . "~A is invalid")
@@ -98,11 +98,11 @@
     (:not-alpha    . "~A must contains only alphabetic characters")
     (:not-alnum    . "~A must contains only alphabetic and digit characters")
     (:not-a-unique . "The same ~A has already been registered")
-    (:not-a-image  . "~A must be a jpeg, png or gif image file."))
-  "An alist of validation error messages: a key -> a string error message")
+    (:not-a-image  . "~A must be a jpeg, png or gif image file"))
+  "An alist of validation error messages: a key -> a string error message.")
 
 (defvar *validators* (make-hash-table)
-  "A hash table: a keyword name of validator -> a validator function")
+  "A hash table: a keyword name of validator -> a validator function.")
 
 (defvar *valid-email-format*
   (remove #\Newline
@@ -111,7 +111,7 @@
 (?:\"(?:\\[^\r\n]|[^\\\"])*\")))\@
 (?:(?:(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+)
 (?:\.(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+))*))$")
-  "The regular expression used to validate a email address")
+  "The regular expression used to validate a email address.")
 
 (defvar *page-param* "page"
   "The get parameter name denotate the current page number.
@@ -125,7 +125,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *slots* (make-hash-table)
-    "A hash table: a symbol name of a pclass => a list of slot-options instances"))
+    "A hash table: a symbol name of a pclass => a list of slot-options instances."))
 
 (defvar *with-slots* nil
   "If this is :all, all pclass slots are showed. Otherwise a list of pclass
@@ -145,14 +145,14 @@
  exceeeds this maximum number. The default is 30.")
 
 (defvar *user* nil
-  "An instance of the user* class used for authentication")
+  "An instance of the user* class used for authentication.")
 
 (defvar *login-msgs*
   '((:login-failed      . "Wrong username and password combination")
     (:login-succeeded   . "Logged in")
     (:logged-out        . "Logged out")
     (:already-logged-in . "You are already logged in"))
-  "An alist of log in/out messages: a keyword key -> a string message")
+  "An alist of log in/out messages: a keyword key -> a string message.")
 
 (defvar *thumbnail-width*  100
   "The default thumbnail width. The default is 100.")

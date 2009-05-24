@@ -18,13 +18,13 @@
 
 (defun get-cont (continuation-id)
   "Returns the continuation associated with the CONTINUATION-ID
- if any and nil otherwise"
+ if any and nil otherwise."
   (awhen (gethash continuation-id *cid->cont*)
     (when (= (cont-sid it) (sid))
       (cont-cont it))))
 
 (defun generate-cid ()
-  "Generates and returns a string unique continuation id"
+  "Generates and returns a string unique continuation id."
   (dotimes (x 10)
     (let ((cid (hunchentoot::create-random-string 10 36)))
       (unless (gethash cid *cid->cont*)
@@ -147,7 +147,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun cont-expand (continuation)
-    "Expands last-post inside the CONTINUATION"
+    "Expands last-post inside the CONTINUATION."
     (loop for x in continuation collect
           (cond ((atom x) x)
                 ((eq 'last-post (car x))
@@ -169,7 +169,7 @@
         expanded)))
 
 (defmacro a/cont (continuation &rest body)
-  "Embeds the CONTINUATION within a link"
+  "Embeds the CONTINUATION within a link."
   (let ((cid (gensym)))
     `(let ((,cid (set-cont (cont/lambda ,continuation))))
        [a :href (concat (host-uri) "?cid=" ,cid) ,@body])))
@@ -183,9 +183,9 @@
              [input :type "hidden" :name "cid" :value ,cid]))))
 
 (defmacro form/cont (continuation &rest body)
-  "Embeds the CONTINUATION within a form"
+  "Embeds the CONTINUATION within a form."
   `(%form/cont nil ,continuation ,@body))
 
 (defmacro multipart-form/cont (continuation &rest body)
-  "Embeds the CONTINUATION within a multi part form"
+  "Embeds the CONTINUATION within a multi part form."
   `(%form/cont t   ,continuation ,@body))

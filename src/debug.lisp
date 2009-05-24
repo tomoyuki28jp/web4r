@@ -3,7 +3,7 @@
 ; --- Util ------------------------------------------------------
 
 (defun ps (instance)
-  "Prints each slot's name and value of the INSTANCE for debugging"
+  "Prints each slot's name and value of the INSTANCE for debugging."
   (loop for slot in (ele::class-slots (class-of instance))
         as name = (ele::slot-definition-name slot)
         do (print (list name
@@ -12,7 +12,7 @@
                             :unbound)))))
 
 (defmacro with-post-parameters (parameters &rest body)
-  "Executes the BODY with the alist of post PARAMETERS"
+  "Executes the BODY with the alist of post PARAMETERS."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
@@ -20,7 +20,7 @@
      ,@body))
 
 (defmacro with-get-parameters (parameters &rest body)
-  "Executes the BODY with the alist of get PARAMETERS"
+  "Executes the BODY with the alist of get PARAMETERS."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
@@ -30,7 +30,7 @@
 ; --- Logging ---------------------------------------------------
 
 (defun debug-log (&rest contents)
-  "Write a log CONTENTS to the *debug-log-file*"
+  "Write a log CONTENTS to the *debug-log-file*."
   (let ((*message-log-pathname* *debug-log-file*))
     (log-message :debug (join " " contents))))
 
@@ -45,11 +45,11 @@
 ; --- Debug mode ------------------------------------------------
 
 (defun debug-mode-on ()
-  "Turns on debug-mode"
+  "Turns on debug-mode."
   (setf *debug-mode* t
         *show-lisp-errors-p* t))
 
 (defun debug-mode-off ()
-  "Turns off debug-mode"
+  "Turns off debug-mode."
   (setf *debug-mode* nil
         *show-lisp-errors-p* nil))
