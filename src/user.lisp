@@ -21,10 +21,10 @@
                 :documentation "The name of logout page")
    (regist-page :initform "regist"   :initarg :regist-page :type symbol
                 :documentation "The name of regist page"))
-  (:documentation "The instance of this class set to *user* is used to 
-manage authentication. The default user persistent class used for 
-authentication is 'user, and you can simply change it by defining a new 
-user class with extending the 'user class."))
+  (:documentation "The instance of this class set to *user* is used to
+ manage authentication. The default user persistent class used for
+ authentication is 'user, and you can simply change it by defining a new
+ user class with extending the 'user class."))
 
 (defmethod initialize-instance :after ((user user*) &key)
   (set-page (slot-value user 'login-page)  (lambda () (login-page)))
@@ -42,9 +42,9 @@ user class with extending the 'user class."))
          :documentation "A user login ID.")
    (pass :format :alnum :length (4 12) :input :password
          :documentation "A user login password"))
-  (:documentation "This is the default persistent class used for 
-authentication. You can change it by overriding this or defining 
-a new class with extending this."))
+  (:documentation "This is the default persistent class used for
+ authentication. You can change it by overriding this or defining
+ a new class with extending this."))
 
 (defun user-class ()
   "Returns the symbol of the user persistent class name"
@@ -81,22 +81,22 @@ a new class with extending this."))
   (slot-value user (user-pass-slot)))
 
 (defun get-user (user-id &optional user-pass)
-  "Returns an instance of the user persistent class by the USER-ID and 
-USER-PASS if any"
+  "Returns an instance of the user persistent class by the USER-ID and
+ USER-PASS if any"
   (awhen (get-instances-by-value (user-class) (user-id-slot) user-id)
     (if user-pass
         (find-if #'(lambda (u) (equal (user-pass u) user-pass)) it)
         (car it))))
 
 (defun get-user-oid (user-id)
-  "Returns an oid of the user persistent class instance for a user 
-by the USER-ID if any"
+  "Returns an oid of the user persistent class instance for a user
+ by the USER-ID if any"
   (awhen (get-instances-by-value (user-class) (user-id-slot) user-id)
     (oid (car it))))
 
 (defun login (user-oid user-id)
-  "Sets the session data USER-OID and USER-ID so that the current user 
-is treated as a login user"
+  "Sets the session data USER-OID and USER-ID so that the current user
+ is treated as a login user"
   (setf (session-value :user-oid) user-oid
         (session-value :user-id)  user-id))
 
@@ -106,8 +106,8 @@ is treated as a login user"
   (remove-session *session*))
 
 (defun login-user ()
-  "Returns an instance of the user persistent class instance for the 
-current user if the user is logged in"
+  "Returns an instance of the user persistent class instance for the
+ current user if the user is logged in"
   (awhen (session-value :user-oid)
     (get-instance-by-oid (user-class) it)))
 
@@ -116,8 +116,8 @@ current user if the user is logged in"
   (session-value :user-id))
 
 (defun login-user-oid ()
-  "Returns an integer oid of the user persistent class instance for the 
-current user if the user is logged in."
+  "Returns an integer oid of the user persistent class instance for the
+ current user if the user is logged in."
   (session-value :user-oid))
 
 (defun login/cont (redirect-uri)
@@ -132,8 +132,8 @@ current user if the user is logged in."
            (page/error-msgs "login" (login-msg :login-failed))))))
 
 (defun login-page (&optional (redirect-uri (host-uri)))
-  "Displays the login page. After logging in, redirects the user to the 
-REDIRECT-URI."
+  "Displays the login page. After logging in, redirects the user to the
+ REDIRECT-URI."
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
       (let ((*with-slots* (list (user-id-slot) (user-pass-slot))))
@@ -147,14 +147,14 @@ REDIRECT-URI."
   (redirect/msgs redirect-uri (login-msg :logged-out)))
 
 (defun regist-page (&optional (redirect-uri (host-uri)))
-  "Displays the registration page. After registering, redirects the user 
-to the REDIRECT-URI."
+  "Displays the registration page. After registering, redirects the user
+ to the REDIRECT-URI."
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
       (edit-page (user-class) :redirect-uri redirect-uri)))
 
 (defun owner-p (class slot oid)
-  "Returns true if the value of the CLASS SLOT by the OID is eq to the 
-login user oid."
+  "Returns true if the value of the CLASS SLOT by the OID is eq to the
+ login user oid."
   (aand (awhen oid (get-instance-by-oid class it))
         (eq (slot-value it slot) (login-user-oid))))

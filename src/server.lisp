@@ -6,8 +6,8 @@
 ; --- Util ------------------------------------------------------
 
 (defun uri-path (n &optional (request *request*))
-  "Returns the number of the current page uri paths. For example, when 
-the current page is (defpage one/two/three () ...), this returns 3."
+  "Returns the number of the current page uri paths. For example, when
+ the current page is (defpage one/two/three () ...), this returns 3."
   (nth (1- (+ n *page-uri-paths*))
        (split #\/ (car (split #\? (request-uri* request))))))
 
@@ -18,9 +18,9 @@ the current page is (defpage one/two/three () ...), this returns 3."
     (concat "http://" host "/")))
 
 (defun page-uri (&rest paths)
-  "Generates a page uri from PATHS and returns it. 
-Example: (page-uri 'page' 'path1' 'path1') 
-;=> 'http://localhost:8080/page/path1/path1/'"
+  "Generates a page uri from PATHS and returns it.
+  Example: (page-uri 'page' 'path1' 'path1')
+  ;=> 'http://localhost:8080/page/path1/path1/'"
   (concat (host-uri) (apply #'join "/" paths) "/"))
 
 (defun file-data (name n)
@@ -28,18 +28,18 @@ Example: (page-uri 'page' 'path1' 'path1')
   (aand (post-parameter name) (listp it) (nth n it)))
 
 (defun file-path (name)
-  "If the value of the post parameter named by the NAME is a file, 
-returns a pathname denoting the place where the uploaded file was stored."
+  "If the value of the post parameter named by the NAME is a file,
+ returns a pathname denoting the place where the uploaded file was stored."
   (file-data name 0))
 
 (defun file-name (name)
-  "If the value of the post parameter named by the NAME is a file, 
-returns the file name sent by the browser."
+  "If the value of the post parameter named by the NAME is a file,
+ returns the file name sent by the browser."
   (file-data name 1))
 
 (defun file-type (name)
-  "If the value of the post parameter named by the NAME is a file, 
-returns the content type sent by the browser."
+  "If the value of the post parameter named by the NAME is a file,
+ returns the content type sent by the browser."
   (file-data name 2))
 
 (defun set-post-parameters (parameters)
@@ -51,8 +51,8 @@ returns the content type sent by the browser."
   (setf (slot-value *request* 'hunchentoot::get-parameters)  parameters))
 
 (defun start-server (&optional acceptor)
-  "Starts ACCEPTOR so that it begins accepting connections. 
-Returns the acceptor."
+  "Starts ACCEPTOR so that it begins accepting connections.
+ Returns the acceptor."
   (start (or acceptor
              (make-instance 'acceptor :port 8080
                :request-dispatcher 'web4r-dispatcher))))

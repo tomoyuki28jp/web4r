@@ -12,13 +12,13 @@
   (hunchentoot::session-id session))
 
 (defun cid ()
-  "Returns the current continuation id as a string if the request is 
-calling a continuation and nil otherwise."
+  "Returns the current continuation id as a string if the request is
+ calling a continuation and nil otherwise."
   (parameter "cid"))
 
 (defun get-cont (continuation-id)
-  "Returns the continuation associated with the CONTINUATION-ID 
-if any and nil otherwise"
+  "Returns the continuation associated with the CONTINUATION-ID
+ if any and nil otherwise"
   (awhen (gethash continuation-id *cid->cont*)
     (when (= (cont-sid it) (sid))
       (cont-cont it))))
@@ -76,8 +76,8 @@ if any and nil otherwise"
   (remhash cid *cont-sessions*))
 
 (defun destroy-conts (start end)
-  "Destroys the continuations from the START to the END order by 
-their generated time."
+  "Destroys the continuations from the START to the END order by
+ their generated time."
   (loop for i from start to (1- end)
         do (destroy-cont (elt *cid-generated-order* i) i)))
 
@@ -92,9 +92,9 @@ their generated time."
 (add-hook 'after-calling-cont #'destroy-cont)
 
 (defun call-cont (cid)
-  "Calls the continuation associated with the CID (continuation id). By default, 
-this function destroys the continuation after calling it. If you want to leave 
-it, run this code: (rem-hook 'after-calling-cont #'destroy-cont)."
+  "Calls the continuation associated with the CID (continuation id). By default,
+ this function destroys the continuation after calling it. If you want to leave
+ it, run this code: (rem-hook 'after-calling-cont #'destroy-cont)."
   (awhen (get-cont cid)
     ; Without unwind-protect, destroy-cont and cont-gc won't be 
     ; executed when we call hunchentoot:redirect inside a cont.

@@ -32,8 +32,8 @@
       t)))
 
 (defun unique-p (class slot value &optional ins)
-  "Returns nil if the same VALUE has been registered in the SLOT of the CLASS 
-and true otherwise."
+  "Returns nil if the same VALUE has been registered in the SLOT of the CLASS
+ and true otherwise."
   (let* ((i (get-instances-by-value class slot value))
          (l (length i)))
     (or (= l 0)
@@ -93,11 +93,11 @@ and true otherwise."
 
 
 (defun validation-errors (label value validators)
-  "Validates the VALUE with VALIDATORS and returns error messages if any. 
-LABEL is used as the subject of the error messages.
-Example:
- (validation-errors \"label\" \"12345\" '(:length 3))
- ;=> (\"label is too long (maximum is 3 characters)\")"
+  "Validates the VALUE with VALIDATORS and returns error messages if any.
+ LABEL is used as the subject of the error messages.
+  Example:
+  (validation-errors \"label\" \"12345\" '(:length 3))
+  ;=> (\"label is too long (maximum is 3 characters)\")"
   (loop for (type args) on validators by #'cddr
         as validator = (or (get-validator type)
                            (error "invalid validator: ~A" type))
@@ -105,15 +105,15 @@ Example:
         when error collect error until error))
 
 (defmacro with-validations (validations error-handler body)
-  "Executes the VALIDATIONS and the ERROR-HANDLER if any error 
-and BODY otherwise. The ERROR-HANDLER takes one argument which is 
-a list of validation error messages.
-Example:
- (with-validations ((\"1\" \"v\" '(:required t))
-                    (\"2\" nil '(:required t)))
-   (lambda (e) e)
-   \"ok\")
- ; => (\"2 can't be empty\")"
+  "Executes the VALIDATIONS and the ERROR-HANDLER if any error
+ and BODY otherwise. The ERROR-HANDLER takes one argument which is
+ a list of validation error messages.
+  Example:
+  (with-validations ((\"1\" \"v\" '(:required t))
+                     (\"2\" nil '(:required t)))
+    (lambda (e) e)
+    \"ok\")
+  ; => (\"2 can't be empty\")"
   `(aif (append ,@(loop for v in validations
                         collect `(validation-errors ,@v)))
         (funcall ,error-handler it)
