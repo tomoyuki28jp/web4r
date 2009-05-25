@@ -8,7 +8,7 @@
   (generated-time 0 :type integer))
 
 (defun sid (&optional (session *session*))
-  "Returns the current session id as a string."
+  "Returns the integer id of the SESSION."
   (hunchentoot::session-id session))
 
 (defun cid ()
@@ -17,14 +17,13 @@
   (parameter "cid"))
 
 (defun get-cont (continuation-id)
-  "Returns the continuation associated with the CONTINUATION-ID
- if any and nil otherwise."
+  "Returns the continuation associated with the CONTINUATION-ID if any."
   (awhen (gethash continuation-id *cid->cont*)
     (when (= (cont-sid it) (sid))
       (cont-cont it))))
 
 (defun generate-cid ()
-  "Generates and returns a string unique continuation id."
+  "Generates and returns a unique string continuation id."
   (dotimes (x 10)
     (let ((cid (hunchentoot::create-random-string 10 36)))
       (unless (gethash cid *cid->cont*)
@@ -44,7 +43,8 @@
     cid))
 
 (defun cont-gc (&optional (end (length *cid-generated-order*)))
-  "Executes garbage collection for expired continuations."
+  "Executes garbage collection for expired continuations.
+ END is used for the binary search."
   (when (and (plusp end)
              (cont-expired-p (elt *cid-generated-order* 0)))
     (if (= end 1)
@@ -55,15 +55,16 @@
                      (cont-gc))
               (cont-gc (1- mid)))))))
 
-(defun cont-expired-p (cid)
-  "Returns true if the continuation associated with the CID
- (continuation id) has expired and nil otherwise."
-  (awhen (gethash cid *cid->cont*)
+(defun cont-expired-p (continuation-id)
+  "Returns true if the continuation associated with the CONTINUATION-ID
+ has expired and nil otherwise."
+  (awhen (gethash continuation-id *cid->cont*)
     (> (- (get-universal-time) *cont-gc-lifetime*)
        (cont-generated-time it))))
 
 (defun destroy-cont (&optional (cid (cid)) index)
-  "Destroys the continuation associated with the CID (continuation id)."
+  "Destroys the continuation associated with the CID (continuation id).
+ INDEX is the sequence index for *cid-generated-order*."
   (setf *cid-generated-order*
         (if index
             (delete cid *cid-generated-order*
@@ -97,7 +98,7 @@
  it, run this code: (rem-hook 'after-calling-cont #'destroy-cont)."
   (awhen (get-cont cid)
     ; Without unwind-protect, destroy-cont and cont-gc won't be 
-    ; executed when we call hunchentoot:redirect inside a cont.
+    ; executed if we call hunchentoot:redirect inside a cont.
     (unwind-protect (funcall it)
       (run-hook-with-args 'after-calling-cont cid)
       (when (= (random *cont-gc-probability*) 0)
@@ -105,7 +106,8 @@
          (lambda () (cont-gc)))))))
 
 (defun renew-cont-lifetime (cid)
-  "Renews the continuation lifetime associated with the CID (continuation id)."
+  "Renews the lifetime of the continuation associated with the
+ CID (continuation id)."
   (when (get-cont cid)
     (let ((cont (gethash cid *cid->cont*)))
       (setf (cont-generated-time cont) (get-universal-time))
@@ -121,18 +123,21 @@
 
 (defun cont-session (key &optional (cid (cid)))
   "Returns the entry for the KEY in cont-session
- (continuation based session) if any."
+ (continuation based session) associated with the cid (continuation id)
+ if any."
   (cdr (assoc key (gethash cid *cont-sessions*))))
 
 (defun rem-cont-session (key &optional (cid (cid)))
   "Removes the entry for the KEY in cont-session
- (continuation based session) if any."
+ (continuation based session) associated with the cid (continuation id)
+ if any."
   (setf (gethash cid *cont-sessions*)
         (remove-if #'(lambda (x) (eq (car x) key))
                    (gethash cid *cont-sessions*))))
 
 (defun (setf cont-session) (value key &optional (cid (cid)))
-  "Sets the VALUE for the KEY in cont-session (continuation based session)."
+  "Sets the VALUE for the KEY in the cont-session
+ (continuation based session) associated with the cid (continuation id)."
   (setf (gethash cid *cont-sessions*)
         (append (rem-cont-session key cid)
                 (list (cons key value)))))
@@ -147,7 +152,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun cont-expand (continuation)
-    "Expands last-post inside the CONTINUATION."
+    "Expands (last-post ...) inside the CONTINUATION."
     (loop for x in continuation collect
           (cond ((atom x) x)
                 ((eq 'last-post (car x))
@@ -169,7 +174,7 @@
         expanded)))
 
 (defmacro a/cont (continuation &rest body)
-  "Embeds the CONTINUATION within a link."
+  "Generates and displays an html link with embedding CONTINUATION and BODY."
   (let ((cid (gensym)))
     `(let ((,cid (set-cont (cont/lambda ,continuation))))
        [a :href (concat (host-uri) "?cid=" ,cid) ,@body])))
@@ -183,9 +188,9 @@
              [input :type "hidden" :name "cid" :value ,cid]))))
 
 (defmacro form/cont (continuation &rest body)
-  "Embeds the CONTINUATION within a form."
+  "Generates and displays a form with embedding CONTINUATION and BODY."
   `(%form/cont nil ,continuation ,@body))
 
 (defmacro multipart-form/cont (continuation &rest body)
-  "Embeds the CONTINUATION within a multi part form."
+  "Generates and displays a multi part form with embedding CONTINUATION and BODY."
   `(%form/cont t   ,continuation ,@body))

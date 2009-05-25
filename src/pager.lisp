@@ -54,7 +54,7 @@
                                 (+ current-page right)))))))))
 
 (defmacro prev-link* (pager &optional params)
-  "Prints the link to previous page links. The default is '<<'."
+  "Displays the link to previous page links. The default is '<<'."
   `(with-slots (links-per-page current-page prev-link) ,pager
      (let ((page   (max 1 (- current-page links-per-page)))
            (link   (prev-link ,pager))
@@ -63,7 +63,7 @@
          (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
 
 (defmacro next-link* (pager &optional params)
-  "Prints the link to next page links. The default is '>>'."
+  "Displays the link to next page links. The default is '>>'."
   `(with-slots (links-per-page current-page next-link total-pages) ,pager
      (let ((page   (min total-pages (+ current-page links-per-page)))
            (link   (next-link ,pager))
@@ -72,13 +72,14 @@
          (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
 
 (defun page-links (pager &optional params)
-  "Prints page links."
+  "Displays page links."
   (with-slots (total-pages link-start link-end current-page) pager
     (when (> total-pages 1)
       (load-sml-path "paging/page_links.sml"))))
 
 (defun page-summary (pager)
-  "Prints pagination summary. The default format is 'Results 1 - 10  of 100'."
+  "Displays a pagination summary by PAGER, an instance of the pager class.
+ The default format is 'Results 1 - 10  of 100'."
   (with-slots
         (total-items item-start item-end items-per-page links-per-page) pager
     (let ((item-start (1+ item-start)))

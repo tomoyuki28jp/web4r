@@ -3,7 +3,7 @@
 ; --- Util ------------------------------------------------------
 
 (defun ps (instance)
-  "Prints each slot's name and value of the INSTANCE for debugging."
+  "Prints names and values of the slots in the INSTANCE."
   (loop for slot in (ele::class-slots (class-of instance))
         as name = (ele::slot-definition-name slot)
         do (print (list name
@@ -12,7 +12,8 @@
                             :unbound)))))
 
 (defmacro with-post-parameters (parameters &rest body)
-  "Executes the BODY with the alist of post PARAMETERS."
+  "Executes BODY with post PARAMETERS. PARAMETERS must be an alist
+ of key/value pairs."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
@@ -20,7 +21,8 @@
      ,@body))
 
 (defmacro with-get-parameters (parameters &rest body)
-  "Executes the BODY with the alist of get PARAMETERS."
+  "Executes BODY with get PARAMETERS. PARAMETERS must be an alist
+ of key/value pairs."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
@@ -30,7 +32,7 @@
 ; --- Logging ---------------------------------------------------
 
 (defun debug-log (&rest contents)
-  "Write a log CONTENTS to the *debug-log-file*."
+  "Writes CONTENTS to the file, *debug-log-file*."
   (let ((*message-log-pathname* *debug-log-file*))
     (log-message :debug (join " " contents))))
 

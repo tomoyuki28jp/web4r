@@ -22,7 +22,7 @@
           ((equalp "Zip"   (nth 1 s))       "application/zip"))))
 
 (defun image-file-p (file)
-  "Returns true if the FILE is a image file and nil otherwise."
+  "Returns true if the FILE is a image and nil otherwise."
   (when (image-type (mime-type file)) t))
 
 (defun image-type (mime-type)
@@ -32,7 +32,7 @@
       (->keyword (nth 1 s)))))
 
 (defun image-path (file type)
-  "Returns a pathname of the image FILE. The TYPE must be a key of
+  "Returns the pathname of the image FILE. TYPE must be a key of
  *image-public-dirs* such as 'upload' or 'tmp'."
   (when-let (dir (cdr (assoc type *image-public-dirs* :test #'equal)))
     (and file (probe-file (merge-pathnames file (symbol-value dir))))))
@@ -50,9 +50,8 @@
 
 (defun thumbnail (file &key type width height)
   "Displays a thumbnail of the image FILE with the size of WIDTH and HEIGHT.
- If you don't specify the WIDTH or HEIGHT, the values of *thumbnail-width*
- or *thumbnail-height* are used. The TYPE must be a key of *image-public-dirs*
- such as 'upload' or 'tmp'."
+ The default width and height are *thumbnail-width* and *thumbnail-height*.
+ TYPE must be a key of *image-public-dirs* such as 'upload' or 'tmp'."
   (let* ((file   (image-path file type))
          (mime   (aand file (mime-type it)))
          (type   (aand mime (image-type it)))
@@ -78,6 +77,6 @@
 
 (defun thumbnail-uri (file &key type width height)
   "Returns a thumbnail uri of the image FILE with the size of WIDTH and HEIGHT.
- The TYPE must be a key of *image-public-dirs* such as 'upload' or 'tmp'."
+ TYPE must be a key of *image-public-dirs* such as 'upload' or 'tmp'."
   (add-parameters (page-uri "thumbnail")
                   "file" file "type" type  "width" width "height" height))
