@@ -54,9 +54,9 @@
                                 (+ current-page right)))))))))
 
 (defmacro prev-link* (pager &optional parameters)
-  "Displays the link to the previous page links by PAGER, an instance of the
- pager class if needed. The default link is '<<'. PARAMETERS is a string
- get parameters which will be added to the link."
+  "Displays the link to the previous page links by the PAGER, must be
+ an instance of the pager class, if needed. The default link is '<<'.
+ PARAMETERS is a string get parameters which will be added to the link."
   `(with-slots (links-per-page current-page prev-link) ,pager
      (let ((page (max 1 (- current-page links-per-page)))
            (link (prev-link ,pager))
@@ -65,9 +65,9 @@
          (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
 
 (defmacro next-link* (pager &optional parameters)
-  "Displays the link to the next page links by PAGER, an instance of the
- pager class if needed. The default link is '>>'. PARAMETERS is a string
- get parameters which will be added to the link."
+  "Displays the link to the next page links by the PAGER, must be an
+ instance of the pager class, if needed. The default link is '>>'.
+ PARAMETERS is a string get parameters which will be added to the link."
   `(with-slots (links-per-page current-page next-link total-pages) ,pager
      (let ((page (min total-pages (+ current-page links-per-page)))
            (link (next-link ,pager))
@@ -76,20 +76,23 @@
          (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
 
 (defun page-links (pager &optional parameters)
-  "Generates and displays page links by PAGER, an instance of the pager class.
- PARAMETERS is a string get parameters which will be added to the links."
+  "Generates and displays page links by the PAGER, must be an instance
+ of the pager class, if needed. PARAMETERS is a string get parameters
+ which will be added to the links."
   (with-slots (total-pages link-start link-end current-page) pager
     (when (> total-pages 1)
       (load-sml-path "paging/page_links.sml"))))
 
 (defun page-summary (pager)
-  "Generates and displays the summary result of the pagination by PAGER, an
- instance of the pager class. The default format is 'Results 1 - 10  of 100'."
+  "Generates and displays the summary result of the pagination by the
+ PAGER, must be an instance of the pager class, if needed. The default
+ format is 'Results 1 - 10  of 100'."
   (with-slots
         (total-items item-start item-end items-per-page links-per-page) pager
     (let ((item-start (1+ item-start)))
       (load-sml-path "paging/page_summary.sml"))))
 
 (defun w/p (link)
-  "Returns the LINK after adding a get parameter denotate the current page number."
+  "Returns the LINK after adding a get parameter denotate the current
+ page number."
   (add-parameter link *page-param* (get-current-page)))
