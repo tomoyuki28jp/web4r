@@ -95,7 +95,7 @@
 (defun validation-errors (label value validators)
   "Validates the VALUE with VALIDATORS and returns error messages if any.
  LABEL is used as the subject of the error messages.
-  Examples:
+ Examples:
   (validation-errors \"label\" \"12345\" '(:length 3))
   ;=> (\"label is too long (maximum is 3 characters)\")"
   (loop for (type args) on validators by #'cddr
@@ -108,7 +108,7 @@
   "Executes the VALIDATIONS and the ERROR-HANDLER if any error
  and BODY otherwise. The ERROR-HANDLER takes one argument which is
  a list of validation error messages.
-  Examples:
+ Examples:
   (with-validations ((\"1\" \"v\" '(:required t))
                      (\"2\" nil '(:required t)))
     (lambda (e) e)

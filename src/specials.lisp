@@ -76,13 +76,13 @@
 
 (defvar *page-uri-paths* 0
   "The number of the current page uri paths.
-  Examples:
-   (defpage one/two/three () web4r::*page-uri-paths*) ;=> 3")
+ Examples:
+  (defpage one/two/three () web4r::*page-uri-paths*) ;=> 3")
 
 (defvar *pages* nil
   "An alist of page handlers: nested page uri paths -> a handler function.
-  Examples:
-   (defpage onw/two/three () ...) => (\"onw\" (\"two\" (\"three\" (NIL . #))")
+ Examples:
+  (defpage onw/two/three () ...) => (\"onw\" (\"two\" (\"three\" (NIL . #))")
 
 (defvar *msgs* nil
   "This is an instance of msgs/error-msgs if there are messages to display

@@ -45,7 +45,7 @@
 
 (defun add-parameter (link key value)
   "Returns the LINK with a get parameter named KEY with the VALUE.
-  Examples:
+ Examples:
   (add-parameter \"http://host/\" \"k1\" \"v1\") ;=> \"http://host/?k1=v1\""
   (let ((param (concat key "=" value)))
     (multiple-value-bind (replaced matchp)
@@ -61,7 +61,7 @@
 
 (defun add-parameters (link &rest parameters)
   "Returns the LINK with get PARAMETERS.
-  Examples:
+ Examples:
   (add-parameters \"http://host/\" \"k1\" \"v1\" \"k2\" \"v2\")
   ;=> \"http://host/?k1=v1&k2=v2\""
   (loop for (k v) on parameters by #'cddr
@@ -69,8 +69,8 @@
         finally (return l)))
 
 (defun rem-parameter (link key)
-  "Removes a get parameter named KEY from the LINK.
-  Examples:
+  "Returns the LINK after removing a get parameter named KEY
+ Examples:
   (rem-parameter \"http://host/?k1=v1\" \"k1\") ;=> \"http://host/\""
   (let* ((new (regex-replace (concat "(" key  "=[^&]+&?)") link ""))
          (len (length new)))
@@ -78,23 +78,22 @@
         (subseq link 0 (1- len))
         new)))
 
-(defun omit (obj max &optional (omark "..."))
-  "Returns (concat (subseq (->string OBJ) 0 MAX) OMARK) if the length of
- OBJ exceeds the MAX and (->string OBJ) otherwise.
-  Examples:
+(defun omit (obj maxlength &optional (omark "..."))
+  "If the length of OBJ exceeds the MAXLENGTH, replaces the exceeded
+ characters with the OMARK. Returns the OBJ.
+ Examples:
   (omit \"12345\" 3) ;=>  \"123...\""
   (let ((str (->string obj)))
-    (if (<= (length str) max)
+    (if (<= (length str) maxlength)
         str
-        (concat (subseq str 0 max) omark))))
+        (concat (subseq str 0 maxlength) omark))))
 
 (defun file-length* (file)
   (with-open-file (s file :if-does-not-exist nil)
     (aand s (file-length it))))
 
 (defun time-format (format &optional (time (get-universal-time)))
-  "Returns formatted string time from the universal-time TIME and the
- control-string FORMAT.
+  "Returns formatted string TIME according to the FORMAT.
 + -------+-----------------+
 | format |   description   |
 +--------+-----------------+
@@ -105,7 +104,7 @@
 | ~i     | minute (~2,'0d) |
 | ~s     | second (~2,'0d) |
 +--------+-----------------+
-  Examples: 
+ Examples: 
   (time-format \"~y-~m-~d ~h:~i:~s\" 3443621047) ;=> \"2009-02-15 02:24:07\""
   (multiple-value-bind (s i h d m y) (decode-universal-time time)
     (let ((y (format nil "~4,'0d" y))
