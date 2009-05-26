@@ -33,20 +33,19 @@
  The default is 1440 (24 minutes).")
 
 (defvar *tmp-files-gc-probability* 100
-  "The probability to start a gc process for temporary saved files.
+  "The probability to start a gc process for expired temporary saved files.
  The default is 100.")
 
 (defvar *image-public-dirs*
   `(("upload" . *upload-save-dir*)
     ("tmp"    . *tmp-save-dir*))
-  "An alist of image public directories: a string name -> a pathname of the
- public directory.")
+  "An alist of image public directories which must be key/pathname pairs.")
 
 (defvar *debug-log-file* #P"/tmp/web4r/debug.log"
   "A pathname of the debug log file. The default is #P\"/tmp/web4r/debug.log\".")
 
 (defvar *debug-mode* nil
-  "If this is non-nil, debug-mode is turned on and off otherwise.")
+  "If this is non nil, debug-mode is on.")
 
 (defvar *sid->cid*  (make-hash-table)
   "A mapping hash table: sid(session-id) -> cid(continuation-id).")
@@ -69,19 +68,21 @@
 
 (defvar *cont-sessions* (make-hash-table :test 'equal)
   "A hash table of continuation based session data: a string cid(continuation-id)
- -> alist of key and value pairs.")
+ -> alist of key/value pairs.")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *last-posts* nil
-    "This is only used on the process to expand last-post inside a continuation."))
+    "This is used on the process to expand last-post inside a continuation."))
 
 (defvar *page-uri-paths* 0
   "The number of the current page uri paths.
-  Example: (defpage one/two/three () web4r::*page-uri-paths*) ;=> 3")
+  Examples:
+   (defpage one/two/three () web4r::*page-uri-paths*) ;=> 3")
 
 (defvar *pages* nil
   "An alist of page handlers: nested page uri paths -> a handler function.
-  Example: (defpage onw/two/three () ...) => (\"onw\" (\"two\" (\"three\" (NIL . #))")
+  Examples:
+   (defpage onw/two/three () ...) => (\"onw\" (\"two\" (\"three\" (NIL . #))")
 
 (defvar *msgs* nil
   "This is an instance of msgs/error-msgs if there are messages to display
@@ -99,10 +100,10 @@
     (:not-alnum    . "~A must contains only alphabetic and digit characters")
     (:not-a-unique . "The same ~A has already been registered")
     (:not-a-image  . "~A must be a jpeg, png or gif image file"))
-  "An alist of validation error messages: a key -> a string error message.")
+  "An alist of validation error messages: key/message pairs.")
 
 (defvar *validators* (make-hash-table)
-  "A hash table: a keyword name of validator -> a validator function.")
+  "A hash table of validators: a keyword key -> the validation procedure.")
 
 (defvar *valid-email-format*
   (remove #\Newline
@@ -125,18 +126,19 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *slots* (make-hash-table)
-    "A hash table: a symbol name of a pclass => a list of slot-options instances."))
+    "A hash table: a symbol name of a persistent class
+ -> a list of slot-options instances."))
 
 (defvar *with-slots* nil
-  "If this is :all, all pclass slots are showed. Otherwise a list of pclass
- slots to show for a page.")
+  "If this is :all, all slots in a persistent class are displayed. If this is a
+ list of a persistent class slots' symbol, the slots won't be hided.")
 
 (defvar *without-slots* nil
-  "A list of pclass slots to hide for a page.")
+  "If this is a list of persistent class slots' symbol, the slots are hided.")
 
 (defvar *max-items-per-page* 50
   "The maximum number to display items per page. This value is only used when a
- user changes a value of the get parameter named items_per_page and the value
+ user changes the value of the get parameter named items_per_page and the value
  exceeeds this maximum number. The default is 50.")
 
 (defvar *max-links-per-page* 30
@@ -145,14 +147,14 @@
  exceeeds this maximum number. The default is 30.")
 
 (defvar *user* nil
-  "An instance of the user* class used for authentication.")
+  "An instance of the user* class used for the authentication.")
 
 (defvar *login-msgs*
   '((:login-failed      . "Wrong username and password combination")
     (:login-succeeded   . "Logged in")
     (:logged-out        . "Logged out")
     (:already-logged-in . "You are already logged in"))
-  "An alist of log in/out messages: a keyword key -> a string message.")
+  "An alist of log in/out messages: key/message pairs.")
 
 (defvar *thumbnail-width*  100
   "The default thumbnail width. The default is 100.")

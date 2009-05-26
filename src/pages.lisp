@@ -100,7 +100,7 @@
  is created. Users will be redirected to the PAGE after successfully editing the
  instance. The WITH-SLOTS and WITHOUT-SLOTS are lists of slot symbols used to
  specify included/excluded slots for the validations and editing. You can specify
- slot values by the SLOT-VALUES argument which must be an alist of slot a
+ slot values by the SLOT-VALUES argument which must be an alist of slot
  symbol/value pairs."
   (let ((*with-slots* (or with-slots *with-slots*))
         (*without-slots* (or without-slots *without-slots*)))
@@ -202,7 +202,7 @@
           (values items pager slots))))))
 
 (defun unique-p* (class get-parameters oid)
-  "GET-PARAMETERS must be an alist of a slot id/value pairs in the CLASS.
+  "GET-PARAMETERS must be an alist of slot id/value pairs in the CLASS.
  Returns 'false' if the same value has been registered in the slot except
  the instance specified by the OID and 'true' otherwise."
   (if (aand (get-slot-by-id class (caar get-parameters))

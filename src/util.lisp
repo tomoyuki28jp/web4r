@@ -45,7 +45,7 @@
 
 (defun add-parameter (link key value)
   "Returns the LINK with a get parameter named KEY with the VALUE.
-  Example:
+  Examples:
   (add-parameter \"http://host/\" \"k1\" \"v1\") ;=> \"http://host/?k1=v1\""
   (let ((param (concat key "=" value)))
     (multiple-value-bind (replaced matchp)
@@ -61,7 +61,7 @@
 
 (defun add-parameters (link &rest parameters)
   "Returns the LINK with get PARAMETERS.
-  Example:
+  Examples:
   (add-parameters \"http://host/\" \"k1\" \"v1\" \"k2\" \"v2\")
   ;=> \"http://host/?k1=v1&k2=v2\""
   (loop for (k v) on parameters by #'cddr
@@ -70,7 +70,7 @@
 
 (defun rem-parameter (link key)
   "Removes a get parameter named KEY from the LINK.
-  Example:
+  Examples:
   (rem-parameter \"http://host/?k1=v1\" \"k1\") ;=> \"http://host/\""
   (let* ((new (regex-replace (concat "(" key  "=[^&]+&?)") link ""))
          (len (length new)))
@@ -81,7 +81,7 @@
 (defun omit (obj max &optional (omark "..."))
   "Returns (concat (subseq (->string OBJ) 0 MAX) OMARK) if the length of
  OBJ exceeds the MAX and (->string OBJ) otherwise.
-  Example:
+  Examples:
   (omit \"12345\" 3) ;=>  \"123...\""
   (let ((str (->string obj)))
     (if (<= (length str) max)
@@ -105,7 +105,7 @@
 | ~i     | minute (~2,'0d) |
 | ~s     | second (~2,'0d) |
 +--------+-----------------+
-  Example: 
+  Examples: 
   (time-format \"~y-~m-~d ~h:~i:~s\" 3443621047) ;=> \"2009-02-15 02:24:07\""
   (multiple-value-bind (s i h d m y) (decode-universal-time time)
     (let ((y (format nil "~4,'0d" y))

@@ -4,11 +4,15 @@
       *default-content-type* "text/html; charset=utf-8")
 
 ; --- Util ------------------------------------------------------
+(defun uri-path (nth &optional (request *request*))
+  "Returns the nth element of the uri path from the current page uri.
+ Examples:
+  (defpage one () (sml:p (uri-path 1))) 
+  ; wget http://localhost:8080/one/path1 => 'path1'
 
-(defun uri-path (n &optional (request *request*))
-  "Returns the number of the current page uri paths. For example, when
- the current page is (defpage one/two/three () ...), this returns 3."
-  (nth (1- (+ n *page-uri-paths*))
+  (defpage one/two/three () (sml:p (uri-path 1))) 
+  ; wget http://localhost:8080/one/two/three/path1 => 'path1'"
+  (nth (+ nth *page-uri-paths*)
        (split #\/ (car (split #\? (request-uri* request))))))
 
 (defun host-uri ()
@@ -18,8 +22,10 @@
     (concat "http://" host "/")))
 
 (defun page-uri (&rest paths)
-  "Generates a page uri from PATHS and returns it.
-  Example: (page-uri 'page' 'path1' 'path1')
+  "Generates and returns a page uri that contains all the PATHS
+ in the order that they are supplied.
+ Examples:
+  (page-uri 'page' 'path1' 'path1')
   ;=> 'http://localhost:8080/page/path1/path1/'"
   (concat (host-uri) (apply #'join "/" paths) "/"))
 
@@ -28,31 +34,31 @@
   (aand (post-parameter name) (listp it) (nth n it)))
 
 (defun file-path (name)
-  "If the value of the post parameter named by the NAME is a file,
+  "If the value of the post parameter named NAME is a file,
  returns a pathname denoting the place where the uploaded file was stored."
   (file-data name 0))
 
 (defun file-name (name)
-  "If the value of the post parameter named by the NAME is a file,
+  "If the value of the post parameter named NAME is a file,
  returns the file name sent by the browser."
   (file-data name 1))
 
 (defun file-type (name)
-  "If the value of the post parameter named by the NAME is a file,
+  "If the value of the post parameter named NAME is a file,
  returns the content type sent by the browser."
   (file-data name 2))
 
 (defun set-post-parameters (parameters)
-  "Sets the post PARAMETERS. PARAMETERS must be an alist."
+  "Sets the post PARAMETERS which must be an alist of key/value pairs."
   (setf (slot-value *request* 'hunchentoot::post-parameters) parameters))
 
 (defun set-get-parameters (parameters)
-  "Sets the get PARAMETERS. PARAMETERS must be an alist."
+  "Sets the get PARAMETERS which must be an alist of key/value pairs."
   (setf (slot-value *request* 'hunchentoot::get-parameters)  parameters))
 
 (defun start-server (&optional acceptor)
   "Starts ACCEPTOR so that it begins accepting connections.
- Returns the acceptor."
+ Returns the ACCEPTOR."
   (start (or acceptor
              (make-instance 'acceptor :port 8080
                :request-dispatcher 'web4r-dispatcher))))
@@ -105,21 +111,31 @@
 
 (defmacro page-lambda ((&rest args) &body body)
   "Creates a page procedure.
-Syntax:
-page-lambda ([path ...] [:get garg ...] [:post parg ...] :auth :redirect uri) body
-path---a uri path
-garg---a get parameter name
-parg---a post parameter name
-:auth---if :auth is passed and a user hasn't logged, redirect the user to the login page
-uri---the uri to redirect a user after logging in
-body---a form"
+
+ Syntax:
+ page-lambda ([path ...] [:get garg ...] [:post parg ...] :auth :redirect uri) body
+ 
+ Arguments and Values:
+ path---an uri path
+ garg---a symbol name of a get parameter
+ parg---a symbol name of a post parameter
+ :auth---if :auth is supplied and the current user hasn't logged in,
+         redirects the user to the login page
+ uri---the uri to redirect users after logging in
+ body---a form
+ 
+ Examples:
+  (defpage said ()
+    (form/cont (page-lambda (:post foo)
+                 (a/cont [p \"You said: \" foo] \"click here\"))
+     (input-text \"foo\")))"
   (flet ((args (args) (loop for a in args until (keywordp a) collect a))
          (car*  (x) (if (listp x) (car x) x))
          (cadr* (x) (when (listp x) (cadr x))))
     (let ((args* (args args)))
       `(lambda ,(awhen args* `(&optional ,@(mapcar #'car* it)))
          (let (,@(loop for p in args*
-                       as  n = 2 then (1+ n)
+                       as  n = 1 then (1+ n)
                        collect `(,(car* p) (or ,(car* p) (uri-path ,n) ,(cadr* p))))
                ,@(awhen (position :post args)
                    (loop for p* in (args (subseq args (1+ it)))
@@ -134,17 +150,29 @@ body---a form"
                (progn ,@body)))))))
 
 (defmacro defpage (page (&rest args) &rest body)
-  "Defines a new page named PAGE. Users can visit the page by accessing 
-an uri like 'http://yourhost/PAGE'.
-Syntax:
-defpage ([path ...] [:get garg ...] [:post parg ...] :auth :redirect uri :default) body
-path---a uri path
-garg---a get parameter name
-parg---a post parameter name
-:auth---if :auth is passed and a user hasn't logged, redirect the user to the login page
-uri---the uri to redirect a user after logging in
-:default---if :default is passed, the page procedure is set to *default-handler*
-body---a form"
+  "Defines a new page named PAGE. Users can visit the page by accessing
+ an uri like 'http://yourhost/PAGE'.
+
+ Syntax:
+ defpage page ([path ...] [:get garg ...] [:post parg ...]
+               :auth :redirect uri :default) body
+
+ Arguments and Values:
+ page---a name of the page
+ path---an uri path
+ garg---a symbol name of a get parameter
+ parg---a symbol name of a post parameter
+ :auth---if :auth is supplied and the current user hasn't logged in,
+         redirects the user to the login page
+ uri---the uri to redirect users after logging in
+ :default---if :default is supplied, the page procedure is set to *default-handler*
+ body---a form
+
+ Examples:
+  (defpage test (path1 path2 :get get1 get2)
+    (sml:p (my-util:join " " path1 path2 get1 get2)))
+  ; wget http://localhost:8080/test/1/2/ => '1 2'
+  ; wget http://localhost:8080/test/1/2/?get1=3&get2=4 => '1 2 3 4'"
   `(progn
      (set-page (->string-down ',page) (page-lambda (,@args) ,@body))
      (when (member :default ',args)
@@ -152,7 +180,7 @@ body---a form"
              (lambda () (page (->string-down ',page)))))))
 
 (defun page (page &rest args)
-  "Calls the procedure for the PAGE with ARGS."
+  "Calls the procedure of the PAGE with ARGS."
   (multiple-value-bind (fn paths) (get-page page)
     (aif fn
          (let ((*page-uri-paths* paths))
@@ -183,11 +211,11 @@ body---a form"
      (apply #'page ,page ,args)))
 
 (defun page/msgs (page messages &rest args)
-  "Calls the procedure for the PAGE with success MESSAGES and ARGS."
+  "Calls the procedure of the PAGE with success MESSAGES and ARGS."
   (w/msgs messages page args 'msgs))
 
 (defun page/error-msgs (page messages &rest args)
-  "Calls the procedure for the PAGE with error MESSAGES and ARGS."
+  "Calls the procedure of the PAGE with error MESSAGES and ARGS."
   (w/msgs messages page args 'error-msgs))
 
 (defun get-msgs ()
@@ -199,7 +227,7 @@ body---a form"
       it)))
 
 (defun msgs ()
-  "Prints messages if any."
+  "Displays messages if any."
   (awhen (get-msgs)
     (when-let (msgs (slot-value it 'msgs))
       (case (type-of it)
