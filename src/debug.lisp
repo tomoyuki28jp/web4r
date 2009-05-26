@@ -13,7 +13,7 @@
 
 (defmacro with-post-parameters (parameters &rest body)
   "Executes BODY with post PARAMETERS. PARAMETERS must be an alist
- of a key/value pairs."
+ of key/value pairs."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
@@ -22,7 +22,7 @@
 
 (defmacro with-get-parameters (parameters &rest body)
   "Executes BODY with get PARAMETERS. PARAMETERS must be an alist
- of a key/value pairs."
+ of key/value pairs."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
           (*request*  (make-instance 'request :headers-in '())))
