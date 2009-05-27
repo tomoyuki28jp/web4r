@@ -15,24 +15,24 @@
            (zerop (mod year 400)))))
 
 (defun days-of (year month)
-  "Returns the last day of the MONTH of the YEAR."
+  "Returns the last day of the MONTH in the YEAR."
   (let ((feb (if (leap-year-p year) 29 28)))
     (nth (1- month) `(31 ,feb 31 30 31 30 31 31 30 31 30 31))))
 
 (defun valid-date-p (year month day)
-  "Returns true if the date if valid and nil otherwise."
+  "Returns true if the date is valid and nil otherwise."
   (let ((year (->int year)) (month (->int month)) (day (->int day)))
     (when (and year month day)
       (aand (days-of year month) (<= day it) t))))
 
 (defun empty (x)
-  "Returns true if X is nil, '' or a list contains only nil and nil otherwise."
+  "Returns true if X is nil, '' or a list contains only nil."
   (let ((x (if (listp x) (remove nil x) x)))
     (when (or (null x) (equal x ""))
       t)))
 
 (defun unique-p (class slot value &optional ins)
-  "Returns nil if the same VALUE has been registered in the SLOT of the CLASS
+  "Returns nil if the same VALUE has been registered in the CLASS SLOT
  and true otherwise."
   (let* ((i (get-instances-by-value class slot value))
          (l (length i)))
@@ -94,7 +94,7 @@
 
 (defun validation-errors (label value validators)
   "Validates the VALUE with VALIDATORS and returns error messages if any.
- LABEL is used as the subject of the error messages.
+ LABEL is used as a subject of the error messages.
  Examples:
   (validation-errors \"label\" \"12345\" '(:length 3))
   ;=> (\"label is too long (maximum is 3 characters)\")"
@@ -105,9 +105,9 @@
         when error collect error until error))
 
 (defmacro with-validations (validations error-handler body)
-  "Executes the VALIDATIONS and the ERROR-HANDLER if any error
- and BODY otherwise. The ERROR-HANDLER takes one argument which is
- a list of validation error messages.
+  "Executes the VALIDATIONS. Then executes ERROR-HANDLER if there
+ is a error and BODY otherwise. The ERROR-HANDLER takes one argument
+ which is a list of validation error messages.
  Examples:
   (with-validations ((\"1\" \"v\" '(:required t))
                      (\"2\" nil '(:required t)))
