@@ -170,7 +170,7 @@
 
  Examples:
   (defpage test (path1 path2 :get get1 get2)
-    (sml:p (my-util:join " " path1 path2 get1 get2)))
+    (sml:p (my-util:join \" \" path1 path2 get1 get2)))
   ; wget http://localhost:8080/test/1/2/ => '1 2'
   ; wget http://localhost:8080/test/1/2/?get1=3&get2=4 => '1 2 3 4'"
   `(progn
