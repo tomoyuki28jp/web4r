@@ -45,6 +45,7 @@
 
 (defun add-parameter (link key value)
   "Returns the LINK with a get parameter named KEY with the VALUE.
+
  Examples:
   (add-parameter \"http://host/\" \"k1\" \"v1\") ;=> \"http://host/?k1=v1\""
   (let ((param (concat key "=" value)))
@@ -61,6 +62,7 @@
 
 (defun add-parameters (link &rest parameters)
   "Returns the LINK with get PARAMETERS.
+
  Examples:
   (add-parameters \"http://host/\" \"k1\" \"v1\" \"k2\" \"v2\")
   ;=> \"http://host/?k1=v1&k2=v2\""
@@ -70,6 +72,7 @@
 
 (defun rem-parameter (link key)
   "Returns the LINK after removing a get parameter named KEY
+
  Examples:
   (rem-parameter \"http://host/?k1=v1\" \"k1\") ;=> \"http://host/\""
   (let* ((new (regex-replace (concat "(" key  "=[^&]+&?)") link ""))
@@ -81,6 +84,7 @@
 (defun omit (obj maxlength &optional (omark "..."))
   "If the length of OBJ exceeds the MAXLENGTH, replaces the exceeded
  characters with the OMARK. Returns the OBJ.
+
  Examples:
   (omit \"12345\" 3) ;=>  \"123...\""
   (let ((str (->string obj)))
@@ -94,16 +98,17 @@
 
 (defun time-format (format &optional (time (get-universal-time)))
   "Returns formatted string TIME according to the FORMAT.
-+ -------+-----------------+
-| format |   description   |
-+--------+-----------------+
-| ~y     | year   (~4,'0d) |
-| ~m     | month  (~2,'0d) |
-| ~d     | date   (~2,'0d) |
-| ~h     | hour   (~2,'0d) |
-| ~i     | minute (~2,'0d) |
-| ~s     | second (~2,'0d) |
-+--------+-----------------+
+  +--------+-----------------+
+  | format |   description   |
+  +--------+-----------------+
+  | ~y     | year   (~4,'0d) |
+  | ~m     | month  (~2,'0d) |
+  | ~d     | date   (~2,'0d) |
+  | ~h     | hour   (~2,'0d) |
+  | ~i     | minute (~2,'0d) |
+  | ~s     | second (~2,'0d) |
+  +--------+-----------------+
+
  Examples: 
   (time-format \"~y-~m-~d ~h:~i:~s\" 3443621047) ;=> \"2009-02-15 02:24:07\""
   (multiple-value-bind (s i h d m y) (decode-universal-time time)

@@ -6,10 +6,10 @@
 ; --- Util ------------------------------------------------------
 (defun uri-path (nth &optional (request *request*))
   "Returns the nth element of the uri path from the current page uri.
+
  Examples:
   (defpage one () (sml:p (uri-path 1))) 
   ; wget http://localhost:8080/one/path1 => 'path1'
-
   (defpage one/two/three () (sml:p (uri-path 1))) 
   ; wget http://localhost:8080/one/two/three/path1 => 'path1'"
   (nth (+ nth *page-uri-paths*)
@@ -24,6 +24,7 @@
 (defun page-uri (&rest paths)
   "Generates and returns a page uri that contains all the PATHS
  in the order that they are supplied.
+
  Examples:
   (page-uri 'page' 'path1' 'path1')
   ;=> 'http://localhost:8080/page/path1/path1/'"
@@ -113,17 +114,15 @@
   "Creates a page procedure.
 
  Syntax:
- page-lambda ([path ...] [:get garg ...] [:post parg ...] :auth :redirect uri) body
- 
+  page-lambda ([path ...] [:get garg ...] [:post parg ...] :auth :redirect uri) body
  Arguments and Values:
- path---an uri path
- garg---a symbol name of a get parameter
- parg---a symbol name of a post parameter
- :auth---if :auth is supplied and the current user hasn't logged in,
-         redirects the user to the login page
- uri---the uri to redirect users after logging in
- body---a form
- 
+  path---an uri path
+  garg---a symbol name of a get parameter
+  parg---a symbol name of a post parameter
+  :auth---if :auth is supplied and the current user hasn't logged in,
+          redirects the user to the login page
+  uri---the uri to redirect users after logging in
+  body---a form
  Examples:
   (defpage said ()
     (form/cont (page-lambda (:post foo)
@@ -154,20 +153,18 @@
  an uri like 'http://yourhost/PAGE'.
 
  Syntax:
- defpage page ([path ...] [:get garg ...] [:post parg ...]
-               :auth :redirect uri :default) body
-
+  defpage page ([path ...] [:get garg ...] [:post parg ...]
+                :auth :redirect uri :default) body
  Arguments and Values:
- page---a name of the page
- path---an uri path
- garg---a symbol name of a get parameter
- parg---a symbol name of a post parameter
- :auth---if :auth is supplied and the current user hasn't logged in,
-         redirects the user to the login page
- uri---the uri to redirect users after logging in
- :default---if :default is supplied, the page procedure is set to *default-handler*
- body---a form
-
+  page---a name of the page
+  path---an uri path
+  garg---a symbol name of a get parameter
+  parg---a symbol name of a post parameter
+  :auth---if :auth is supplied and the current user hasn't logged in,
+          redirects the user to the login page
+  uri---the uri to redirect users after logging in
+  :default---if :default is supplied, the page procedure is set to *default-handler*
+  body---a form
  Examples:
   (defpage test (path1 path2 :get get1 get2)
     (sml:p (my-util:join \" \" path1 path2 get1 get2)))
