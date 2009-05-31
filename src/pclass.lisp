@@ -5,42 +5,41 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass slot-options ()
      ((symbol   :accessor slot-symbol   :initarg :symbol   :type symbol
-                :documentation "The symbol of the slot.")
+                :documentation "A symbol of a slot.")
       (id       :accessor slot-id       :initarg :id       :type string
-                :documentation "The string id of the slot.")
+                :documentation "A string id of a slot.")
       (label    :accessor slot-label    :initarg :label    :type string
-                :documentation "The label of the slot.")
+                :documentation "A label of a slot.")
       (unique   :accessor slot-unique   :initarg :unique   :initform nil
-                :documentation "The value of the slot must be unique if this is non nil.")
+                :documentation "A value of a slot must be unique if this is non nil.")
       (required :accessor slot-required :initarg :required :initform nil
-                :documentation "The value of the slot is required if this is non nil.")
+                :documentation "A value of a slot is required if this is non nil.")
       (rows     :accessor slot-rows     :initarg :rows     :initform nil
-                :documentation "The row size of the textarea input field.")
+                :documentation "A row size of a textarea input field.")
       (cols     :accessor slot-cols     :initarg :cols     :initform nil
-                :documentation "The column size of the textarea input field.")
+                :documentation "A column size of a textarea input field.")
       (size     :accessor slot-size     :initarg :size     :initform nil
-                :documentation "The size of the text input field.")
+                :documentation "A size of a text input field.")
       (length   :accessor slot-length   :initarg :length   :initform nil
-                :documentation "If this is non nil, validates the length of the value.
+                :documentation "If this is non nil, validates a length of a value.
  An integer for a max length or a list of two elements for '(min max) length.")
       (hide-for :accessor slot-hide-for :initarg :hide-for :initform nil
-                :documentation "This specifies where to hide the slot for.
+                :documentation "This specifies where to hide a slot for.
  :all for all or a string regexp to hide it only on pages where the request
  uri matches to the regexp.")
       (options  :accessor slot-options  :initarg :options  :initform '() :type list
-                :documentation "The options for a select, radio or checkbox
- input forms.")
+                :documentation "Options for a select, radio or checkbox input forms.")
       (comment  :accessor slot-comment  :initarg :comment  :initform ""  :type string
-                :documentation "The comment of the slot.")
+                :documentation "A comment of a slot.")
       (input    :accessor slot-input    :initarg :input    :initform nil
-                :documentation "The type of the input form which must be :text,
+                :documentation "A type of a input form which must be :text,
  :textarea, :radio, :checkbox, :select, :password or :file.")
       (format   :accessor slot-format   :initarg :format   :initform nil
-                :documentation "The validation type which must be :alpha, :alnum,
+                :documentation "A validation type which must be :alpha, :alnum,
  :integer, :email :date, :image ,regexp in string, a function or nil.")
       (type     :accessor slot-type     :initarg :type    :initform nil :type symbol
-                :documentation "The type specifier of the slot."))
-    (:documentation "The extended slot options of the persistent class.")))
+                :documentation "A type specifier of a slot."))
+    (:documentation "Extended slot options of a persistent class.")))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun slot-type* (slot-definition)
