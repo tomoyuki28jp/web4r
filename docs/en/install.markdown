@@ -25,7 +25,7 @@ Install
 --------
 1. Install all the depending libraries above
 2. [Configure elephant](http://common-lisp.net/project/elephant/doc/elephant.html#Getting-Started)
-3. [Download web4r](http://localhost/en/download)  
+3. [Download](http://web4r.org/en/download) and install web4r
    (make sure to create a symbolic link to *.asd in your load path)
 
 For Emacs Users
