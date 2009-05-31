@@ -2,29 +2,29 @@
 
 (defclass pager ()
   ((items-per-page :type integer :initform *items-per-page* :initarg :items-per-page
-                   :documentation "The number to display items per page.")
+                   :documentation "A number to display items per page.")
    (links-per-page :type integer :initform *links-per-page* :initarg :links-per-page
-                   :documentation "The number to display page links per page.")
+                   :documentation "A number to display page links per page.")
    (total-items    :type integer :initarg :total-items
                    :initform (error "Must supply total-items.")
-                   :documentation "The number of total items.")
+                   :documentation "A number of total items.")
    (current-page   :type integer :initarg :current-page
                    :initform (get-current-page) :accessor current-page
-                   :documentation "The current page number.")
+                   :documentation "A current page number.")
    (total-pages    :type integer :accessor total-pages
-                   :documentation "The number of total pages.")
+                   :documentation "A number of total pages.")
    (item-start     :type integer :accessor item-start
-                   :documentation "The start number to display items.")
+                   :documentation "A start number to display items.")
    (item-end       :type integer :accessor item-end
-                   :documentation "The end number to display items.")
+                   :documentation "An end number to display items.")
    (link-start     :type integer :accessor link-start
-                   :documentation "The start number to display page links.")
+                   :documentation "A start number to display page links.")
    (link-end       :type integer :accessor link-end
-                   :documentation "The end number to display page links.")
+                   :documentation "An end number to display page links.")
    (next-link      :type string  :accessor next-link :initform ">>"
-                   :documentation "The link to next page links.")
+                   :documentation "A link to next page links.")
    (prev-link      :type string  :accessor prev-link :initform "<<"
-                   :documentation "The link to previous page links."))
+                   :documentation "A link to previous page links."))
   (:documentation "A pagination class."))
 
 (defun get-current-page ()
@@ -54,7 +54,7 @@
                                 (+ current-page right)))))))))
 
 (defmacro prev-link* (pager &optional parameters)
-  "Displays the link to the previous page links by the PAGER, must be
+  "Displays a link to previous page links by the PAGER, must be
  an instance of the pager class, if needed. The default link is '<<'.
  PARAMETERS is a string get parameters which will be added to the link."
   `(with-slots (links-per-page current-page prev-link) ,pager
@@ -65,7 +65,7 @@
          (load-sml-path "paging/page_link.sml" ,*web4r-package*)))))
 
 (defmacro next-link* (pager &optional parameters)
-  "Displays the link to the next page links by the PAGER, must be an
+  "Displays a link to next page links by the PAGER, must be an
  instance of the pager class, if needed. The default link is '>>'.
  PARAMETERS is a string get parameters which will be added to the link."
   `(with-slots (links-per-page current-page next-link total-pages) ,pager
@@ -84,7 +84,7 @@
       (load-sml-path "paging/page_links.sml"))))
 
 (defun page-summary (pager)
-  "Generates and displays the summary result of the pagination by the
+  "Generates and displays a summary result of a pagination by the
  PAGER, must be an instance of the pager class, if needed. The default
  format is 'Results 1 - 10  of 100'."
   (with-slots

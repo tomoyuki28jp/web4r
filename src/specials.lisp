@@ -13,18 +13,18 @@
 
   (defvar *example-bdb*
     `(:BDB ,(merge-pathnames "examples/bdb/" *web4r-dir*))
-    "A pathname of the BDB database directory for example applications.")
+    "A pathname of a BDB database directory for example applications.")
 
   (defvar *web4r-package* (find-package :web4r)
     "The web4r package designator."))
 
 (defvar *upload-save-dir* #P"/tmp/web4r/upload/"
-  "A pathname of the directory to save uploaded files.
+  "A pathname of a directory to save uploaded files.
  The default is #P\"/tmp/web4r/upload/\".")
 (ensure-directories-exist *upload-save-dir* :verbose nil)
 
 (defvar *tmp-save-dir* #P"/tmp/web4r/tmp/"
-  "A pathname of the directory to save temporary uploaded files.
+  "A pathname of a directory to save temporary uploaded files.
  The default is #P\"/tmp/web4r/tmp/\".")
 (ensure-directories-exist *tmp-save-dir*    :verbose nil)
 
@@ -42,7 +42,7 @@
   "An alist of image public directories which must be key/pathname pairs.")
 
 (defvar *debug-log-file* #P"/tmp/web4r/debug.log"
-  "A pathname of the debug log file. The default is #P\"/tmp/web4r/debug.log\".")
+  "A pathname of a debug log file. The default is #P\"/tmp/web4r/debug.log\".")
 
 (defvar *debug-mode* nil
   "If this is non nil, debug-mode is on.")
@@ -75,7 +75,7 @@
     "This is used on the process to expand last-post inside a continuation."))
 
 (defvar *page-uri-paths* 0
-  "The number of the current page uri paths.
+  "A number of the current page uri paths.
 
  Examples:
   (defpage one/two/three () web4r::*page-uri-paths*) ;=> 3")
@@ -105,7 +105,7 @@
   "An alist of validation error messages: key/message pairs.")
 
 (defvar *validators* (make-hash-table)
-  "A hash table of validators: a keyword key -> the validation procedure.")
+  "A hash table of validators: a keyword key -> a validation procedure.")
 
 (defvar *valid-email-format*
   (remove #\Newline
@@ -114,10 +114,10 @@
 (?:\"(?:\\[^\r\n]|[^\\\"])*\")))\@
 (?:(?:(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+)
 (?:\.(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+))*))$")
-  "The regular expression used to validate a email address.")
+  "A string regular expression used to validate a email address.")
 
 (defvar *page-param* "page"
-  "The get parameter name denotate the current page number.
+  "A get parameter name denotate the current page number.
  The default is 'page'.")
 
 (defvar *items-per-page* 10
@@ -140,7 +140,7 @@
 
 (defvar *max-items-per-page* 50
   "The maximum number to display items per page. This value is only used when a
- user changes the value of the get parameter named items_per_page and the value
+ user changes a value of the get parameter named items_per_page and the value
  exceeeds this maximum number. The default is 50.")
 
 (defvar *max-links-per-page* 30

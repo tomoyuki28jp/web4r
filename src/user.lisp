@@ -47,27 +47,27 @@
  defining a new persistent class with extending this class."))
 
 (defun user-class ()
-  "Returns the symbol name of the user persistent class."
+  "Returns a symbol name of the user persistent class."
   (slot-value *user* 'class))
 
 (defun user-id-slot ()
-  "Returns the symbol name of the id slot."
+  "Returns a symbol name of the id slot."
   (slot-value *user* 'id-slot))
 
 (defun user-pass-slot ()
-  "Returns the symbol name of the password slot."
+  "Returns a symbol name of the password slot."
   (slot-value *user* 'pass-slot))
 
 (defun user-id-label ()
-  "Returns the string label of the id slot."
+  "Returns a string label of the id slot."
   (slot-value *user* 'id-label))
 
 (defun user-pass-label ()
-  "Returns the string label of the password slot."
+  "Returns a string label of the password slot."
   (slot-value *user* 'pass-label))
 
 (defun user-login-page ()
-  "Returns the name of the login page."
+  "Returns a name of the login page."
   (slot-value *user* 'login-page))
 
 (defgeneric user-id (user)
@@ -132,8 +132,8 @@
            (page/error-msgs "login" (login-msg :login-failed))))))
 
 (defun login-page (&optional (redirect-uri (host-uri)))
-  "Displays the login page. After logging in, redirects the user to the
- REDIRECT-URI."
+  "Generates and displays a login page. After logging in, redirects the
+ user to the REDIRECT-URI."
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
       (let ((*with-slots* (list (user-id-slot) (user-pass-slot))))
@@ -147,8 +147,8 @@
   (redirect/msgs redirect-uri (login-msg :logged-out)))
 
 (defun regist-page (&optional (redirect-uri (host-uri)))
-  "Displays the registration page. After registering, redirects the user
- to the REDIRECT-URI."
+  "Generates and displays a registration page. After registering,
+ redirects the user to the REDIRECT-URI."
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
       (edit-page (user-class) :redirect-uri redirect-uri)))

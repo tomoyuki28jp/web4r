@@ -94,7 +94,7 @@
 
 (defun validation-errors (label value validators)
   "Validates the VALUE with VALIDATORS and returns error messages if any.
- LABEL is used as a subject of the error messages.
+ LABEL is used as a subject of error messages.
 
  Examples:
   (validation-errors \"label\" \"12345\" '(:length 3))

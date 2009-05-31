@@ -121,7 +121,7 @@
   parg---a symbol name of a post parameter
   :auth---if :auth is supplied and the current user hasn't logged in,
           redirects the user to the login page
-  uri---the uri to redirect users after logging in
+  uri---an uri to redirect users after logging in
   body---a form
  Examples:
   (defpage said ()
@@ -162,14 +162,14 @@
   parg---a symbol name of a post parameter
   :auth---if :auth is supplied and the current user hasn't logged in,
           redirects the user to the login page
-  uri---the uri to redirect users after logging in
+  uri---an uri to redirect users after logging in
   :default---if :default is supplied, the page procedure is set to *default-handler*
   body---a form
  Examples:
   (defpage test (path1 path2 :get get1 get2)
-    (sml:p (my-util:join \" \" path1 path2 get1 get2)))
-  ; wget http://localhost:8080/test/1/2/ => '1 2'
-  ; wget http://localhost:8080/test/1/2/?get1=3&get2=4 => '1 2 3 4'"
+    [p path1 \" \" path2 \" \" get1 \" \" get2])
+  ; wget http://localhost:8080/test/1/2/ => '<p>1 2  </p>'
+  ; wget http://localhost:8080/test/1/2/?get1=3&get2=4 => '<p>1 2 3 4</p>'"
   `(progn
      (set-page (->string-down ',page) (page-lambda (,@args) ,@body))
      (when (member :default ',args)

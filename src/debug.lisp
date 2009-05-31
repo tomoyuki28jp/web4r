@@ -3,7 +3,7 @@
 ; --- Util ------------------------------------------------------
 
 (defun ps (instance)
-  "Prints names and values of the slots in the INSTANCE."
+  "Prints slot's names and values of the INSTANCE."
   (loop for slot in (ele::class-slots (class-of instance))
         as name = (ele::slot-definition-name slot)
         do (print (list name
@@ -12,7 +12,7 @@
                             :unbound)))))
 
 (defmacro with-post-parameters (parameters &rest body)
-  "Executes BODY with post PARAMETERS. PARAMETERS must be an alist
+  "Executes BODY with post PARAMETERS which must be an alist
  of key/value pairs."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))
@@ -21,7 +21,7 @@
      ,@body))
 
 (defmacro with-get-parameters (parameters &rest body)
-  "Executes BODY with get PARAMETERS. PARAMETERS must be an alist
+  "Executes BODY with get PARAMETERS which must be an alist
  of key/value pairs."
   `(let* ((*acceptor* (make-instance 'acceptor))
           (*reply*    (make-instance (acceptor-reply-class *acceptor*)))

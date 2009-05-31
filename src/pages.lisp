@@ -2,12 +2,12 @@
 
 (defmacro genpages (class &key index-slot index-sml show-sml edit-sml
                     items-per-page links-per-page)
-  "Generates seven pages for the CLASS. The pages are index, show, edit,
- delete, uniquness validation, list and delete* pages. The last three pages
- are used via ajax. You can change the sml template files by the INDEX-SML,
- SHOW-SML or EDIT-SML argument. INDEX-SLOT is a symbol of the index slot
- used in the index page to sort instances. You can set the number to display
- items per page by the ITEMS-PER-PAGE and the number to display links per
+  "Generates seven pages for the persistent CLASS. The pages are index, show,
+ edit, delete, uniquness validation, list and delete* pages. The last three
+ pages are used via ajax. You can change the sml template files by the INDEX-SML,
+ SHOW-SML or EDIT-SML argument. INDEX-SLOT is a symbol of a index slot
+ used in the index page to sort instances. You can set a number to display
+ items per page by the ITEMS-PER-PAGE and a number to display links per
  page by the LINKS-PER-PAGE argument."
   `(progn
      (defpage ,class (:get (slot ,index-slot))
@@ -31,13 +31,13 @@
                       (items-per-page *items-per-page*)
                       (links-per-page *links-per-page*) plural sml)
   "Displays a list of the CLASS instances for the current page as (x)html order
- by the INDEX-SLOT. You can set the number to display items per page by the
- ITEMS-PER-PAGE and the number to display links per page by the LINKS-PER-PAGE
+ by the INDEX-SLOT. You can set a number to display items per page by the
+ ITEMS-PER-PAGE and a number to display links per page by the LINKS-PER-PAGE
  argument. SML is a pathname of a sml template file. The default title format
  of the page is like 'Listing pluralized-classname' where the 'pluralized-classname'
  part is created by (pluralize (->string-down class)), and you can change the
  part by the PLURAL argument. The MAXLENGTH is a max length of a slot value to
- display in a table cell, and the exceeded characters will be replaced by '...'."
+ display in a table cell, and exceeded characters will be replaced by '...'."
   `(let* ((class  ,class)
           (cname  (->string-down ,class))
           (plural (or ,plural (pluralize cname)))
@@ -52,7 +52,7 @@
                      ,*web4r-package*))))
 
 (defmacro show-page (class oid &key sml)
-  "Displays the values of the slots in the CLASS as (x)html for an instance
+  "Displays values of slots in the CLASS as (x)html for an instance
  specified by the OID. SML is a pathname of a sml template file."
   `(let ((cname (->string-down ,class))
          (slots (get-excluded-slots ,class))
@@ -61,7 +61,7 @@
                ,*web4r-package*)))
 
 (defmacro edit-page (class &key oid slot-values redirect-uri sml)
-  "Displays an edit form for the instance specified by the OID in the CLASS.
+  "Displays an edit form for an instance specified by the OID in the CLASS.
  You can specify slot values by the SLOT-VALUES argument which must be an alist
  of a slot symbol/value paris. Users will be redirected to the REDIRECT-URI
  after successfully editing the instance. SML is a pathname of a sml template
@@ -89,8 +89,8 @@
 
 (defun delete-page (class oid &optional (redirect-uri
                                          (page-uri (->string-down class))))
-  "Redirects the user to the REDIRECT-URI after deleting an instance
- specified by the OID in the CLASS."
+  "Redirects the current user to the REDIRECT-URI after deleting an
+ instance specified by the OID in the CLASS."
   (redirect/msgs (rem-parameter redirect-uri "page")
                  (drop-instance-by-oid* class oid)))
 
@@ -121,11 +121,11 @@
 (defun per-page (instances &key (index 'updated-at) (order #'>)
                  items-per-page links-per-page)
   "Returns two values, a list of instances and a pager instance. The 
- returned instances is a copy of the INSTANCES retrieved by the pager
- instance. INDEX is a symbol of the index slot used to sort the instances.
+ returning instances is a copy of the INSTANCES retrieved by the pager
+ instance. INDEX is a symbol of a index slot used to sort the instances.
  ORDER is a predicate function to determine the order. You can set
- the number to display items per page by the ITEMS-PER-PAGE, and the
- number to display links per page by the LINKS-PER-PAGE argument."
+ a number to display items per page by the ITEMS-PER-PAGE, and a number
+ to display links per page by the LINKS-PER-PAGE argument."
   (let* ((total (length instances))
          (pager (apply #'make-instance 'pager
                        (append `(:total-items ,total)
@@ -204,7 +204,7 @@
 (defun unique-p* (class get-parameters oid)
   "GET-PARAMETERS must be an alist of slot id/value pairs in the CLASS.
  Returns 'false' if the same value has been registered in the slot except
- the instance specified by the OID and 'true' otherwise."
+ an instance specified by the OID and 'true' otherwise."
   (if (aand (get-slot-by-id class (caar get-parameters))
             (slot-unique it)
             (unique-p class (slot-symbol it) (cdar get-parameters)

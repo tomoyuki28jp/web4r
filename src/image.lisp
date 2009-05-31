@@ -22,7 +22,7 @@
           ((equalp "Zip"   (nth 1 s))       "application/zip"))))
 
 (defun image-file-p (file)
-  "Returns true if the FILE is a image and nil otherwise."
+  "Returns true if the FILE is a image file and nil otherwise."
   (when (image-type (mime-type file)) t))
 
 (defun image-type (mime-type)
@@ -32,7 +32,7 @@
       (->keyword (nth 1 s)))))
 
 (defun image-path (file type)
-  "Returns the pathname of the image FILE. TYPE must be a key of
+  "Returns a pathname of the image FILE. TYPE must be a key of
  *image-public-dirs* such as 'upload' or 'tmp'."
   (when-let (dir (cdr (assoc type *image-public-dirs* :test #'equal)))
     (and file (probe-file (merge-pathnames file (symbol-value dir))))))

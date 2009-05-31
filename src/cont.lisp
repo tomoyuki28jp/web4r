@@ -8,16 +8,16 @@
   (generated-time 0 :type integer))
 
 (defun sid (&optional (session *session*))
-  "Returns the integer id of the SESSION."
+  "Returns an integer id of the SESSION."
   (hunchentoot::session-id session))
 
 (defun cid ()
-  "Returns the current continuation id as a string if the request is
- calling a continuation and nil otherwise."
+  "Returns the current continuation id as a string if the current
+ request is calling a continuation and nil otherwise."
   (parameter "cid"))
 
 (defun get-cont (continuation-id)
-  "Returns the continuation associated with the CONTINUATION-ID if any."
+  "Returns a continuation associated with the CONTINUATION-ID if any."
   (awhen (gethash continuation-id *cid->cont*)
     (when (= (cont-sid it) (sid))
       (cont-cont it))))
@@ -30,7 +30,7 @@
         (return-from generate-cid cid)))))
 
 (defun set-cont (continuation)
-  "Sets the CONTINUATION and returns the string continuation id."
+  "Sets the CONTINUATION and returns a string continuation id."
   (let ((cid (generate-cid)))
     (setf (gethash cid *cid->cont*)
           (make-cont :sid (sid) :cont continuation
@@ -44,7 +44,7 @@
 
 (defun cont-gc (&optional (end (length *cid-generated-order*)))
   "Executes garbage collection for expired continuations.
- END is used for the binary search."
+ END is used for binary search."
   (when (and (plusp end)
              (cont-expired-p (elt *cid-generated-order* 0)))
     (if (= end 1)
@@ -56,15 +56,15 @@
               (cont-gc (1- mid)))))))
 
 (defun cont-expired-p (continuation-id)
-  "Returns true if the continuation associated with the CONTINUATION-ID
+  "Returns true if a continuation associated with the CONTINUATION-ID
  has expired and nil otherwise."
   (awhen (gethash continuation-id *cid->cont*)
     (> (- (get-universal-time) *cont-gc-lifetime*)
        (cont-generated-time it))))
 
 (defun destroy-cont (&optional (cid (cid)) index)
-  "Destroys the continuation associated with the CID (continuation id).
- INDEX is the sequence index for *cid-generated-order*."
+  "Destroys a continuation associated with the CID (continuation id).
+ INDEX is a sequence index for *cid-generated-order*."
   (setf *cid-generated-order*
         (if index
             (delete cid *cid-generated-order*
@@ -77,13 +77,13 @@
   (remhash cid *cont-sessions*))
 
 (defun destroy-conts (start end)
-  "Destroys the continuations from the START to the END order by
+  "Destroys continuations from the START to the END order by
  their generated time."
   (loop for i from start to (1- end)
         do (destroy-cont (elt *cid-generated-order* i) i)))
 
 (defun destroy-conts-by-session (session)
-  "Destroys the all continuations associated with the SESSION."
+  "Destroys all continuations associated with the SESSION."
   (let ((sid (sid session)))
     (when-let (cids (gethash sid *sid->cid*))
       (remhash sid *sid->cid*)
@@ -93,7 +93,7 @@
 (add-hook 'after-calling-cont #'destroy-cont)
 
 (defun call-cont (cid)
-  "Calls the continuation associated with the CID (continuation id). By default,
+  "Calls a continuation associated with the CID (continuation id). By default,
  this function destroys the continuation after calling it. If you want to leave
  it, run this code: (rem-hook 'after-calling-cont #'destroy-cont)."
   (awhen (get-cont cid)
@@ -106,7 +106,7 @@
          (lambda () (cont-gc)))))))
 
 (defun renew-cont-lifetime (cid)
-  "Renews the lifetime of the continuation associated with the
+  "Renews a lifetime of a continuation associated with the
  CID (continuation id)."
   (when (get-cont cid)
     (let ((cont (gethash cid *cid->cont*)))
@@ -122,22 +122,22 @@
 ; --- Cont sessions ---------------------------------------------
 
 (defun cont-session (key &optional (cid (cid)))
-  "Returns the entry for the KEY in cont-session
- (continuation based session) associated with the cid (continuation id)
+  "Returns the entry for the KEY in cont-session (continuation
+ based session) associated with the cid (continuation id)
  if any."
   (cdr (assoc key (gethash cid *cont-sessions*))))
 
 (defun rem-cont-session (key &optional (cid (cid)))
-  "Removes the entry for the KEY in cont-session
- (continuation based session) associated with the cid (continuation id)
+  "Removes the entry for the KEY in cont-session (continuation
+ based session) associated with the cid (continuation id)
  if any."
   (setf (gethash cid *cont-sessions*)
         (remove-if #'(lambda (x) (eq (car x) key))
                    (gethash cid *cont-sessions*))))
 
 (defun (setf cont-session) (value key &optional (cid (cid)))
-  "Sets the VALUE for the KEY in the cont-session
- (continuation based session) associated with the cid (continuation id)."
+  "Sets the VALUE for the KEY in the cont-session (continuation
+ based session) associated with the cid (continuation id)."
   (setf (gethash cid *cont-sessions*)
         (append (rem-cont-session key cid)
                 (list (cons key value)))))

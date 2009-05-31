@@ -43,7 +43,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun slot-type* (slot-definition)
-    "Returns a type specifier of the slot from the SLOT-DEFINITION."
+    "Returns a type specifier of a slot from the SLOT-DEFINITION."
     (acond ((member :type slot-definition) (nth 1 it))
            ((aand (member :format slot-definition)
                   (member (nth 1 it) '(:date :integer integer)))
@@ -141,8 +141,8 @@
            (apply #'append (remove nil (mapcar fn op)))))))))
 
 (defgeneric slot-display-value (instance slot &key nl->br)
-  (:documentation "Returns the display value of the SLOT for the INSTANCE.
- If NL->BR is non nil, replace newlines with br html tags like <br />."))
+  (:documentation "Returns a display value of the SLOT for the INSTANCE.
+ If NL->BR is non nil, replace #\newline with br html tags like <br />."))
 (defmethod slot-display-value (instance (slot slot-options) &key (nl->br nil))
   (aif (ignore-errors (slot-value instance (slot-symbol slot)))
     (let ((input (slot-input slot)))
@@ -236,19 +236,19 @@
            (t (load-sml-path "form/input/text.sml"))))))
 
 (defgeneric form-label (slot)
-  (:documentation "Displays the label of the SLOT."))
+  (:documentation "Displays a label of the SLOT."))
 (defmethod form-label ((slot slot-options))
   (with-slots (format label id input) slot
     (load-sml-path "form/input/label.sml")))
 
 (defgeneric required-mark (slot)
-  (:documentation "Displays a required mark if the slot is required."))
+  (:documentation "Displays a required mark if the SLOT is required."))
 (defmethod required-mark ((slot slot-options))
   (when (slot-required slot)
     (load-sml-path "form/input/required_mark.sml")))
 
 (defgeneric form-comment (slot)
-  (:documentation "Displays the comment of the SLOT if any."))
+  (:documentation "Displays a comment of the SLOT if any."))
 (defmethod form-comment ((slot slot-options))
   (when-let (comment (aand (slot-comment slot) (not (equal it "")) it))
     (load-sml-path "form/input/comment.sml")))
@@ -256,7 +256,7 @@
 (defmacro form-for/cont (continuation &key class instance (submit "submit"))
   "Generates and displays a form for the persistent CLASS with embedding the
  CONTINUATION within the form. INSTANCE is an instance of the CLASS only needed
- to update an existing instance. SUBMIT is the value of the submit button."
+ to update an existing instance. SUBMIT is a value of a submit button."
   `(%form/cont (get-excluded-file-slots ,class) ,continuation
      :id (concat (->string-down ,class) "_form")
      [table
@@ -378,7 +378,7 @@
                t)))
 
 (defun drop-instances-by-class (class)
-  "Drops all the instances of the persistent CLASS."
+  "Drops instances by the CLASS."
   (when (find-class class nil)
     (drop-instances (get-instances-by-class class))))
 
