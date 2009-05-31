@@ -185,7 +185,7 @@
        (form :method "post" :action ""
              ,@(when multipart-p '(:enctype "multipart/form-data"))
              ,@body
-             [input :type "hidden" :name "cid" :value ,cid]))))
+             [input :type "hidden" :name "cid" :value ,cid /]))))
 
 (defmacro form/cont (continuation &rest body)
   "Generates and displays a form with embedding CONTINUATION and BODY."
