@@ -145,11 +145,11 @@
                          as p = (car* p*) as d = (cadr* p*)
                          collect `(,p (or (get-parameter  ,(->string-down p)) ,d)))))
            (if (and ',(member :auth args) (null (login-user)))
-               (regist-page (or ,(cadr (member :redirect args)) (host-uri)))
+               (login-page (or ,(cadr (member :redirect args)) (request-uri*)))
                (progn ,@body)))))))
 
 (defmacro defpage (page (&rest args) &rest body)
-  "Defines a new page named PAGE. Users can visit the page by accessing
+  "Defines a new page named PAGE. Users can visit a defined page by accessing
  an uri like 'http://yourhost/PAGE'.
 
  Syntax:
