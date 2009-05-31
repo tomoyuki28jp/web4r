@@ -43,7 +43,7 @@ Examples:
     
 Markup language
 ----------------
-You can change the markup language to generate by \*markup-lang* which must be either one of :xhtml, :html or :xml. The default markup language is xhtml.
+You can change the markup language to generate by \*markup-lang\* which must be either one of :xhtml, :html or :xml. The default markup language is xhtml.
 
 Examples:
 

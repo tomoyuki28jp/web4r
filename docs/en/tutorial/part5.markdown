@@ -4,7 +4,7 @@ web4r uses a persistent object database named [Elephant](http://common-lisp.net/
 
 Download and Install
 ---------------------
-web4r depends on Elephant. If you haven't downloaded or installed it, [download](http://common-lisp.net/project/elephant/downloads.html) and [configure](http://common-lisp.net/project/elephant/doc/elephant.html#Getting-Started) Elephant.
+web4r depends on Elephant. If you haven't downloaded or installed it, [download](http://common-lisp.net/project/elephant/downloads.html) and [configure](http://common-lisp.net/project/elephant/doc/elephant.html#Getting-Started) Elephant. (currently only works with v0.9)
 
 Example Usage
 --------------

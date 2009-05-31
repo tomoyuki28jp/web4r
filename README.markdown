@@ -11,7 +11,7 @@ The goal of web4r is enabling users to develop web applications with the shortes
     (start-server)
 
     ; wget http://localhost:8080/hello => '<p>Hello, world</p>'
-    ; wget http://localhost:8080/hello?name=tomo => '<p>Hello, tomo</p>'
+    ; wget http://localhost:8080/hello?name=tom => '<p>Hello, tom</p>'
 
 A complete web4r application.
 
