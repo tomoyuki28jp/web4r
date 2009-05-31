@@ -1,6 +1,16 @@
 Change Log
 ====================
 
+Version 0.2.4 (2009-05-31)
+----------------------------
+- Fixed to redirect to the login-page instead of regist-page when users access an auth page
+- s/[input ...]/[input ... \/]/
+- Renamed the class from user-class to user*
+- Updated to use my-util v0.1.4 (for hooks functions)
+- Updated to use sml v0.1.4 (for nl->br)
+- Wrote documentations and tutorial in English and Japanese
+- Rewrote README and CHANGELOG in markdown syntax
+
 Version 0.2.3 (2009-05-11)
 ----------------------------
 - Added renew-cont-lifetime

@@ -3,7 +3,7 @@ Download
 
 Latest Stable Version
 ------------------------------
-    wget http://github.com/tomoyuki28jp/web4r/tarball/v0.2.3
+    wget http://github.com/tomoyuki28jp/web4r/tarball/v0.2.4
 
 Latest Development Version From Git
 --------------------------------------------
