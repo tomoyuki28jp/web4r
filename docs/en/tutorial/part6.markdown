@@ -49,6 +49,8 @@ Examples:
     
     (start-server)
 
+- [Demo](http://demo.web4r.org/customer)
+
 ### index page
 - Sorting a list with/without ajax
 - Pagination with/without ajax 

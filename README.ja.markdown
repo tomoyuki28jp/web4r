@@ -2,6 +2,8 @@ About
 ======
 web4rは「世界一短いコードでwebアプリ作成ができるフレームワーク」を目指して開発されました。
 
+#### "Hello World" アプリケーション:
+
     (require :web4r)
     (use-package :web4r)
     
@@ -11,7 +13,17 @@ web4rは「世界一短いコードでwebアプリ作成ができるフレーム
     (start-server)
 
     ; wget http://localhost:8080/hello => '<p>Hello, world</p>'
-    ; wget http://localhost:8080/hello?name=tom => '<p>Hello, tom</p>'
+    ; wget http://localhost:8080/hello?name=tomo => '<p>Hello, tomo</p>'
+
+#### Arc Challenge:
+
+    (defpage said ()
+      (form/cont (a/cont [p "You said: " (last-post "foo")] "click here")
+       (input-text "foo")))
+
+- [Take the Arc Challenge](http://www.paulgraham.com/arcchallenge.html) 
+  ([和訳](http://practical-scheme.net/wiliki/wiliki.cgi?Arc%E3%81%8B%E3%82%89%E3%81%AE%E6%8C%91%E6%88%A6))
+- [Arc Challenge デモ](http://demo.web4r.org/said)
 
 Documentation
 ==============

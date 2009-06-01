@@ -13,7 +13,7 @@ Library Dependencies
 - [inflector](http://github.com/tomoyuki28jp/inflector/tree/master)
 - [hunchentoot](http://www.weitz.de/hunchentoot/) (v1.0.0 or higher)
 - [bordeaux-threads](http://common-lisp.net/project/bordeaux-threads/)
-- [elephant](http://common-lisp.net/project/elephant/) (currently only works with v0.9)
+- [elephant](http://common-lisp.net/project/elephant/) (only works with v0.9)
 - [trivial-shell](http://common-lisp.net/project/trivial-shell/)
 - [cl-gd](http://weitz.de/cl-gd/)
 - [flexi-streams](http://www.weitz.de/flexi-streams/)

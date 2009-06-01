@@ -49,6 +49,8 @@ Genpagesマクロ
     
     (start-server)
 
+- [デモ](http://demo.web4r.org/customer)
+
 ### index page (一覧表示)
 - 一覧の表示
 - 一覧の並び替え with/without ajax

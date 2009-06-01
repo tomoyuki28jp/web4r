@@ -30,7 +30,7 @@ Tutorial Part 3. ページの定義
       [p "Hello, " name])
 
     ; wget http://localhost:8080/hello => '<p>Hello, world</p>'
-    ; wget http://localhost:8080/hello?name=tom => '<p>Hello, tom</p>'
+    ; wget http://localhost:8080/hello?name=tomo => '<p>Hello, tomo</p>'
 
 例2:
 

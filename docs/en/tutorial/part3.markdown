@@ -31,7 +31,7 @@ Example1:
       [p "Hello, " name])
 
     ; wget http://localhost:8080/hello => '<p>Hello, world</p>'
-    ; wget http://localhost:8080/hello?name=tom => '<p>Hello, tom</p>'
+    ; wget http://localhost:8080/hello?name=tomo => '<p>Hello, tomo</p>'
 
 Example2:
 

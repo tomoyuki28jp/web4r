@@ -2,6 +2,8 @@ About
 ======
 The goal of web4r is enabling users to develop web applications with the shortest codes.
 
+#### The "Hello World" Application:
+
     (require :web4r)
     (use-package :web4r)
     
@@ -11,9 +13,16 @@ The goal of web4r is enabling users to develop web applications with the shortes
     (start-server)
 
     ; wget http://localhost:8080/hello => '<p>Hello, world</p>'
-    ; wget http://localhost:8080/hello?name=tom => '<p>Hello, tom</p>'
+    ; wget http://localhost:8080/hello?name=tomo => '<p>Hello, tomo</p>'
 
-A complete web4r application.
+#### Arc Challenge:
+
+    (defpage said ()
+      (form/cont (a/cont [p "You said: " (last-post "foo")] "click here")
+       (input-text "foo")))
+
+- [Take the Arc Challenge](http://www.paulgraham.com/arcchallenge.html)
+- [Arc Challenge Demo](http://demo.web4r.org/said)
 
 Documentation
 ==============
