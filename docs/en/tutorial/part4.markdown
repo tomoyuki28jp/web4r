@@ -1,5 +1,5 @@
-Tutorial Part 4. Continuation Passing Style (CPS) page
-=======================================================
+Tutorial Part 4. Continuation Passing Style (CPS)
+==================================================
 web4r provides a way to write web applications in continuation passing style.
 
 a/cont
