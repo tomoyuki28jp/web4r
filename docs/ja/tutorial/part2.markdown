@@ -41,7 +41,7 @@ web4r:start-serverとweb4r:stop-serverはhunchentoot:startとhunchentoot:stopに
     +--------------------------------------------------------------+
     | Hunchentoot stand alone          | 0.217       | 128.460     |
     | Apache + mod_proxy + Hunchentoot | 0.105       |   5.077     |
-    | Apache + mod_php                 | 0.083       |   5.095     |
+    | Apache + mod_php + php           | 0.083       |   5.095     |
     +--------------------------------------------------------------+
     ※ bigは100000回ループでコンテンツを生成しています
 
