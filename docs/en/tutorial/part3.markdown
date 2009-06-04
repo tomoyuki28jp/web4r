@@ -9,12 +9,12 @@ Syntax:
 
 Arguments and Values:
 
-    page---a name of the page
+    page---a name of a page
     path---an uri path
     garg---a symbol name of a get parameter
     parg---a symbol name of a post parameter
     :auth---if :auth is supplied and the current user hasn't logged in,
-            redirects the user to the login page
+            redirects the user to a login page
     uri---an uri to redirect users after logging in
     :default---if :default is supplied, the page procedure is set to *default-handler*
     body---a form
