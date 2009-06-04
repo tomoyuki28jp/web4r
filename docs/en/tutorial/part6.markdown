@@ -4,6 +4,7 @@ web4r provides extended slot options for a persistent class and [genpages macro]
 
 Extended slot options
 ----------------------
+- **index:**    If this is true, a slot is indexed.
 - **label:**    A label of a slot.
 - **unique:**   A value of a slot must be unique if this is non nil.
 - **required:** A value of a slot is required if this is non nil.
