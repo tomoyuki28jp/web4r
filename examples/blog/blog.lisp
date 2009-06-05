@@ -67,5 +67,5 @@
 (defun post-comment/cont (oid)
   (edit/cont 'comment nil (request-uri*) :slot-values `((blog-oid . ,oid))))
 
-(defparameter *srv* (start-server))
+(defvar *srv* (start-server))
 ;(stop-server *srv*)

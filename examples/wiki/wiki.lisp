@@ -22,5 +22,5 @@
 (genpages wiki :edit-sml (example-path "wiki/sml/edit.sml")
                :show-sml (example-path "wiki/sml/show.sml"))
 
-(defparameter *srv* (start-server))
+(defvar *srv* (start-server))
 ;(stop-server *srv*)

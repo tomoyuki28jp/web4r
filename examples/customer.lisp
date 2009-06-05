@@ -31,5 +31,5 @@
    (image        :input :file :format :image :length (1000 500000) :required nil)))
 (genpages customer)
 
-(defparameter *srv* (start-server))
+(defvar *srv* (start-server))
 ;(stop-server *srv*)

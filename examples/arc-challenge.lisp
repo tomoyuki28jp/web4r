@@ -24,5 +24,5 @@
   (form/cont (a/cont [p "You said: " (last-post "foo")] "click here")
    (input-text "foo")))
 
-(defparameter *srv* (start-server))
+(defvar *srv* (start-server))
 ;(stop-server *srv*)
