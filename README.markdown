@@ -27,6 +27,8 @@ The goal of web4r is enabling users to develop web applications with the shortes
 
 #### Blog Application:
 
+    (ele:open-store *example-bdb*)
+
     (defpclass blog ()
       ((title :length 50 :index t)
        (body  :length 3000)))

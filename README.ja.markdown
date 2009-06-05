@@ -28,6 +28,8 @@ web4rは「世界一短いコードでwebアプリ作成ができるフレーム
 
 #### Blog アプリケーション:
 
+    (ele:open-store *example-bdb*)
+
     (defpclass blog ()
       ((title :length 50 :index t)
        (body  :length 3000)))
