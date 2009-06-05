@@ -24,6 +24,16 @@ The goal of web4r is enabling users to develop web applications with the shortes
 - [Take the Arc Challenge](http://www.paulgraham.com/arcchallenge.html)
 - [Arc Challenge Demo](http://demo.web4r.org/said)
 
+#### Blog Application:
+
+    (defpclass blog ()
+      ((title :length 50 :index t)
+       (body  :length 3000)))
+    
+    (genpages blog)
+
+- [Blog Demo](http://demo.web4r.org/blog)
+
 Documentation
 ==============
 [Download](http://web4r.org/en/download)  

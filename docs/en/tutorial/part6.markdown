@@ -20,7 +20,54 @@ Extended slot options
 
 Genpages macro
 ---------------
-Examples:
+
+### Generated Pages and Functions
+
+#### index page
+- Sorting a list with/without ajax
+- Pagination with/without ajax 
+- Deleting an instance with/without ajax
+
+[![customer-index](http://web4r.org/customer-index-thumbnail.png)](http://web4r.org/customer-index.png)
+
+#### show page
+- Showing slot values of an instance
+
+[![customer-show](http://web4r.org/customer-show-thumbnail.png)](http://web4r.org/customer-show.png)
+
+#### edit page
+- Creating an instance or editing an existing instance
+- Validations
+    - Client side validation with Javascript (uniqueness validation via ajax)
+    - Server side validation
+
+[![customer-new](http://web4r.org/customer-new-thumbnail.png)](http://web4r.org/customer-new.png)
+[![customer-edit](http://web4r.org/customer-edit-thumbnail.png)](http://web4r.org/customer-edit.png)
+
+### Examples:
+
+#### Blog Application
+
+    (eval-when (:compile-toplevel :load-toplevel :execute)
+      (asdf:oos 'asdf:load-op :web4r))
+    
+    (in-package :cl-user)
+    (defpackage :blog (:use :cl :web4r))
+    (in-package :blog)
+    
+    (ele:open-store *example-bdb*)
+    
+    (defpclass blog ()
+      ((title :length 50 :index t)
+       (body  :length 3000)))
+    
+    (genpages blog)
+    
+    (start-server)
+
+- [Blog Demo](http://demo.web4r.org/blog)
+
+#### Customer Application
 
     (eval-when (:compile-toplevel :load-toplevel :execute)
       (asdf:oos 'asdf:load-op :web4r))
@@ -50,25 +97,4 @@ Examples:
     
     (start-server)
 
-- [Demo](http://demo.web4r.org/customer)
-
-### index page
-- Sorting a list with/without ajax
-- Pagination with/without ajax 
-- Deleting an instance with/without ajax
-
-[![customer-index](http://web4r.org/customer-index-thumbnail.png)](http://web4r.org/customer-index.png)
-
-### show page
-- Showing slot values of an instance
-
-[![customer-show](http://web4r.org/customer-show-thumbnail.png)](http://web4r.org/customer-show.png)
-
-### edit page
-- Creating an instance or editing an existing instance
-- Validations
-    - Client side validation with Javascript (uniqueness validation via ajax)
-    - Server side validation
-
-[![customer-new](http://web4r.org/customer-new-thumbnail.png)](http://web4r.org/customer-new.png)
-[![customer-edit](http://web4r.org/customer-edit-thumbnail.png)](http://web4r.org/customer-edit.png)
+- [Customer Demo](http://demo.web4r.org/customer)

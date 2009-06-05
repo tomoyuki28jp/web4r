@@ -20,7 +20,56 @@ web4rは永続化クラスの為の拡張スロットオプションと、永続
 
 Genpagesマクロ
 ---------------
-例:
+
+### 生成される主要ページとその機能
+
+#### index page (一覧ページ)
+- 一覧の表示
+- 一覧の並び替え with/without ajax
+- ページング with/without ajax 
+- インスタンスの削除 with/without ajax
+
+[![customer-index](http://web4r.org/customer-index-thumbnail.png)](http://web4r.org/customer-index.png)
+
+#### show page (詳細ページ)
+- インスタンスのslot値詳細表示
+
+[![customer-show](http://web4r.org/customer-show-thumbnail.png)](http://web4r.org/customer-show.png)
+
+#### edit page (編集ページ)
+- インスタンスの新規作成、もしくは既存のインスタンスの編集
+- バリデーション
+    - Javascriptによるクライアントサイド バリデーション (重複チェックはajaxで行う)
+    - サーバーサイド バリデーション
+
+[![customer-new](http://web4r.org/customer-new-thumbnail.png)](http://web4r.org/customer-new.png)
+[![customer-edit](http://web4r.org/customer-edit-thumbnail.png)](http://web4r.org/customer-edit.png)
+
+
+### 例:
+
+#### Blogアプリケーション
+
+    (eval-when (:compile-toplevel :load-toplevel :execute)
+      (asdf:oos 'asdf:load-op :web4r))
+    
+    (in-package :cl-user)
+    (defpackage :blog (:use :cl :web4r))
+    (in-package :blog)
+    
+    (ele:open-store *example-bdb*)
+    
+    (defpclass blog ()
+      ((title :length 50 :index t)
+       (body  :length 3000)))
+    
+    (genpages blog)
+    
+    (start-server)
+
+- [Blogデモ](http://demo.web4r.org/blog)
+
+#### Customerアプリケーション
 
     (eval-when (:compile-toplevel :load-toplevel :execute)
       (asdf:oos 'asdf:load-op :web4r))
@@ -50,26 +99,4 @@ Genpagesマクロ
     
     (start-server)
 
-- [デモ](http://demo.web4r.org/customer)
-
-### index page (一覧表示)
-- 一覧の表示
-- 一覧の並び替え with/without ajax
-- ページング with/without ajax 
-- インスタンスの削除 with/without ajax
-
-[![customer-index](http://web4r.org/customer-index-thumbnail.png)](http://web4r.org/customer-index.png)
-
-### show page (詳細表示)
-- インスタンスのslot値詳細表示
-
-[![customer-show](http://web4r.org/customer-show-thumbnail.png)](http://web4r.org/customer-show.png)
-
-### edit page (編集)
-- インスタンスの新規作成、もしくは既存のインスタンスの編集
-- バリデーション
-    - Javascriptによるクライアントサイド バリデーション (重複チェックはajaxで行う)
-    - サーバーサイド バリデーション
-
-[![customer-new](http://web4r.org/customer-new-thumbnail.png)](http://web4r.org/customer-new.png)
-[![customer-edit](http://web4r.org/customer-edit-thumbnail.png)](http://web4r.org/customer-edit.png)
+- [Customerデモ](http://demo.web4r.org/customer)
