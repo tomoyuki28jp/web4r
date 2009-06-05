@@ -152,15 +152,27 @@ selectorを利用してテンプレートエレメントを選択し、manipulat
     ;       </body>
     ;   </html>
 
-利用例
--------
+FAQ
+----
+### Q. [cl-who](http://www.weitz.de/cl-who/)は普通のマクロでsmlと同様のことが出来るのに、なぜ新たなマークアップ言語をリードマクロで開発したのですか？
 
-Lispプログラムを利用して(x)htmlテーブルを生成:
+A. そちらの方が短く記述出来るからです。例えば次のコードをcl-whoで書き直したらsmlよりも長くなると思います。
 
-    [table (dotimes (x 3) [tr [td x]])]
+    [html [body [table (dotimes (x 3) [tr [td x]])]]]
+    
+    ; =>
+    ;<?xml version="1.0" encoding="UTF-8"?>
+    ;<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    ;"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    ;<html>
+    ;    <body>
+    ;        <table>
+    ;            <tr><td>0</td></tr>
+    ;            <tr><td>1</td></tr>
+    ;            <tr><td>2</td></tr>
+    ;        </table>
+    ;    </body>
+    ;</html>
 
-    ;=> <table>
-    ;       <tr><td>0</td></tr>
-    ;       <tr><td>1</td></tr>
-    ;       <tr><td>2</td></tr>
-    ;   </table>    
+
+[cl-who](http://www.weitz.de/cl-who/)の方がお好みであれば、cl-whoをsmlの代わりに利用することが出来ます。

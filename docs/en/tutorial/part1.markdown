@@ -151,15 +151,27 @@ Examples:
     ;       </body>
     ;   </html>
 
-Example Usage
---------------
+FAQ
+----
+### Q. Why did you reinvent yet another markup language with reader macros? [cl-who](http://www.weitz.de/cl-who/) does the similar things with a regular macro.
 
-Generates (x)html table with Lisp code.
+A. Because it's shorter. For example, if you rewrite the following code with cl-who, I think it's gonna be longer.
 
-    [table (dotimes (x 3) [tr [td x]])]
+    [html [body [table (dotimes (x 3) [tr [td x]])]]]
+    
+    ; =>
+    ;<?xml version="1.0" encoding="UTF-8"?>
+    ;<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    ;"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    ;<html>
+    ;    <body>
+    ;        <table>
+    ;            <tr><td>0</td></tr>
+    ;            <tr><td>1</td></tr>
+    ;            <tr><td>2</td></tr>
+    ;        </table>
+    ;    </body>
+    ;</html>
 
-    ;=> <table>
-    ;       <tr><td>0</td></tr>
-    ;       <tr><td>1</td></tr>
-    ;       <tr><td>2</td></tr>
-    ;   </table>    
+
+If you prefer [cl-who](http://www.weitz.de/cl-who/), you can use it instead of sml.
