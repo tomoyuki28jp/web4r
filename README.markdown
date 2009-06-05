@@ -1,6 +1,7 @@
 About
 ======
 The goal of web4r is enabling users to develop web applications with the shortest codes.
+(The shortness is about the number of tokens.)
 
 #### The "Hello World" Application:
 
