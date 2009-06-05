@@ -155,7 +155,7 @@ FAQ
 ----
 ### Q. Why did you reinvent yet another markup language with reader macros? [cl-who](http://www.weitz.de/cl-who/) does the similar things with a regular macro.
 
-A. Because it's shorter. For example, if you rewrite the following code with cl-who, I think it's gonna be longer.
+A. Because it's shorter. For example, if you rewrite the following sml code with cl-who, I think it's gonna be longer.
 
     [html [body [table (dotimes (x 3) [tr [td x]])]]]
     
