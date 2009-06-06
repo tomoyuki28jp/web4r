@@ -27,6 +27,26 @@
 (defun cont/uri (x)
   (matched x "<a href=\"(.+)\""))
 
+(test renew-cont-lifetime
+  (defpage test ()
+    (let* ((web4r::*cid->cont* (make-hash-table :test 'equal))
+           (web4r::*cid-generated-order* (make-array 0 :fill-pointer 0 :adjustable t))
+           (cid1 (web4r::set-cont 1))
+           (cid2 (web4r::set-cont 2))
+           (cid3 (web4r::set-cont 3))
+           (cont2 (gethash cid2 web4r::*cid->cont*))
+           (time2 (web4r::cont-generated-time cont2)))
+      (declare (ignore cid1 cid3))
+      (sleep 1)
+      (renew-cont-lifetime cid2)
+      (let* ((cont2* (gethash cid2 web4r::*cid->cont*))
+             (time2* (web4r::cont-generated-time cont2*)))
+        (unless (= time2 time2*)
+          (p "ok")))
+      (when (equal (elt web4r::*cid-generated-order* 2) cid2)
+        (p "ok"))))
+  (is (string= (http-request (page-uri "test")) "okok")))
+
 (test cont-session
   (defpage test ()
     (a/cont (progn (setf (cont-session 'key) "ok")
