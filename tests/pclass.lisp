@@ -8,16 +8,16 @@
   (string= (rem-newline str1) (rem-newline str2)))
 
 (defpclass testdb1 ()
-    ((name         :length 50 :label "full name" :size 30)
+    ((name         :length 50 :label "full name" :size 30 :index t)
      (password     :input :password :length (8 12) :hide-for :all :comment "8-12 characters")
      (email        :format :email :unique t)
      (sex          :input :radio :options ("male" "female"))
      (marriage     :input :select :options ("single" "married" "divorced"))
      (hobbies      :input :checkbox :options ("sports" "music" "reading"))
-     (birth-date   :format :date)
+     (birth-date   :format :date :index t)
      (nickname     :length 50 :required nil)
-     (phone-number :format "^\\d{3}-\\d{3}-\\d{4}$" :comment "xxx-xxx-xxxx")
-     (zip-code     :type integer :length 5 :comment "5 digit")
+     (phone-number :format "^\\d{3}-\\d{3}-\\d{4}$" :comment "xxx-xxx-xxxx" :index t)
+     (zip-code     :type integer :length 5 :comment "5 digit" :index t)
      (note         :length 300 :rows 5 :cols 30)
      (image        :input :file :format :image :length (1000 500000) :required nil)))
 
@@ -487,6 +487,20 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 (test get-file-slots
   (is (equal (get-file-slots 'testdb1)
              (list (get-slot 'testdb1 'image)))))
+
+(test indexed-slot-p
+  (is (eq t   (indexed-slot-p 'testdb1 'name)))
+  (is (eq nil (indexed-slot-p 'testdb1 'password)))
+  (is (eq t   (indexed-slot-p 'testdb1 'email)))
+  (is (eq nil (indexed-slot-p 'testdb1 'sex)))
+  (is (eq nil (indexed-slot-p 'testdb1 'marriage)))
+  (is (eq nil (indexed-slot-p 'testdb1 'hobbies)))
+  (is (eq t   (indexed-slot-p 'testdb1 'birth-date)))
+  (is (eq nil (indexed-slot-p 'testdb1 'nickname)))
+  (is (eq t   (indexed-slot-p 'testdb1 'phone-number)))
+  (is (eq t   (indexed-slot-p 'testdb1 'zip-code)))
+  (is (eq nil (indexed-slot-p 'testdb1 'note)))
+  (is (eq nil (indexed-slot-p 'testdb1 'image))))
 
 (test oid
   (loop for i in '(1 2 3)
