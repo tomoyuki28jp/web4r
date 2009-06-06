@@ -9,6 +9,18 @@
   (is (string= (page-uri "page" 1 2)
                (concat *host-uri* "page/1/2/"))))
 
+(test set-post-parameters
+  (defpage test ()
+    (set-post-parameters '(("foo" . "ok")))
+    (p (hunchentoot:post-parameter "foo")))
+  (is (string= (http-request (page-uri "test")) "ok")))
+
+(test set-get-parameters
+  (defpage test ()
+    (set-get-parameters '(("foo" . "ok")))
+    (p (hunchentoot:get-parameter "foo")))
+  (is (string= (http-request (page-uri "test")) "ok")))
+
 (test page
   (defpage test () (p "ok"))
   (is (string= (http-request (page-uri "test")) "ok"))
