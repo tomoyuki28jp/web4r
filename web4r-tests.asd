@@ -15,6 +15,7 @@
                          :components
                          ((:file "package")
                           (:file "util")
+                          (:file "debug")
                           (:file "cont")
                           (:file "server")
                           (:file "valid")
