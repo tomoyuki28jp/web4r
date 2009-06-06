@@ -97,7 +97,7 @@
            :slot-cols
            :slot-size
            :slot-length
-           :slot-hide
+           :slot-hide-for
            :slot-options
            :slot-comment
            :slot-input
