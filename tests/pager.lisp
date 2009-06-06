@@ -13,6 +13,14 @@
               'pager :total-items 81  :items-per-page 10)))
       (is (eq  9 (total-pages i))))))
 
+(test get-current-page
+  (let ((*page-param* "page"))
+    (with-get-parameters `((,*page-param* . "1"))
+      (is (eq (get-current-page) 1))))
+  (let ((*page-param* "foo"))
+    (with-get-parameters `((,*page-param* . "2"))
+      (is (eq (get-current-page) 2)))))
+
 (test item-start
   (with-post-parameters nil
     (let ((i (make-instance
@@ -104,12 +112,6 @@
             'pager :total-items 120 :items-per-page 10
             :current-page  3 :links-per-page 10)))
     (is-true (page-link= 12 (next-link* i)))))
-
-(test get-current-page
-  (with-get-parameters (list (cons *page-param* "3"))
-    (is (eq 3 (get-current-page))))
-  (with-get-parameters (list (cons *page-param* "0"))
-    (is (eq 1 (get-current-page)))))
 
 (test w/p
   (with-get-parameters (list (cons *page-param* "3"))
