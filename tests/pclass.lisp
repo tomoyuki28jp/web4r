@@ -298,7 +298,7 @@
                (slot-display-value i (get-slot 'testdb1 'note) :nl->br t)))
     (is (string=* "<a href=\"http://localhost:8080/upload/test.gif\">
 <img src=\"http://localhost:8080/thumbnail/?file=test.gif&amp;type=upload&amp;width=&amp;height=\"
- alt=\"testdb1_image\" /></a>" 
+ alt=\"testdb1_image\" /></a>"
                   (sml->ml (slot-display-value i (get-slot 'testdb1 'image)))))))
 
 (test slot-save-value
@@ -344,6 +344,31 @@ world")
                (slot-save-value (get-slot 'testdb1 'zip-code))))
     (is (equal "hello
 world"         (slot-save-value (get-slot 'testdb1 'note))))))
+
+(test form-valid-attr
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'name))
+              '(:CLASS "required" :MAXLENGTH 50)))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'password))
+              '(:CLASS "required" :MINLENGTH 8 :MAXLENGTH 12)))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'email))
+              '(:CLASS "required email" :REMOTE "/ajax/testdb1/unique/")))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'sex))
+              '(:CLASS "required")))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'marriage))
+              '(:CLASS "required")))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'hobbies))
+              '(:CLASS "required")))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'birth-date))
+              '(:CLASS "required")))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'nickname))
+              '(:MAXLENGTH 50)))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'phone-number))
+              '(:CLASS "required format" :FORMAT "^\\d{3}-\\d{3}-\\d{4}$")))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'zip-code))
+              '(:CLASS "required number" :MAXLENGTH 5)))
+  (is (equal  (form-valid-attr 'testdb1 (get-slot 'testdb1 'note))
+              '(:CLASS "required" :MAXLENGTH 300)))
+  (is (eq     (form-valid-attr 'testdb1 (get-slot 'testdb1 'image)) NIL)))
 
 (defmacro sml= (sml ml)
   `(string=* (sml->ml ,sml) ,ml))
@@ -529,7 +554,7 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 (test make-pinstance
   (drop-instances-by-class 'testdb1)
-  (with-post-parameters 
+  (with-post-parameters
       '(("testdb1_name" . "tomoyuki matsumoto")
         ("testdb1_email" . "tomo@tomo.com")
         ("testdb1_sex" . "male")
