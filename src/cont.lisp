@@ -110,10 +110,9 @@
  CID (continuation id)."
   (when (get-cont cid)
     (let ((cont (gethash cid *cid->cont*)))
-      (setf (cont-generated-time cont) (get-universal-time)
-            (gethash cid *cid->cont*) cont)
+      (setf (cont-generated-time cont) (get-universal-time)))
     (vector-push-extend
-     cid (delete cid *cid-generated-order* :test #'equal)))))
+     cid (delete cid *cid-generated-order* :test #'equal))))
 
 (setf *session-removal-hook*
       #'(lambda (session)
