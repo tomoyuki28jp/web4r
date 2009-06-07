@@ -30,6 +30,10 @@
   (loop for s in (get-slots 'testdb1)
         do (is (member (web4r::slot-symbol s) *test-slots*))))
 
+(test get-slots-if
+  (is (equal (list (get-slot 'testdb1 'image))
+             (get-slots-if #'(lambda (s) (eq (slot-input s) :file)) 'testdb1))))
+
 (test get-excluded-slots
   (let ((sl (remove 'password *test-slots*)))
     (is (eq (length sl) (length (get-excluded-slots 'testdb1))))
@@ -512,6 +516,25 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 (test get-file-slots
   (is (equal (get-file-slots 'testdb1)
              (list (get-slot 'testdb1 'image)))))
+
+(test get-excluded-slots-if
+  (let ((*with-slots* :all))
+    (is (equal (list (get-slot 'testdb1 'sex)
+                     (get-slot 'testdb1 'marriage)
+                     (get-slot 'testdb1 'hobbies))
+               (get-excluded-slots-if
+                #'(lambda (s) (not (null (slot-options s)))) 'testdb1))))
+  (let ((*without-slots* '(sex marriage)))
+        (is (equal (list (get-slot 'testdb1 'hobbies))
+                   (get-excluded-slots-if
+                    #'(lambda (s) (not (null (slot-options s)))) 'testdb1)))))
+
+(test get-excluded-file-slots
+  (let ((*with-slots* :all))
+    (is (equal (list (get-slot 'testdb1 'image))
+               (get-excluded-file-slots 'testdb1))))
+  (let ((*without-slots* '(image)))
+    (is (eq nil (get-excluded-file-slots 'testdb1)))))
 
 (test indexed-slot-p
   (is (eq t   (indexed-slot-p 'testdb1 'name)))
