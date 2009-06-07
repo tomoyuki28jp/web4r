@@ -29,7 +29,7 @@
     (p (hunchentoot:get-parameter "foo")))
   (is (string= (http-request (page-uri "test")) "ok")))
 
-(test page
+(test defpage
   (defpage test () (p "ok"))
   (is (string= (http-request (page-uri "test")) "ok"))
   (defpage test (path1 path2)
@@ -66,6 +66,18 @@
                                 "g1" "gv1" "g2" "gv2")
                 :method :post :parameters '(("p1" . "pv1") ("p2" . "pv2")))
                "pp1 pp2 pv1 pv2 gv1 gv2")))
+
+(test page-lambda
+  (defpage test ()
+    (form/cont (page-lambda (:post foo)
+                 (p foo))
+      (input-text "foo")))
+  (let* ((c  (make-instance 'cookie-jar))
+         (r1 (http-request (page-uri "test") :cookie-jar c))
+         (c1 (cid r1))
+         (r2 (http-request *host-uri* :method :post :cookie-jar c
+                           :parameters `(("cid" ,@c1) ("foo" . "ok")))))
+    (is (string= r2 "ok"))))
 
 (test set/get-page
   (setf web4r::*pages* nil)
