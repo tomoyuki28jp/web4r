@@ -1,6 +1,14 @@
 (in-package :web4r-tests)
 (in-suite web4r)
 
+(test uri-path
+  (defpage one () (p (uri-path 1)))
+  (is (string= (http-request (page-uri "one/two")) "two"))
+  (is (eq (http-request (page-uri "one")) nil))
+  (defpage one/two/three () (p (uri-path 1)))
+  (is (string= (http-request (page-uri "one/two/three/four")) "four"))
+  (is (eq (http-request (page-uri "one/two/three")) nil)))
+
 (test page-uri
   (is (string= (page-uri "page")
                (concat *host-uri* "page/")))
