@@ -148,3 +148,15 @@
                            `(("cid" ,@c1) ("foo" . "ok"))))
          (r3 (http-request (cont/uri r2) :cookie-jar c)))
     (is (string= r3 "ok"))))
+
+(test multipart-form/cont
+  (defpage test ()
+    (multipart-form/cont (p "ok")))
+  (let* ((c  (make-instance 'cookie-jar))
+         (r1 (http-request (page-uri "test") :cookie-jar c))
+         (c1 (cid r1))
+         (r2 (http-request *host-uri*
+                           :method :post :cookie-jar c
+                           :parameters `(("cid" ,@c1)))))
+    (is (not (null (scan "enctype=\"multipart/form-data\"" r1))))
+    (is (string= r2 "ok"))))
