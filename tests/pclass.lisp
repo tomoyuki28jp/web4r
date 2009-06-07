@@ -532,6 +532,28 @@ oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
         as oid = (make-instance 'testdb1 :name i)
         do (is (eq i (slot-value (get-instance-by-oid 'testdb1 (oid oid)) 'name)))))
 
+(test instance-by-oid
+  (let* ((oid (oid (make-instance 'testdb1 :name "name1")))
+         (ins (get-instance-by-oid 'testdb1 oid)))
+    (is (string= (name ins) "name1"))
+    (drop-instance-by-oid 'testdb1 oid)
+    (is (eq nil (get-instance-by-oid 'testdb1 oid))))
+  (is (eq nil (get-instance-by-oid 'testdb1 10000000000000))))
+
+(test drop-instance
+  (let* ((oid (oid (make-instance 'testdb1 :name "name1")))
+         (ins (get-instance-by-oid 'testdb1 oid)))
+    (drop-instance ins)
+    (is (eq nil (get-instance-by-oid 'testdb1 oid)))))
+
+(test drop-instances-by-class
+  (drop-instances-by-class 'testdb1)
+  (is (= 0 (length (ele:get-instances-by-class 'testdb1))))
+  (make-instance 'testdb1 :name "name1")
+  (is (= 1 (length (ele:get-instances-by-class 'testdb1))))
+  (drop-instances-by-class 'testdb1)
+  (is (= 0 (length (ele:get-instances-by-class 'testdb1)))))
+
 (test per-page
   (drop-instances-by-class 'testdb1)
   (loop for n from 1 to 26
