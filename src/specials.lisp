@@ -11,6 +11,10 @@
   (defvar *sml-dir*    (merge-pathnames "sml/"    *web4r-dir*)
     "A pathname of the sml directory.")
 
+  (defvar *test-bdb*
+    `(:BDB ,(merge-pathnames "tests/bdb/" *web4r-dir*))
+    "A pathname of a BDB database directory for tests.")
+
   (defvar *example-bdb*
     `(:BDB ,(merge-pathnames "examples/bdb/" *web4r-dir*))
     "A pathname of a BDB database directory for example applications.")

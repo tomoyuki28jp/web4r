@@ -6,6 +6,7 @@
            :*web4r-dir*
            :*public-dir*
            :*sml-dir*
+           :*test-bdb*
            :*example-bdb*
            :*upload-save-dir*
            :*tmp-save-dir*

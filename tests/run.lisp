@@ -3,6 +3,6 @@
 
 (in-package :web4r-tests)
 
-(ele:open-store *example-bdb*)
+(ele:open-store *test-bdb*)
 (defvar *srv* (start-server))
 ;(5am:run! 'web4r)
