@@ -4,7 +4,7 @@ This part of a tutorial will show how to use [sml](http://github.com/tomoyuki28j
 
 Download, Install and Use
 --------------------------
-web4r depends on sml, so if you have already installed web4r, you should already have installed sml. Otherwise download sml from [this page](https://github.com/tomoyuki28jp/sml) and install it.
+web4r depends on sml, so if you have already installed web4r, you should already have installed sml. You can download sml from [this page](https://github.com/tomoyuki28jp/sml).
 
 To use sml, run this codes:
 
