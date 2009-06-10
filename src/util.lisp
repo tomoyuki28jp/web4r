@@ -83,14 +83,18 @@
 
 (defun omit (obj maxlength &optional (omark "..."))
   "If the length of OBJ exceeds the MAXLENGTH, replaces the exceeded
- characters with the OMARK. Returns the OBJ.
+ characters with the OMARK. Returns the OBJ. Note that if the OBJ is
+ an instance of the sml::safe class, this returns the OBJ without
+ making any change.
 
  Examples:
   (omit \"12345\" 3) ;=>  \"123...\""
-  (let ((str (->string obj)))
-    (if (<= (length str) maxlength)
-        str
-        (concat (subseq str 0 maxlength) omark))))
+  (if (typep obj 'safe)
+      obj
+      (let ((str (->string obj)))
+        (if (<= (length str) maxlength)
+            str
+            (concat (subseq str 0 maxlength) omark)))))
 
 (defun file-length* (file)
   (with-open-file (s file :if-does-not-exist nil)
