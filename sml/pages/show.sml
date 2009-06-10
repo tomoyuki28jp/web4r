@@ -4,5 +4,6 @@
                            [table :id "table_show"
                                   (loop for s in slots do
                                         [tr [th (slot-label s)]
-                                            [td (slot-display-value it s :nl->br t)]])]
+                                            [td :id (slot-id s)
+                                                (slot-display-value it s :nl->br t)]])]
                          [p "That page doesn't exist"])]))
