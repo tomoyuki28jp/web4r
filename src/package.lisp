@@ -106,6 +106,7 @@
            :slot-type
            :get-slots
            :get-slot
+           :hide-slot-p
            :get-excluded-slots
            :get-slots-if
            :get-excluded-slots-if

@@ -81,6 +81,13 @@
                 (equal id (slot-id s)))) ; for a inherited slot
         class)))
 
+(defun hide-slot-p (slot uri)
+  "Returns true if the SLOT should be hided for the URI and nil otherwise."
+  (with-slots (symbol hide-for) slot
+    (or (aand hide-for (or (eq it :all) (null uri) (scan it uri)))
+        (member symbol *without-slots*)
+        (aand *with-slots* (not (member symbol it))))))
+
 (defun get-excluded-slots (class)
   "Returns a list of excluded slot-options instances for the CLASS. You can
  set the excluded slots by the hide-for slot option or *without-slots*.
@@ -89,10 +96,7 @@
       (get-slots class)
       (loop for s in (get-slots class)
             as symbol = (slot-symbol s)
-            unless (or (aand (slot-hide-for s)
-                             (or (eq it :all) (scan it (request-uri*))))
-                       (member symbol *without-slots*)
-                       (aand *with-slots* (not (member symbol it))))
+            unless (hide-slot-p s (ignore-errors (request-uri*)))
             collect s)))
 
 (defun get-file-slots (class)
