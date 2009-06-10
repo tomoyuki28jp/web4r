@@ -88,15 +88,15 @@
         (member symbol *without-slots*)
         (aand *with-slots* (not (member symbol it))))))
 
-(defun get-excluded-slots (class)
-  "Returns a list of excluded slot-options instances for the CLASS. You can
- set the excluded slots by the hide-for slot option or *without-slots*.
+(defun get-excluded-slots (class &optional (uri (ignore-errors (request-uri*))))
+  "Returns a list of excluded slot-options instances of the CLASS for the URI.
+ You can set the excluded slots by the hide-for slot option or *without-slots*.
  The values of *with-slots* affects this."
   (if (eq *with-slots* :all)
       (get-slots class)
       (loop for s in (get-slots class)
             as symbol = (slot-symbol s)
-            unless (hide-slot-p s (ignore-errors (request-uri*)))
+            unless (hide-slot-p s uri)
             collect s)))
 
 (defun get-file-slots (class)
