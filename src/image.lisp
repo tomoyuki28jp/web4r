@@ -78,5 +78,5 @@
 (defun thumbnail-uri (file &key type width height)
   "Returns a thumbnail uri of the image FILE with the size of WIDTH and HEIGHT.
  TYPE must be a key of *image-public-dirs* such as 'upload' or 'tmp'."
-  (add-parameters (page-uri "thumbnail")
+  (add-parameters "/thumbnail/"
                   "file" file "type" type  "width" width "height" height))
