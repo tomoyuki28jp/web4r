@@ -16,7 +16,7 @@ Extended slot options
 - **options:**  Options for a select, radio or checkbox input forms.
 - **comment:**  A comment of a slot.
 - **input:**    A type of a input form which must be :text, :textarea, :radio, :checkbox, :select, :password or :file.
-- **format:**   A validation type which must be :alpha, :alnum, :integer, :email :date, :image ,regexp in string, a function or nil.
+- **format:**   A format of a value to validate which must be :alpha, :alnum, :integer, :email, :date, :image, regexp as a string, a function or nil.
 
 Genpages macro
 ---------------

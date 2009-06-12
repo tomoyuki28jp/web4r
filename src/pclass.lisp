@@ -36,7 +36,7 @@
  :textarea, :radio, :checkbox, :select, :password or :file.")
       (format   :accessor slot-format   :initarg :format   :initform nil
                 :documentation "A validation type which must be :alpha, :alnum,
- :integer, :email :date, :image ,regexp in string, a function or nil.")
+ :integer, :email :date, :image, regexp as a string, a function or nil.")
       (type     :accessor slot-type     :initarg :type    :initform nil :type symbol
                 :documentation "A type specifier of a slot."))
     (:documentation "Extended slot options of a persistent class.")))
