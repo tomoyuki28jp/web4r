@@ -91,7 +91,6 @@
 
 ; --- Validations -----------------------------------------------
 
-
 (defun validation-errors (label value validators)
   "Validates the VALUE with VALIDATORS and returns error messages if any.
  LABEL is used as a subject of error messages.
