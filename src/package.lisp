@@ -15,7 +15,7 @@
            :*debug-log-file*
            :*cont-gc-lifetime*
            :*cont-gc-probability*
-           :*error-formats*
+           :*validation-error-messages*
            :*valid-email-format*
            :*page-param*
            :*items-per-page*

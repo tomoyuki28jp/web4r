@@ -90,7 +90,7 @@
   "This is an instance of msgs/error-msgs if there are messages to display
  and nil otherwise.")
 
-(defvar *error-formats*
+(defvar *validation-error-messages*
   '((:invalid      . "~A is invalid")
     (:empty        . "~A can't be empty")
     (:too-long     . "~A is too long (maximum is ~D characters)")

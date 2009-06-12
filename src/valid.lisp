@@ -4,7 +4,7 @@
 
 (defun error-msg (error &rest args)
   "Returns a string validation error message for the ERROR."
-  (awhen (cdr (assoc error *error-formats*))
+  (awhen (cdr (assoc error *validation-error-messages*))
     (apply #'format (append (list nil it) args))))
 
 (defun leap-year-p (year)
