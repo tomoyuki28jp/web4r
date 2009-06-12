@@ -160,6 +160,38 @@ define-templateマクロを利用してテンプレートを定義すること�
     ;       </body>
     ;   </html>
 
+インデント
+-----------
+smlは比較的綺麗にインデントされたコードを生成します。
+
+    [body [table (dotimes (x 3) [tr [td x]])]]
+    
+    ;=> <body>
+    ;       <table>
+    ;           <tr>
+    ;               <td>0</td>
+    ;   
+    ;           </tr>
+    ;           <tr>
+    ;               <td>1</td>
+    ;   
+    ;           </tr>
+    ;           <tr>
+    ;               <td>2</td>
+    ;   
+    ;           </tr>
+    ;   
+    ;       </table>
+    ;   
+    ;   </body>
+
+インデントが不要な場合、\*indent-mode\*の値をnilにセットして下さい。
+
+    (let ((*indent-mode* nil))
+      [body [table (dotimes (x 3) [tr [td x]])]])
+
+    ;=> <body><table><tr><td>0</td></tr><tr><td>1</td></tr><tr><td>2</td></tr></table></body>
+
 FAQ
 ----
 ### Q. [cl-who](http://www.weitz.de/cl-who/)は普通のマクロでsmlと同様のことが出来るのに、なぜ新たなマークアップ言語をリードマクロで開発したのですか？

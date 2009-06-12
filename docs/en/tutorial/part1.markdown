@@ -159,6 +159,38 @@ You can select a template element by a selector and manipulate it with a manipul
     ;       </body>
     ;   </html>
 
+Indentations
+-------------
+sml generates relatively beautiful indented codes.
+
+    [body [table (dotimes (x 3) [tr [td x]])]]
+    
+    ;=> <body>
+    ;       <table>
+    ;           <tr>
+    ;               <td>0</td>
+    ;   
+    ;           </tr>
+    ;           <tr>
+    ;               <td>1</td>
+    ;   
+    ;           </tr>
+    ;           <tr>
+    ;               <td>2</td>
+    ;   
+    ;           </tr>
+    ;   
+    ;       </table>
+    ;   
+    ;   </body>
+
+If you don't need the indentations, set \*indent-mode\* nil.
+
+    (let ((*indent-mode* nil))
+      [body [table (dotimes (x 3) [tr [td x]])]])
+
+    ;=> <body><table><tr><td>0</td></tr><tr><td>1</td></tr><tr><td>2</td></tr></table></body>
+
 FAQ
 ----
 ### Q. Why did you reinvent yet another markup language with reader macros? [cl-who](http://www.weitz.de/cl-who/) does the similar things with a regular macro.
