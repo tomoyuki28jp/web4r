@@ -4,7 +4,7 @@ This part of a tutorial will show how to use [sml](http://github.com/tomoyuki28j
 
 Download, Install and Use
 --------------------------
-web4r depends on sml, so if you have already installed web4r, you should already have installed sml. You can download sml from [this page](https://github.com/tomoyuki28jp/sml).
+web4r depends on sml, so if you have already installed web4r, you should already have installed sml. Otherwise you can download sml from [this page](https://github.com/tomoyuki28jp/sml).
 
 To use sml, run this codes:
 
@@ -29,7 +29,7 @@ Examples:
 
 Attributes
 -----------
-Keyword parameters or any parameter inside (attr ...) appears before values become attributes.
+Keyword parameters or any parameters inside (attr ...) appears before values become attributes.
 
 Examples:
 
@@ -43,7 +43,7 @@ Examples:
     
 Markup language
 ----------------
-You can change the markup language to generate by \*markup-lang\* which must be either one of :xhtml, :html or :xml. The default markup language is xhtml.
+You can change the markup language to generate by the \*markup-lang\* special variable which must be either one of :xhtml, :html or :xml. The default markup language is :xhtml.
 
 Examples:
 
@@ -78,7 +78,7 @@ Examples:
 
 Closed Parenthesis
 -------------------
-If you don't need a closed parenthesis, supplies / as a last parameter.
+If you don't need a closed parenthesis, supplies '/ as a last parameter.
 
 Examples:
 
@@ -99,14 +99,17 @@ By default, sml escapes all attributes and values.
 
     [p "<>"] ;=> <p>&lt;&gt;</p>
 
-You can manually escape an object with the escape function, and escaped objects won't be double escaped.
-
-    [p (escape"<>")] ;=> <p>&lt;&gt;</p>
-    [p (escape (escape"<>"))] ;=> <p>&lt;&gt;</p>
-
 If you don't want to escape an object, use the safe macro.
 
-    [p (safe"<>")] ;=> <p><></p>
+    [p (safe "<>")] ;=> <p><></p>
+
+You can manually escape an object with the escape function.
+
+    [p (safe (escape "<>") "<br />")] ;=> <p>&lt;&gt;<br /></p>
+
+Escaped objects won't be double escaped.
+
+    [p (escape (escape "<>"))] ;=> <p>&lt;&gt;</p>
 
 Template
 ---------
