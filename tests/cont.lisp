@@ -22,7 +22,7 @@
     (elt regs 0)))
 
 (defun cid (x)
-  (matched x "name=\"cid\" value=\"(.+)\""))
+  (matched x "name=\"cid\" value=\"([^\"]+)\""))
 
 (defun cont/uri (x)
   (matched x "<a href=\"(.+)\""))
