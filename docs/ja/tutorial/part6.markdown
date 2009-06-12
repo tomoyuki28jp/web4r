@@ -100,3 +100,5 @@ Genpagesマクロ
     (start-server)
 
 - [Customerデモ](http://demo.web4r.org/customer)
+
+**※ 永続化クラスは単数形で命名して下さい。（genpagesマクロは必要に応じて永続化クラス名を複数形に変換します。）**

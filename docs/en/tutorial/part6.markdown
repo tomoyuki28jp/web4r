@@ -98,3 +98,5 @@ Genpages macro
     (start-server)
 
 - [Customer Demo](http://demo.web4r.org/customer)
+
+**Note: A name of a persistent class must be a singular. (The genpages macro pluralize it when needed.)**
