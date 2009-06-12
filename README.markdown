@@ -44,4 +44,4 @@ Documentation
 [Tutorial](http://web4r.org/en/tutorial)  
 [API Documentation](http://web4r.org/en/api)  
 
-*Note: These documents are placed under the web4r/docs directory*
+*Note: These documents are included under the web4r/docs directory*
