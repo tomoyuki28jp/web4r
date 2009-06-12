@@ -3,6 +3,7 @@
 
 (in-package :web4r-tests)
 
-(ele:open-store *test-bdb*)
+(ele:open-store
+ `(:BDB ,(merge-pathnames "tests/bdb/" *web4r-dir*)))
 (defvar *srv* (start-server))
 ;(5am:run! 'web4r)
