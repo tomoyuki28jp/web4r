@@ -79,7 +79,7 @@ Markup language (マークアップ言語)
 
 閉じ括弧
 ---------
-閉じ括弧が不要な場合、引数の最後に/を渡して下さい。
+閉じ括弧が不要な場合、引数の最後に'/を渡して下さい。
 
 例:
 
@@ -112,31 +112,36 @@ escape関数を利用することにより、手動で値をエスケープす�
 
     [p (escape (escape "<>"))] ;=> <p>&lt;&gt;</p>
 
-テンプレート
--------------
-smlはテンプレート言語としても利用することが出来ます。別ファイルに記述されたsmlコードはコンパイル時にLispコード内に展開される為、テンプレートに値をassignするような手間は不要です。
+smlコードの分離
+----------------
+load-smlマクロは別ファイルに記述されたsmlコードをコンパイル時にLispコード内に展開する為、別途テンプレートに値をassignするような手間は不要です。
 
 例:
 */tmp/template.sml*
 
-    (print x)
+    [p x]
 
 */tmp/use.lisp*
 
     (let ((x "ok!"))
-      (load-sml "/tmp/template.sml")) ;=> "ok!"
+      (load-sml "/tmp/template.sml")) ;=> <p>ok!</p>
 
-テンプレートエレメントの操作
------------------------------
-selectorを利用してテンプレートエレメントを選択し、manipulatorを利用して、テンプレートエレメントを操作することが出来ます。selectorの文法はtag, #id, もしくは.classであり、定義済のmanipulatorはappend, replace, そしてremoveです。
+*展開イメージ*
 
-例:
+    (let ((x "ok!"))
+      [p x])
+
+テンプレートの定義とエレメントの操作
+-------------------------------------
+define-templateマクロを利用してテンプレートを定義することが出来ます。
 
     (define-template :template1
         [html [head [title "Default title"]]
               [body [p :id "id1" "p1"]
                     [p :class "class1" "p2"]]])
-    
+
+定義したテンプレートのエレメントはselectorを利用して選択可能であり、manipulatorを利用して選択したエレメントを操作することが出来ます。selectorの文法はtag, #id, もしくは.classであり、定義済のmanipulatorはappend, replace, そしてremoveです。	
+
     (with-template (:template1)
       (replace title [title "new title"]) ; タイトルを変更
       (remove  "#id1") ; idの値が'id1'であるエレメントを削除

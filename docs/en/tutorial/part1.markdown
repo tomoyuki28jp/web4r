@@ -78,7 +78,7 @@ Examples:
 
 Closed Parenthesis
 -------------------
-If you don't need a closed parenthesis, supplies '/ as a last parameter.
+If you don't need a closed parenthesis, supplies '/ as the last parameter.
 
 Examples:
 
@@ -111,30 +111,35 @@ Escaped objects won't be double escaped.
 
     [p (escape (escape "<>"))] ;=> <p>&lt;&gt;</p>
 
-Template
----------
-You can use sml as a template markup language. Sml codes written in another template file are expanded inside a lisp code at compile time, so you don't need to assign any variable.
+Separating sml codes into another file
+---------------------------------------
+The load-sml macro expands sml codes written in another file inside a lisp code at compile time, so you don't need to assign any variable.
 
 Examples:  
 */tmp/template.sml*
 
-    (print x)
+    [p x]
 
 */tmp/use.lisp*
 
     (let ((x "ok!"))
-      (load-sml "/tmp/template.sml")) ;=> "ok!"
+      (load-sml "/tmp/template.sml")) ;=> <p>ok!</p>
 
-Manipulate Template Elements
------------------------------
-You can select a template element by a selector and manipulate it with a manipulator. The syntax of selector is tag, #id and .class. Manipulators are append, replace and remove.
+*The expanded code*
 
-Examples:
+    (let ((x "ok!"))
+      [p x])
+
+Defining a template and manipulating the elements
+--------------------------------------------------
+You can define a template with the define-template macro.
 
     (define-template :template1
         [html [head [title "Default title"]]
               [body [p :id "id1" "p1"]
                     [p :class "class1" "p2"]]])
+
+You can select a template element by a selector and manipulate it with a manipulator. The syntax of selector is tag, #id and .class. Manipulators are append, replace and remove.
     
     (with-template (:template1)
       (replace title [title "new title"]) ; replace the title
