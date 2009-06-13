@@ -92,11 +92,13 @@
 ; --- Validations -----------------------------------------------
 
 (defun validation-errors (label value validators)
-  "Validates the VALUE with VALIDATORS and returns error messages if any.
+  "Validates VALUE with VALIDATORS and returns error messages if any.
  LABEL is used as a subject of error messages.
 
  Examples:
-  (validation-errors \"label\" \"12345\" '(:length 3))
+  (validation-errors \"label\" nil '(:required t :length 3))
+  ;=> (\"label can't be empty\") 
+  (validation-errors \"label\" \"12345\" '(:required t :length 3))
   ;=> (\"label is too long (maximum is 3 characters)\")"
   (loop for (type args) on validators by #'cddr
         as validator = (or (get-validator type)
@@ -105,16 +107,19 @@
         when error collect error until error))
 
 (defmacro with-validations (validations error-handler body)
-  "Executes the VALIDATIONS. Then executes ERROR-HANDLER if there
- is a error and BODY otherwise. The ERROR-HANDLER takes one argument
+  "Executes VALIDATIONS. Then executes ERROR-HANDLER if there is
+ any error and BODY otherwise. The ERROR-HANDLER takes one argument
  which is a list of validation error messages.
 
  Examples:
   (with-validations ((\"1\" \"v\" '(:required t))
                      (\"2\" nil '(:required t)))
     (lambda (e) e)
-    \"ok\")
-  ; => (\"2 can't be empty\")"
+    \"ok\") ;=> (\"2 can't be empty\")
+  (with-validations ((\"1\" \"v\" '(:required t))
+                     (\"2\" \"v\" '(:required t)))
+    (lambda (e) e)
+    \"ok\") ;=> \"ok\""
   `(aif (append ,@(loop for v in validations
                         collect `(validation-errors ,@v)))
         (funcall ,error-handler it)

@@ -16,7 +16,7 @@ web4rは永続化クラスの為の拡張スロットオプションと、永続
 - **options:**  セレクトボックス、ラジオボタン、チェックボックスの為の選択肢リスト
 - **comment:**  slotコメント (表示用)
 - **input:**    入力フォームタイプ。:text, :textarea, :radio, :checkbox, :select, :password, :fileのいずれか
-- **format:**   バリデーションタイプ。:alpha, :alnum, :integer, :email :date, :image, 文字列型の正規表現、関数、nil(validationを行わない)のいずれか
+- **format:**   値のフォーマットバリデーション。:alpha, :alnum, :integer, :email, :date, :image, 文字列型の正規表現、関数、nil(チェックを行わない)のいずれか
 
 Genpagesマクロ
 ---------------
