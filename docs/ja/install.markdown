@@ -18,8 +18,9 @@ GNU/Linux x86-64 32bit SBCL 1.0.18 - 1.0.19でのみ動作確認済。
 - [cl-gd](http://weitz.de/cl-gd/)
 - [flexi-streams](http://www.weitz.de/flexi-streams/)
 - [trivial-backtrace](http://common-lisp.net/project/trivial-backtrace/)
+- [drakma](http://weitz.de/drakma/)
+- [closure-html](http://common-lisp.net/project/closure/closure-html/)
 - [fiveam](http://common-lisp.net/project/bese/FiveAM.html) (web4r-testsでのみ利用)
-- [drakma](http://weitz.de/drakma/) (web4r-testsでのみ利用)
 
 インストール
 ------------

@@ -19,7 +19,9 @@
                 :trivial-shell
                 :cl-gd
                 :flexi-streams
-                :trivial-backtrace)
+                :trivial-backtrace
+                :drakma
+                :closure-html)
   :components  ((:module "src"
                          :serial  t
                          :components
@@ -35,4 +37,5 @@
                           (:file "pages")
                           (:file "user")
                           (:file "image")
+                          (:file "http")
                           ))))

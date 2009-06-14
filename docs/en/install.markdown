@@ -18,8 +18,9 @@ Library Dependencies
 - [cl-gd](http://weitz.de/cl-gd/)
 - [flexi-streams](http://www.weitz.de/flexi-streams/)
 - [trivial-backtrace](http://common-lisp.net/project/trivial-backtrace/)
+- [drakma](http://weitz.de/drakma/)
+- [closure-html](http://common-lisp.net/project/closure/closure-html/)
 - [fiveam](http://common-lisp.net/project/bese/FiveAM.html) (required by web4r-tests)
-- [drakma](http://weitz.de/drakma/) (required by web4r-tests)
 
 Install
 --------

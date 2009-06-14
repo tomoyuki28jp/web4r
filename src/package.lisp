@@ -175,7 +175,11 @@
            :thumbnail
            :thumbnail-uri
            ; --- inflector ---
-           :pluralize)
+           :pluralize
+           ; --- http ---
+           :http-get-instance-by-oid
+           :http-test-get-instance-by-oid
+           )
   (:shadow :defpclass))
 
 (in-package :web4r)
