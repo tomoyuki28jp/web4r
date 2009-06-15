@@ -49,7 +49,7 @@ Examples:
       (form/cont (a/cont [p "You said: " (last-post "foo")] "click here")
         [input :type "text" :name "foo" /]))
 
-    ; Expanded image:
+    ; Expanded code (image):
     ; (defpage test ()
     ;   (form/cont (let ((#:G1152 (hunchentoot:post-parameter "foo")))
     ;                (a/cont [p "You said: " #:G1152] "click here"))

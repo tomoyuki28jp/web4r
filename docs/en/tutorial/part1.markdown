@@ -78,7 +78,7 @@ Examples:
 
 Closed Parenthesis
 -------------------
-If you don't need a closed parenthesis, supplies '/ as the last parameter.
+If you don't need a closed parenthesis, supplies / as the last parameter.
 
 Examples:
 
