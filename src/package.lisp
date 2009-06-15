@@ -177,6 +177,8 @@
            ; --- inflector ---
            :pluralize
            ; --- http ---
+           :http-regist
+           :http-test-regist
            :http-get-instance-by-oid
            :http-test-get-instance-by-oid
            )
