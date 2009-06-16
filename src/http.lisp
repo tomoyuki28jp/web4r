@@ -24,6 +24,10 @@
   #'(lambda (class oid)
       (concat *host-uri* (join "/" (->string-down class ) "show" oid) "/")))
 
+(defvar *delete-page-uri*
+  #'(lambda (class oid)
+      (concat *host-uri* (join "/" (->string-down class ) "delete" oid) "/")))
+
 ; --- Utilties --------------------------------------------------
 
 (defmacro without-indenting (&rest body)
@@ -148,7 +152,7 @@
         (error "regist failed: ~S" error))))
 
 (defun http-login (&key id pass)
-  "Logs in a user with ID and PASS via http."
+  "Logs in the current user with ID and PASS via http."
   (let* ((uri (funcall *login-page-uri*))
          (cid (cid* (http-request* uri))))
     (http-request* uri :method :post :parameters
@@ -156,7 +160,8 @@
                            (list (cons "cid" cid))))))
 
 (defun http-test-login (&key id pass)
-  "Executes (http-login :id ID :pass PASS). This raises an error if login failed
+  "Executes (http-login :id ID :pass PASS) and check if the user was
+ successfully logged in. This raises an error if the test failed
  and returns true otherwise."
   (let ((html (http-login :id id :pass pass)))
     (if (string= (http-request* (funcall *loggedin-page-uri*)) "true")
@@ -164,9 +169,13 @@
         (error "Login failed: ~S" (get-error-msgs (parse* html))))))
 
 (defun http-logout ()
+  "Logs out the current user via http."
   (http-request* (funcall *logout-page-uri*)))
 
 (defun http-test-logout ()
+  "Executes (http-logout) and check if the current user was successfully
+ logged out. This raises and error if the test failed and returns true
+ otherwise."
   (http-logout)
   (if (string= (http-request* (funcall *loggedin-page-uri*)) "false")
       t
@@ -180,34 +189,49 @@
 ;  )
 
 (defun http-get-instance-by-oid (class oid)
-  "Gets and returns a list of slot symbol/value alist pairs like
+  "Gets and returns a list of slots' symbol/value alist pairs like
  '((slot-symbol . slot-value) ...) of the CLASS INSTANCE specified by OID
  via http"
-  (when (get-instance-by-oid class oid)
-    (without-indenting
-      (without-rewriting-urls
-        (let* ((uri  (funcall *show-page-uri* class oid))
-               (page (parse* (http-request* uri))))
-          (loop for s in (get-excluded-slots class uri)
-                as id = (web4r::slot-id* class s)
-                as e  = (get-element-by-id id page)
-                when e collect (cons (slot-symbol s) e)))))))
+  (if (get-instance-by-oid class oid)
+      (without-indenting
+        (without-rewriting-urls
+          (let* ((uri  (funcall *show-page-uri* class oid))
+                 (page (parse* (http-request* uri))))
+            (loop for s in (get-excluded-slots class uri)
+                  as id = (web4r::slot-id* class s)
+                  as e  = (get-element-by-id id page)
+                  when e collect (cons (slot-symbol s) e)))))
+      (error "There is no object associated with the oid '~D'" oid)))
 
 (defun http-test-get-instance-by-oid (class oid)
-  "Runs the tests to check if the displayed slots' values of the CLASS instance
- specified by OID are correct ones. This raises an error if there is any error
- and returns true otherwise."
+  "Executes (http-get-instance-by-oid CLASS OID) and check if the values
+ are correct ones. This raises an error if the tests failed and returns true
+ otherwise."
   (without-indenting
-    (aif (get-instance-by-oid class oid)
-         (loop for a in (http-get-instance-by-oid class oid)
-               as slot = (get-slot class (car a))
-               as ans  = (aand (slot-display-value it slot)
-                               (case (slot-input slot)
-                                 (:file (car (parse* (slot-value it 'sml:obj))))
-                                 (:textarea (parse* (sml:nl->br it)))
-                                 (otherwise (->string it))))
-               unless (equal ans (cdr a))
-               do (error "~S is not equal to ~S for the slot '~S' of the class '~S'"
-                         (cdr a) ans (car a) class)
-               finally (return t))
-         (error "There is no object associated with the oid '~D'" oid))))
+    (let ((ins (get-instance-by-oid class oid)))
+      (loop for a in (http-get-instance-by-oid class oid)
+            as slot = (get-slot class (car a))
+            as ans  = (aand (slot-display-value ins slot)
+                            (case (slot-input slot)
+                              (:file (car (parse* (slot-value it 'sml:obj))))
+                              (:textarea (parse* (sml:nl->br it)))
+                              (otherwise (->string it))))
+            unless (equal ans (cdr a))
+            do (error "~S is not equal to ~S for the slot '~S' of the class '~S'"
+                      (cdr a) ans (car a) class)
+            finally (return t)))))
+
+(defun http-drop-instance-by-oid (class oid)
+  "Drops the CLASS instance specified by OID via http."
+  (if (get-instance-by-oid class oid)
+      (http-request* (funcall *delete-page-uri* class oid))
+      (error "There is no object associated with the oid '~D'" oid)))
+
+(defun http-test-drop-instance-by-oid (class oid)
+  "Executes (http-drop-instance-by-oid CLASS OID) and check if the instance
+ was successfully deleted. This raises an error if the test failed and returns
+ true otherwise."
+  (http-drop-instance-by-oid class oid)
+  (if (get-instance-by-oid class oid)
+      (error "Dropping an instance failed")
+      t))

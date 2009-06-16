@@ -185,6 +185,8 @@
            :http-test-logout
            :http-get-instance-by-oid
            :http-test-get-instance-by-oid
+           :http-drop-instance-by-oid
+           :http-test-drop-instance-by-oid
            )
   (:shadow :defpclass))
 
