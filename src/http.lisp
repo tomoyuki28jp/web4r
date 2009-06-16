@@ -1,15 +1,17 @@
 (in-package :web4r)
 
-(defvar *cookie* nil)
+(defvar *cookie-jar* nil)
 
 (defvar *host-uri* "http://localhost:8080/")
 
-(defvar *show-page-uri*
-  #'(lambda (oid)
-      (concat *host-uri* "customer/show/" oid "/")))
-
 (defvar *regist-page-uri*
   #'(lambda () (concat *host-uri* "regist")))
+
+(defvar *login-page-uri*
+  #'(lambda () (concat *host-uri* "login")))
+
+(defvar *show-page-uri*
+  #'(lambda (oid) (concat *host-uri* "customer/show/" oid "/")))
 
 ; --- Utilties --------------------------------------------------
 
@@ -64,7 +66,10 @@
    lhtml))
 
 (defun get-error-msgs (lhtml)
-  (mapcar #'cddr (get-element-by-class "errors" lhtml)))
+  (aand (get-element-by-class "errors" lhtml)
+        (if (listp (car it))
+            (mapcar #'cddr (get-element-by-class "errors" lhtml))
+            (car (last it)))))
 
 (defun get-element (test getter lhtml)
   (loop for e in lhtml
@@ -76,7 +81,7 @@
 
 (defun http-request* (uri &rest args)
   (apply #'drakma:http-request uri
-         (append (aif *cookie* (list :cookie-jar it))
+         (append (aif *cookie-jar* (list :cookie-jar it))
                  args)))
 
 (defun regex-matched (string regex)
@@ -130,6 +135,22 @@
                    (slots= class it args)))
         t
         (error "regist failed: ~S" error))))
+
+(defun http-login (&key id pass)
+  "Logs in a user with ID and PASS via http."
+  (let* ((uri (funcall *login-page-uri*))
+         (cid (cid* (http-request* uri))))
+    (http-request* uri :method :post :parameters
+                   (append `(("user_id" . ,id) ("user_pass" . ,pass))
+                           (list (cons "cid" cid))))))
+
+(defun http-test-login (&key id pass)
+  "Executes (http-login :id ID :pass PASS). This raises an error if login failed
+ and returns true otherwise."
+  (let ((html (http-login :id id :pass pass)))
+    (if (string= (http-request* (concat *host-uri* "user/is/loggedin")) "true")
+        t
+        (error "Login failed: ~S" (get-error-msgs (parse* html))))))
 
 (defun http-get-instance-by-oid (class oid)
   "Gets and returns a list of slot symbol/value alist pairs like

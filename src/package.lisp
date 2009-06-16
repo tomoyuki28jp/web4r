@@ -179,6 +179,8 @@
            ; --- http ---
            :http-regist
            :http-test-regist
+           :http-login
+           :http-test-login
            :http-get-instance-by-oid
            :http-test-get-instance-by-oid
            )

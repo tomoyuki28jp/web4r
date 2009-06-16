@@ -158,3 +158,6 @@
  by the OID is eq to the login user oid."
   (aand (awhen oid (get-instance-by-oid class it))
         (eq (slot-value it slot) (login-user-oid))))
+
+(defpage user/is/loggedin ()
+  (p (if (login-user) "true" "false")))
