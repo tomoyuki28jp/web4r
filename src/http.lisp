@@ -7,11 +7,22 @@
 (defvar *regist-page-uri*
   #'(lambda () (concat *host-uri* "regist")))
 
+(defvar *loggedin-page-uri*
+  #'(lambda () (concat *host-uri* "user/is/loggedin")))
+
 (defvar *login-page-uri*
   #'(lambda () (concat *host-uri* "login")))
 
+(defvar *logout-page-uri*
+  #'(lambda () (concat *host-uri* "logout")))
+
+(defvar *edit-page-uri*
+  #'(lambda (class &optional oid)
+      (concat *host-uri* (join "/" (->string-down class ) "edit" oid) "/")))
+
 (defvar *show-page-uri*
-  #'(lambda (oid) (concat *host-uri* "customer/show/" oid "/")))
+  #'(lambda (class oid)
+      (concat *host-uri* (join "/" (->string-down class ) "show" oid) "/")))
 
 ; --- Utilties --------------------------------------------------
 
@@ -148,9 +159,25 @@
   "Executes (http-login :id ID :pass PASS). This raises an error if login failed
  and returns true otherwise."
   (let ((html (http-login :id id :pass pass)))
-    (if (string= (http-request* (concat *host-uri* "user/is/loggedin")) "true")
+    (if (string= (http-request* (funcall *loggedin-page-uri*)) "true")
         t
         (error "Login failed: ~S" (get-error-msgs (parse* html))))))
+
+(defun http-logout ()
+  (http-request* (funcall *logout-page-uri*)))
+
+(defun http-test-logout ()
+  (http-logout)
+  (if (string= (http-request* (funcall *loggedin-page-uri*)) "false")
+      t
+      (error "Logout failed")))
+
+;(defun http-make-instance (class &rest args)
+;  (let* ((uri (funcall *edit-page-uri* 
+;  )
+;
+;(defun http-test-make-instance (&rest args)
+;  )
 
 (defun http-get-instance-by-oid (class oid)
   "Gets and returns a list of slot symbol/value alist pairs like
@@ -159,7 +186,7 @@
   (when (get-instance-by-oid class oid)
     (without-indenting
       (without-rewriting-urls
-        (let* ((uri  (funcall *show-page-uri* oid))
+        (let* ((uri  (funcall *show-page-uri* class oid))
                (page (parse* (http-request* uri))))
           (loop for s in (get-excluded-slots class uri)
                 as id = (web4r::slot-id* class s)
