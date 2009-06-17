@@ -1,7 +1,0 @@
--*- Mode: Outline -*-
-
-* TODO
-- Write tests for GC
-- Integration testing
-- Support more lisp implementations
-- Performance testing
