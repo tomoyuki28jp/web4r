@@ -15,7 +15,9 @@ Examples:
 
 form/cont
 ----------
-[form/cont](http://web4r.org/en/api#form/cont) embeds continuation within a form node.
+[form/cont](http://web4r.org/en/api#form/cont) embeds continuation within a form node.  
+*- To upload files, use [multipart-form/cont](http://web4r.org/en/api#multipart-form/cont) instead.*  
+*- form/cont and multipart-form/cont inserts a submit button if there isn't one.*
 
 Examples:
 

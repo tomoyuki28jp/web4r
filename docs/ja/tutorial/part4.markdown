@@ -15,7 +15,9 @@ a/cont
 
 form/cont
 ----------
-[form/cont](http://web4r.org/en/api#form/cont)は継続をフォームに埋め込みます。
+[form/cont](http://web4r.org/en/api#form/cont)は継続をフォームに埋め込みます。  
+*- ファイルをアップロードするには代わりに[multipart-form/cont](http://web4r.org/en/api#multipart-form/cont)を利用して下さい*  
+*- form/contとmultipart-form/contはsubmitボタンが存在しない場合、submitボタンを挿入します*
 
 例:
 
