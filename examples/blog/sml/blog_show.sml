@@ -6,8 +6,9 @@
                         (msgs)
                         ; blog post
                         [div [p (time-format "~y/~m/~d" (updated-at it))]
-                             [h3 (title it)]
-                             [p (safe (nl->br (escape (body it))))]]
+                             [h3 :id "blog-post_title" (title it)]
+                             [p :id "blog-post_body"
+                                (safe (nl->br (escape (body it))))]]
                         ; comment list
                         [hr /]
                         [div [h3 "Comments"]
