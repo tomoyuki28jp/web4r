@@ -35,22 +35,24 @@
   (with-gensyms (indent-mode result)
     `(let ((,indent-mode sml:*indent-mode*))
        (setf sml:*indent-mode* nil)
-       (let ((,result ,@body))
+       (let ((,result (multiple-value-list ,@body)))
          (setf sml:*indent-mode* ,indent-mode)
-         ,result))))
+         (apply #'values ,result)))))
 
 (defmacro without-rewriting-urls (&rest body)
   "Executes BODY with setting hunchentoot:*rewrite-for-session-urls* nil."
   (with-gensyms (rewrite? result)
     `(let ((,rewrite? hunchentoot:*rewrite-for-session-urls*))
        (setf hunchentoot:*rewrite-for-session-urls* nil)
-       (let ((,result ,@body))
+       (let ((,result (multiple-value-list ,@body)))
          (setf hunchentoot:*rewrite-for-session-urls* ,rewrite?)
-         ,result))))
+         (apply #'values ,result)))))
 
 (defun parse* (html)
-  (aand (closure-html:parse html (closure-html:make-lhtml-builder))
-        (cddr (cadddr it))))
+  (closure-html:parse html (closure-html:make-lhtml-builder)))
+
+(defun parse** (html)
+  (cddr (cadddr (parse* html))))
 
 (defun element-getter (l e)
   (declare (ignore e))
@@ -268,7 +270,7 @@
              (values (loop for s in (get-excluded-slots class uri)
                            as id = (web4r::slot-id* class s)
                            as e  = (get-element-by-id id page)
-                           when e collect (cons (slot-symbol s) e))
+                           collect (cons (slot-symbol s) e))
                      it))))
        (error "There is no object associated with the oid '~D'" oid)))
 
@@ -283,12 +285,13 @@
             as slot = (get-slot class (car a))
             as ans  = (aand (slot-display-value ins slot)
                             (case (slot-input slot)
-                              (:file (car (parse* (slot-value it 'sml:obj))))
-                              (:textarea (parse* (sml:nl->br it)))
+                              (:file (car (parse** (slot-value it 'sml:obj))))
+                              (:textarea (parse** (sml:nl->br it)))
                               (otherwise (->string it))))
-            unless (equal ans (cdr a))
+            as ans* = (if (= 1 (length ans)) (car ans) ans)
+            unless (equal ans* (cdr a))
             do (error "~S is not equal to ~S for the slot '~S' of the class '~S'"
-                      (cdr a) ans (car a) class)
+                      (cdr a) ans* (car a) class)
             finally (return t)))))
 
 (defun http-drop-instance-by-oid (class oid)
