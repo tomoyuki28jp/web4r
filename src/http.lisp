@@ -1,33 +1,5 @@
 (in-package :web4r)
 
-(defvar *cookie-jar* nil)
-
-(defvar *host-uri* "http://localhost:8080/")
-
-(defvar *regist-page-uri*
-  #'(lambda () (concat *host-uri* "regist")))
-
-(defvar *loggedin-page-uri*
-  #'(lambda () (concat *host-uri* "user/is/loggedin")))
-
-(defvar *login-page-uri*
-  #'(lambda () (concat *host-uri* "login")))
-
-(defvar *logout-page-uri*
-  #'(lambda () (concat *host-uri* "logout")))
-
-(defvar *edit-page-uri*
-  #'(lambda (class &optional oid)
-      (concat *host-uri* (join "/" (->string-down class ) "edit" oid) "/")))
-
-(defvar *show-page-uri*
-  #'(lambda (class oid)
-      (concat *host-uri* (join "/" (->string-down class ) "show" oid) "/")))
-
-(defvar *delete-page-uri*
-  #'(lambda (class oid)
-      (concat *host-uri* (join "/" (->string-down class ) "delete" oid) "/")))
-
 ; --- Utilties --------------------------------------------------
 
 (defmacro without-indenting (&rest body)

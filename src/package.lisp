@@ -28,6 +28,15 @@
            :*login-msgs*
            :*thumbnail-width*
            :*thumbnail-height*
+           :*cookie-jar*
+           :*host-uri*
+           :*regist-page-uri*
+           :*loggedin-page-uri*
+           :*login-page-uri*
+           :*logout-page-uri*
+           :*edit-page-uri*
+           :*show-page-uri*
+           :*delete-page-uri*
            ; --- util ---
            :web4r-path
            :public-path

@@ -28,24 +28,15 @@
  The default is #P\"/tmp/web4r/tmp/\".")
 (ensure-directories-exist *tmp-save-dir*    :verbose nil)
 
-(defvar *tmp-files-gc-lifetime* 1440
-  "The lifetime of temporary saved files in number of seconds.
- The default is 1440 (24 minutes).")
-
-(defvar *tmp-files-gc-probability* 100
-  "The probability to start a gc process for expired temporary saved files.
- The default is 100.")
-
-(defvar *image-public-dirs*
-  `(("upload" . *upload-save-dir*)
-    ("tmp"    . *tmp-save-dir*))
-  "An alist of image public directories which must be key/pathname pairs.")
+; --- used in debug.lisp ----------------------------------------
 
 (defvar *debug-log-file* #P"/tmp/web4r/debug.log"
   "A pathname of a debug log file. The default is #P\"/tmp/web4r/debug.log\".")
 
 (defvar *debug-mode* nil
   "If this is non nil, debug-mode is on.")
+
+; --- used in cont.lisp -----------------------------------------
 
 (defvar *sid->cid*  (make-hash-table)
   "A mapping hash table: sid(session-id) -> cid(continuation-id).")
@@ -74,6 +65,8 @@
   (defvar *last-posts* nil
     "This is used on the process to expand last-post inside a continuation."))
 
+; --- used in server.lisp ---------------------------------------
+
 (defvar *page-uri-paths* 0
   "A number of the current page uri paths.
 
@@ -89,6 +82,8 @@
 (defvar *msgs* nil
   "This is an instance of msgs/error-msgs if there are messages to display
  and nil otherwise.")
+
+; --- used in valid.lisp ----------------------------------------
 
 (defvar *validation-error-messages*
   '((:invalid      . "~A is invalid")
@@ -116,6 +111,8 @@
 (?:\.(?:[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+))*))$")
   "A string regular expression used to validate a email address.")
 
+; --- used in pager.lisp ----------------------------------------
+
 (defvar *page-param* "page"
   "A get parameter name denotate the current page number.
  The default is 'page'.")
@@ -125,6 +122,8 @@
 
 (defvar *links-per-page* 10
   "The default number to display page links per page. The default is 10.")
+
+; --- used in pclass.lisp ---------------------------------------
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *slots* (make-hash-table)
@@ -138,6 +137,16 @@
 (defvar *without-slots* nil
   "If this is a list of persistent class slots' symbol, the slots are hided.")
 
+(defvar *tmp-files-gc-lifetime* 1440
+  "The lifetime of temporary saved files in number of seconds.
+ The default is 1440 (24 minutes).")
+
+(defvar *tmp-files-gc-probability* 100
+  "The probability to start a gc process for expired temporary saved files.
+ The default is 100.")
+
+; --- used in pages.lisp ----------------------------------------
+
 (defvar *max-items-per-page* 50
   "The maximum number to display items per page. This value is only used when a
  user changes a value of the get parameter named items_per_page and the value
@@ -147,6 +156,8 @@
   "The maximum number to display page links per page. This value is only used when
  a user changes a value of the get parameter named links_per_page and the value
  exceeeds this maximum number. The default is 30.")
+
+; --- used in user.lisp -----------------------------------------
 
 (defvar *user* nil
   "An instance of the user* class used for the authentication.")
@@ -158,8 +169,45 @@
     (:already-logged-in . "You are already logged in"))
   "An alist of log in/out messages: key/message pairs.")
 
+; --- used in image.lisp ----------------------------------------
+
 (defvar *thumbnail-width*  100
   "The default thumbnail width. The default is 100.")
 
 (defvar *thumbnail-height* 100
   "The default thumbnail height. The default is 100.")
+
+(defvar *image-public-dirs*
+  `(("upload" . *upload-save-dir*)
+    ("tmp"    . *tmp-save-dir*))
+  "An alist of image public directories which must be key/pathname pairs.")
+
+; --- used in http.lisp -----------------------------------------
+
+(defvar *cookie-jar* nil)
+
+(defvar *host-uri* "http://localhost:8080/")
+
+(defvar *regist-page-uri*
+  #'(lambda () (concat *host-uri* "regist")))
+
+(defvar *loggedin-page-uri*
+  #'(lambda () (concat *host-uri* "user/is/loggedin")))
+
+(defvar *login-page-uri*
+  #'(lambda () (concat *host-uri* "login")))
+
+(defvar *logout-page-uri*
+  #'(lambda () (concat *host-uri* "logout")))
+
+(defvar *edit-page-uri*
+  #'(lambda (class &optional oid)
+      (concat *host-uri* (join "/" (->string-down class ) "edit" oid) "/")))
+
+(defvar *show-page-uri*
+  #'(lambda (class oid)
+      (concat *host-uri* (join "/" (->string-down class ) "show" oid) "/")))
+
+(defvar *delete-page-uri*
+  #'(lambda (class oid)
+      (concat *host-uri* (join "/" (->string-down class ) "delete" oid) "/")))
