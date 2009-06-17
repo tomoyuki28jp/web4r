@@ -123,6 +123,22 @@
     (pass "user_pass")
     (otherwise (slot-id* class (get-slot class slot)))))
 
+(defmacro with-new-cookie (&rest body)
+  `(let ((*cookie-jar* (make-instance 'drakma:cookie-jar)))
+     ,@body))
+
+ (defmacro test (form)
+   (let ((args (cdr form)))
+     (case (car form)
+       (http-regist               `(http-test-regist ,@args))
+       (http-login                `(http-test-login ,@args))
+       (http-logout               `(http-test-logout ,@args))
+       (http-make-instance        `(http-test-make-instance ,@args))
+       (http-update-instance      `(http-test-update-instance ,@args))
+       (http-get-instance-by-oid  `(http-test-get-instance-by-oid ,@args))
+       (http-drop-instance-by-oid `(http-test-drop-instance-by-oid ,@args))
+       (otherwise (error "The test procedure for ~S is undefined." (car form))))))
+
 ; --- Via HTTP --------------------------------------------------
 
 (defun http-regist (args)
@@ -181,35 +197,89 @@
       t
       (error "Logout failed")))
 
-;(defun http-make-instance (class &rest args)
-;  (let* ((uri (funcall *edit-page-uri* 
-;  )
-;
-;(defun http-test-make-instance (&rest args)
-;  )
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun slots=* (instance alist)
+    (loop for a in alist
+          unless (equal (funcall (car a) instance) (cdr a))
+            return nil
+          finally (return t))))
+
+(defun http-edit-instance (class oid values)
+  (let* ((uri (funcall *edit-page-uri* class oid))
+         (cid (cid* (http-request* uri))))
+    (http-request* uri :method :post :parameters
+                   (append values (list (cons "cid" cid))))))
+
+(defmacro http-make-instance (class &rest initargs)
+  "Makes an instance of the CLASS with INITARGS via http and returns
+ an oid of the created instance."
+  (with-gensyms (instance created-time values)
+    `(let ((,created-time (get-universal-time))
+           (,values (loop for (k v) on ',initargs by #'cddr
+                          collect (cons (->symbol k) v))))
+       (http-edit-instance
+        ,class nil (loop for v in ,values collect
+                         (cons (slot-id** ,class (car v)) (cdr v))))
+       (let ((,instance (get-instances-by-class ,class)))
+         (loop for i in (sort ,instance #'> :key 'created-at)
+               while (>= (created-at i) ,created-time)
+               when (slots=* i ,values) return (oid i))))))
+
+(defmacro http-test-make-instance (class &rest initargs)
+  "Executes `(http-make-instance ,CLASS ,@INITARGS) and check if
+ an instance was successfully created. This raises an error if the test
+ failed and returns an oid of the created instance otherwise."
+  `(progn
+     (aif (http-make-instance ,class ,@initargs)
+          it
+          (error "Making an instance failed"))))
+
+(defun http-update-instance (class oid values)
+  "Updates an instance of the CLASS associated with OID with VALUES
+ which must be a list of slots' symbol/value alist pairs via http.
+ This returns a string html and the instance."
+  (aif (get-instance-by-oid class oid)
+       (values (http-edit-instance class oid values) it)
+       (error "There is no object associated with the oid '~D'" oid)))
+
+(defun http-test-update-instance (class oid values)
+  "Executes (http-update-instance CLASS OID VALUES) and check if
+ the instance was successfully updated. This raises an error if the
+ tests failed and returns true otherwise."
+  (multiple-value-bind (html instance)
+      (http-update-instance
+       class oid (mapcar #'(lambda (x)
+                             (cons (slot-id** class (car x)) (cdr x)))
+                         values))
+    (if (slots=* instance values)
+        t
+        (error "Updating an instance failed: ~S"
+               (get-error-msgs (parse* html))))))
 
 (defun http-get-instance-by-oid (class oid)
-  "Gets and returns a list of slots' symbol/value alist pairs like
+  "Returns a list of slots' symbol/value alist pairs like
  '((slot-symbol . slot-value) ...) of the CLASS INSTANCE specified by OID
- via http"
-  (if (get-instance-by-oid class oid)
-      (without-indenting
-        (without-rewriting-urls
-          (let* ((uri  (funcall *show-page-uri* class oid))
-                 (page (parse* (http-request* uri))))
-            (loop for s in (get-excluded-slots class uri)
-                  as id = (web4r::slot-id* class s)
-                  as e  = (get-element-by-id id page)
-                  when e collect (cons (slot-symbol s) e)))))
-      (error "There is no object associated with the oid '~D'" oid)))
+ via http and the instance."
+  (aif (get-instance-by-oid class oid)
+       (without-indenting
+         (without-rewriting-urls
+           (let* ((uri  (funcall *show-page-uri* class oid))
+                  (page (parse* (http-request* uri))))
+             (values (loop for s in (get-excluded-slots class uri)
+                           as id = (web4r::slot-id* class s)
+                           as e  = (get-element-by-id id page)
+                           when e collect (cons (slot-symbol s) e))
+                     it))))
+       (error "There is no object associated with the oid '~D'" oid)))
 
 (defun http-test-get-instance-by-oid (class oid)
   "Executes (http-get-instance-by-oid CLASS OID) and check if the values
  are correct ones. This raises an error if the tests failed and returns true
  otherwise."
   (without-indenting
-    (let ((ins (get-instance-by-oid class oid)))
-      (loop for a in (http-get-instance-by-oid class oid)
+    (multiple-value-bind (values ins)
+        (http-get-instance-by-oid class oid)
+      (loop for a in values
             as slot = (get-slot class (car a))
             as ans  = (aand (slot-display-value ins slot)
                             (case (slot-input slot)
