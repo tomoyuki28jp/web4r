@@ -184,7 +184,7 @@ sml generates relatively beautiful indented codes.
     ;   
     ;   </body>
 
-If you don't need the indentations, sets \*indent-mode\* nil.
+If you don't need the indentations, set \*indent-mode\* nil.
 
     (let ((*indent-mode* nil))
       [body [table (dotimes (x 3) [tr [td x]])]])
