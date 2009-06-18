@@ -21,6 +21,8 @@
                           (:file "valid")
                           (:file "pager")
                           (:file "pclass")
+                          (:file "pages")
                           (:file "user")
                           (:file "image")
+                          (:file "http")
                           ))))
