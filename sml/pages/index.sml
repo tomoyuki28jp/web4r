@@ -15,24 +15,24 @@
                                             per-page))
                         [table :id "table_list"
                           [thead :class (concat (order-slot-id class) " " (list-order))
-                           [tr (loop for s in slots
-                                     as id = (slot-id s)
-                                     as order = (order-param id)
-                                     if (indexed-slot-p class (slot-symbol s))
-                                          do [th :id id :class "sort"
-                                                 [a :href (concat "?slot=" id
-                                                                  "&order=" order
-                                                                  per-page)
-                                                    (slot-label s)]
-                                                 [img :src
-                                                      (if (string= id (get-parameter "slot"))
-                                                          (if (string= (list-order) "asc")
-                                                              "/images/order_asc.gif"
-                                                              "/images/order_desc.gif")
-                                                          "/images/order_no.gif")
-                                                      :alt "order"]]
-                                     else do [th (slot-label s)]
-                                     finally (dotimes (x 3) [th (safe "&nbsp;")]))]]
+                           [tr (dolist (s slots)
+                                 (let* ((id    (slot-id s))
+                                        (order (order-param id)))
+                                   (if (indexed-slot-p class (slot-symbol s))
+                                       [th :id id :class "sort"
+                                           [a :href (concat "?slot=" id
+                                                            "&order=" order
+                                                            per-page)
+                                              (slot-label s)]
+                                           [img :src
+                                                (if (string= id (get-parameter "slot"))
+                                                    (if (string= (list-order) "asc")
+                                                        "/images/order_asc.gif"
+                                                        "/images/order_desc.gif")
+                                                    "/images/order_no.gif")
+                                                :alt "order"]]
+                                       [th (slot-label s)])))
+                               (dotimes (x 3) [th (safe "&nbsp;")])]]
                           [tbody
                            (load-sml-path "pages/list.sml" #.*web4r-package*)]])
                     [p "There is no " cname])
