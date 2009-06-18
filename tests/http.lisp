@@ -30,7 +30,7 @@
   
   (defpage blog (:default)
     (multiple-value-bind (items pager slots)
-        (web4r::items-per-page 'blog 'updated-at)
+        (items-per-page 'blog 'updated-at)
       (html "Listing blogs"
             (msgs)
             (page-links pager)

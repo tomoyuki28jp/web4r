@@ -151,6 +151,7 @@
            :delete-page
            :edit/cont
            :per-page
+           :items-per-page
            :item-list
            ; --- user.lisp ---
            :login-msg

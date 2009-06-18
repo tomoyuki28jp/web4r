@@ -186,6 +186,11 @@
             "&links_per_page=" links-per-page)))
 
 (defun items-per-page (class index &key items-per-page links-per-page)
+  "Returns multiple values, a list of the persistent CLASS instances
+ for the current page sorted by the INDEX slot, an instances of the
+ pager class and excluded slots for the current page. You can set a
+ number to display items per page by the ITEMS-PER-PAGE and a number
+ to display links per page by the LINKS-PER-PAGE argument."
   (let* ((index (order-slot-symbol class index))
          (slots (get-excluded-slots class))
          (type  (if (member index '(updated-at created-at))
