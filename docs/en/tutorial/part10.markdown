@@ -83,7 +83,7 @@ Debug mode
 -----------
 [debug-mode-on](http://web4r.org/en/api#debug-mode-on) turns debug mode on and [debug-mode-off](http://web4r.org/en/api#debug-mode-off) turns it off.  
 
-Debug mode does two thins.
+Debug mode does two things when lisp errors happen.
 
 1. Show lisp errors as html via HTTP
 2. Write lisp errors and its back traces to [\*debug-log-file\*](http://web4r.org/en/api#*debug-log-file*)
