@@ -4,7 +4,7 @@ This part of a tutorial will show how to use [sml](http://github.com/tomoyuki28j
 
 Download, Install and Use
 --------------------------
-web4r depends on sml, so if you have already installed web4r, you should already have installed sml. Otherwise you can download sml from [this page](https://github.com/tomoyuki28jp/sml).
+web4r depends on sml, so if you have already installed web4r, you should already have installed sml. Otherwise download sml from [this page](https://github.com/tomoyuki28jp/sml).
 
 To use sml, run this codes:
 
@@ -113,7 +113,7 @@ Escaped objects won't be double escaped.
 
 Separating sml codes into another file
 ---------------------------------------
-The load-sml macro expands sml codes written in another file inside a lisp code at compile time, so you don't need to assign any variable.
+The load-sml macro expands sml codes written in another file inside a lisp code at compile time.
 
 Examples:  
 */tmp/template.sml*
