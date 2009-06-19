@@ -1,5 +1,5 @@
-Tutorial Part 9. Make an application without genpages macro: blog example
-==========================================================================
+Tutorial Part 9. Making an application without genpages macro: blog example
+============================================================================
 
 Design policy of this example application
 ------------------------------------------
