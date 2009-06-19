@@ -133,6 +133,8 @@ load-smlマクロは別ファイルに記述されたsmlコードをコンパイ
 
 テンプレートの定義とエレメントの操作
 -------------------------------------
+
+### Lispコード内で完結する方法
 define-templateマクロを利用してテンプレートを定義することが出来ます。
 
     (define-template :template1
@@ -159,6 +161,34 @@ define-templateマクロを利用してテンプレートを定義すること�
     ;           <p>ok!</p>
     ;       </body>
     ;   </html>
+
+### テンプレートファイルを分離する方法
+
+**/tmp/template.sml**
+
+    [html :xmlns "http://www.w3.org/1999/xhtml" :lang "en"
+          [head [meta :http-equiv "content-type" :content "text/html; charset=utf-8" /]
+                [title "Default template title"]]
+          [body [p "Default template body"]]]
+
+**use.lisp**
+
+    (with-sml-file "/tmp/template.sml"
+      (replace title [title "new title"]) ; タイトルを変更
+      (replace body  [body "new body"]))  ; bodyを変更
+
+    ;=> <?xml version="1.0" encoding="UTF-8"?>
+    ;   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    ;   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    ;   <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    ;       <head>
+    ;           <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    ;           <title>new title</title>
+    ;       </head>
+    ;       <body>new body</body>
+    ;   </html>
+
+*with-sml-fileマクロはsmlファイル内でも利用可能です*
 
 インデント
 -----------

@@ -132,14 +132,16 @@ Examples:
 
 Defining a template and manipulating the elements
 --------------------------------------------------
-You can define a template with the define-template macro.
+
+### The way to do it inside lisp programs
+Define a template with the define-template macro.
 
     (define-template :template1
         [html [head [title "Default title"]]
               [body [p :id "id1" "p1"]
                     [p :class "class1" "p2"]]])
 
-You can select a template element by a selector and manipulate it with a manipulator. The syntax of selector is tag, #id and .class. Manipulators are append, replace and remove.
+Select a template element by a selector and manipulate it with a manipulator. The syntax of selector is tag, #id and .class. Manipulators are append, replace and remove.
     
     (with-template (:template1)
       (replace title [title "new title"]) ; replace the title
@@ -158,6 +160,35 @@ You can select a template element by a selector and manipulate it with a manipul
     ;           <p>ok!</p>
     ;       </body>
     ;   </html>
+
+
+### The way to separate a template file
+
+**/tmp/template.sml**
+
+    [html :xmlns "http://www.w3.org/1999/xhtml" :lang "en"
+          [head [meta :http-equiv "content-type" :content "text/html; charset=utf-8" /]
+                [title "Default template title"]]
+          [body [p "Default template body"]]]
+
+**use.lisp**
+
+    (with-sml-file "/tmp/template.sml"
+      (replace title [title "new title"]) ; replace the title
+      (replace body  [body "new body"]))  ; replace the body
+
+    ;=> <?xml version="1.0" encoding="UTF-8"?>
+    ;   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    ;   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    ;   <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    ;       <head>
+    ;           <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    ;           <title>new title</title>
+    ;       </head>
+    ;       <body>new body</body>
+    ;   </html>
+
+*You can use with-sml-file macro in a sml file*
 
 Indentations
 -------------
