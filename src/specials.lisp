@@ -184,30 +184,41 @@
 
 ; --- used in http.lisp -----------------------------------------
 
-(defvar *cookie-jar* nil)
+(defvar *cookie-jar* nil
+  "An instance of the 'drakma:cookie-jar class used when we make an http
+ request inside http-* functions or macros.")
 
-(defvar *host-uri* "http://localhost:8080/")
+(defvar *host-uri* "http://localhost:8080/"
+  "A host uri used when we make an http request inside http-* functions
+ or macros.")
 
 (defvar *regist-page-uri*
-  #'(lambda () (concat *host-uri* "regist")))
+  #'(lambda () (concat *host-uri* "regist"))
+  "A procedure which returns a uri of a user registration page")
 
 (defvar *loggedin-page-uri*
-  #'(lambda () (concat *host-uri* "user/is/loggedin")))
+  #'(lambda () (concat *host-uri* "user/is/loggedin"))
+  "A procedure which returns a uri of a logged-in checking page")
 
 (defvar *login-page-uri*
-  #'(lambda () (concat *host-uri* "login")))
+  #'(lambda () (concat *host-uri* "login"))
+  "A procedure which returns a uri of a login page")
 
 (defvar *logout-page-uri*
-  #'(lambda () (concat *host-uri* "logout")))
+  #'(lambda () (concat *host-uri* "logout"))
+  "A procedure which returns a uri of a logout page")
 
 (defvar *edit-page-uri*
   #'(lambda (class &optional oid)
-      (concat *host-uri* (join "/" (->string-down class ) "edit" oid) "/")))
+      (concat *host-uri* (join "/" (->string-down class ) "edit" oid) "/"))
+  "A procedure which returns a uri of a edit page")
 
 (defvar *show-page-uri*
   #'(lambda (class oid)
-      (concat *host-uri* (join "/" (->string-down class ) "show" oid) "/")))
+      (concat *host-uri* (join "/" (->string-down class ) "show" oid) "/"))
+  "A procedure which returns a uri of a show page")
 
 (defvar *delete-page-uri*
   #'(lambda (class oid)
-      (concat *host-uri* (join "/" (->string-down class ) "delete" oid) "/")))
+      (concat *host-uri* (join "/" (->string-down class ) "delete" oid) "/"))
+  "A procedure which returns a uri of a delete page")
