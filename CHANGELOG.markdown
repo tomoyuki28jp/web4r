@@ -1,6 +1,17 @@
 Change Log
 ====================
 
+Version 0.2.5 (2009-06-20)
+----------------------------
+- Added tutorial part 8, 9 and 10
+- Wrote integration tests with using http-* functions and macros
+- Added src/http.lisp: http-* functions and macros
+- Updated the version of sml to use from v0.1.4 to v0.1.5
+- Added hide-slot-p
+- Wrote more unit tests
+- Bug fixes (see git log for detail)
+- Updated documentations and tutorial
+
 Version 0.2.4 (2009-05-31)
 ----------------------------
 - Fixed to redirect to the login-page instead of regist-page when users access an auth page
