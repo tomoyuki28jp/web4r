@@ -39,7 +39,7 @@ Examples:
                    (a/cont [p "You said: " foo] "click here"))
         [input :type "text" :name "foo" /]))
 
-    ; => The result is the same with the previous example.
+    ; => Generated pages are the same with the previous example.
 
 last-post
 ----------
@@ -57,4 +57,4 @@ Examples:
     ;                (a/cont [p "You said: " #:G1152] "click here"))
     ;     [input :type "text" :name "foo" /]))
 
-    ; => The result is the same with the previous example.
+    ; => Generated pages are the same with the previous example.
