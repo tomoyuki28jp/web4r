@@ -1,16 +1,16 @@
 Tutorial Part 3. Defining a page
 =================================
-[defpage](http://web4r.org/en/api#defpage) is a macro to define a new page. Users can visit a defined page by accessing an uri like 'http://localhost:8080/PAGE'.
+[defpage](http://web4r.org/en/api#defpage) is a macro to define a new page. Users can visit a defined page by accessing an uri like 'http://localhost:8080/PATHS'.
 
 Syntax:
 
-    defpage page ([path ...] [:get garg ...] [:post parg ...]
+    defpage paths ([parg ...] [:get garg ...] [:post parg ...]
                   :auth :redirect uri :default) body
 
 Arguments and Values:
 
-    page---a name of a page
-    path---an uri path
+    paths---a base path of a page
+    parg---a relative uri path from the base PATHS
     garg---a symbol name of a get parameter
     parg---a symbol name of a post parameter
     :auth---if :auth is supplied and the current user hasn't logged in,
@@ -50,7 +50,7 @@ Example2:
     ; wget "http://localhost:8080/hello?name=tomo" => '<p>Hello, tomo</p>'
 
 Example3:  
-*A name of a page can be multiple paths, and in that case, a path becomes a relative path from the base paths.*
+*PATHS can be multiple paths. In that case, PARG becomes a relative path from the base PATHS.*
 
     (eval-when (:compile-toplevel :load-toplevel :execute)
       (asdf:oos 'asdf:load-op :web4r))
