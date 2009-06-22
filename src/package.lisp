@@ -184,8 +184,6 @@
            :image-path
            :thumbnail
            :thumbnail-uri
-           ; --- inflector ---
-           :pluralize
            ; --- http ---
            :with-new-cookie
            :test
@@ -203,7 +201,8 @@
            :http-test-get-instance-by-oid
            :http-drop-instance-by-oid
            :http-test-drop-instance-by-oid
-           )
+           ; --- inflector ---
+           :pluralize)
   (:shadow :defpclass))
 
 (in-package :web4r)
