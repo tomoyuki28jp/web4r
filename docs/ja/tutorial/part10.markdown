@@ -84,5 +84,4 @@ genpagesマクロで作成したアプリケーションのテスト
 デバッグモードはエラー発生時に次の２つのことを行います。
 
 1. Lispエラーの内容をHTTP経由でHTMLとして表示
-2. Lispエラーとそのバックトレースを[\*debug-log-file\*](http://web4r.org/en/api#*debug-log-file*)記録
-
+2. Lispエラーとそのバックトレースを[\*debug-log-file\*](http://web4r.org/en/api#*debug-log-file*)に記録
