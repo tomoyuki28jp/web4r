@@ -6,7 +6,7 @@ userという名前の永続化クラスがweb4r/src/user.lispで定義されて
       ((id   :format :alnum :length (4 12) :unique t)
        (pass :format :alnum :length (4 12) :input :password)))
 
-ユーザーがuserクラスを継承した際、ログイン、ログアウト、新規ユーザー登録のページが自動生成されます。
+開発者がuserクラスを継承した際、ログイン、ログアウト、新規ユーザー登録のページが自動生成されます。
 
     (require :web4r)
     (use-package :web4r)
@@ -20,7 +20,7 @@ userという名前の永続化クラスがweb4r/src/user.lispで定義されて
 [![login-page](http://web4r.org/login-thumbnail.png)](http://web4r.org/login.png)
 [![regist-page](http://web4r.org/regist-thumbnail.png)](http://web4r.org/regist.png)
 
-ユーザーが[defpage](http://web4r.org/en/api#defpage)の引数に:authを渡してページを定義して、尚且つユーザーがログインしていない場合、ユーザーはログインページにリダイレクトされます。
+ログインしていないユーザーが:auth引数と共に定義されたページにアクセスした場合、そのユーザーはログインページにリダイレクトされます。
 
     (defpage test (:auth)
       [p "会員専用ページ"])

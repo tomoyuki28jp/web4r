@@ -1,12 +1,12 @@
 Tutorial Part 7. Authentication
 ================================
-The persistent class named user is defined in web4r/src/user.lisp.
+A persistent class named user is defined in web4r/src/user.lisp.
 
     (defpclass user ()
       ((id   :format :alnum :length (4 12) :unique t)
        (pass :format :alnum :length (4 12) :input :password)))
 
-When a user extends the user persistent class, login, logout and regist pages are automatically generated.
+When a developer extends the user persistent class, login, logout and regist pages are automatically generated.
 
     (require :web4r)
     (use-package :web4r)
@@ -20,7 +20,7 @@ When a user extends the user persistent class, login, logout and regist pages ar
 [![login-page](http://web4r.org/login-thumbnail.png)](http://web4r.org/login.png)
 [![regist-page](http://web4r.org/regist-thumbnail.png)](http://web4r.org/regist.png)
 
-If a user supplies :auth as an argument of [defpage](http://web4r.org/en/api#defpage) and the user hasn't logged in yet, redirects the user to the login page.
+When a user access to a page defined with the :auth argument and the user hasn't logged in yet, the user will be redirected to the login page.
 
     (defpage test (:auth)
       [p "For login users only"])
