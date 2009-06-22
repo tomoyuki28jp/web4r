@@ -149,15 +149,15 @@
                (progn ,@body)))))))
 
 (defmacro defpage (page (&rest args) &rest body)
-  "Defines a new page named PAGE. Users can visit a defined page by accessing
- an uri like 'http://yourhost/PAGE'.
+  "Defines a new page for PATHS. Users can visit a defined page by accessing
+ an uri like 'http://yourhost/PATHS'.
 
  Syntax:
-  defpage page ([path ...] [:get garg ...] [:post parg ...]
-                :auth :redirect uri :default) body
+  defpage paths ([parg ...] [:get garg ...] [:post parg ...]
+                 :auth :redirect uri :default) body
  Arguments and Values:
-  page---a name of a page
-  path---an uri path
+  paths---a base path of a page
+  parg---a relative uri path from the base PATHS
   garg---a symbol name of a get parameter
   parg---a symbol name of a post parameter
   :auth---if :auth is supplied and the current user hasn't logged in,
