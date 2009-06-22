@@ -12,7 +12,7 @@ Starting and Stopping your HTTP server
     (defparameter *srv* (start-server)) ; starts your server
     (stop-server  *srv*) ; stops your server
 
-start-server and stop-server are wrapper functions defined in the web4r package for hunchentoot:start and hunchentoot:stop. The default port is 8080. See [web4r:start-server](api#start-server) and [hunchentoot:acceptor](http://www.weitz.de/hunchentoot/#acceptors) for detail.
+web4r:start-server and web4r:stop-server are wrapper functions for hunchentoot:start and hunchentoot:stop. If you start your server by web4r:start-server, the default port is 8080. See [web4r:start-server](api#start-server) and [hunchentoot:acceptor](http://www.weitz.de/hunchentoot/#acceptors) for detail.
 
 Performance
 ------------
