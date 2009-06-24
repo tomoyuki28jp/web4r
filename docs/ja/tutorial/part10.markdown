@@ -19,6 +19,8 @@ HTTP経由でアプリケーションをテストをする為の関数とマク�
 - [http-drop-instance-by-oid](http://web4r.org/en/api#http-drop-instance-by-oid): HTTP経由でoidからインスタンスを削除
 - [http-test-drop-instance-by-oid](http://web4r.org/en/api#http-test-drop-instance-by-oid): http-drop-instance-by-oidを実行し、結果をテスト
 
+*※ http-get-instance-by-oidを利用するには、id属性にslot idを指定したタグでslotの値を囲む必要があります。slot idは[slot-id](http://web4r.org/en/api#slot-id)にて取得可能です。*
+
 Testマクロ
 -----------
 - (test (http-regist &rest args))は`(http-test-regist ,@args))と等価。

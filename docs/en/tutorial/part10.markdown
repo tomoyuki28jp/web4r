@@ -19,6 +19,8 @@ Functions and macros to test your application via HTTP
 - [http-drop-instance-by-oid](http://web4r.org/en/api#http-drop-instance-by-oid): Drops an instance by oid via HTTP.
 - [http-test-drop-instance-by-oid](http://web4r.org/en/api#http-test-drop-instance-by-oid): Executes http-drop-instance-by-oid and test the result.
 
+*Note: To use http-get-instance-by-oid, a slot value must be surrounded by a tag with an id attribute whose value is a slot id. You can get the slot id by [slot-id](http://web4r.org/en/api#slot-id).*
+
 Test macro
 -----------
 - (test (http-regist &rest args)) is equivalent to `(http-test-regist ,@args))
