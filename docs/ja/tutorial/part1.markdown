@@ -42,8 +42,8 @@ Attributes (属性)
     [p (attr "id" "id1") (attr "class" "class1") "value"]
     [p (attr :id "id1" :class "class1") "value"]
     
-Markup language (マークアップ言語)
------------------------------------
+生成するマークアップ言語
+-------------------------
 生成するマークアップ言語は\*markup-lang\*の値によって変更をすることができます。有効な\*markup-lang\*の値は:xhtml, :html, :xmlのいずれかであり、デフォルトは:xhtmlです。
 
 例:
