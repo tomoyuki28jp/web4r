@@ -1,5 +1,5 @@
-Tutorial Part 2. HTTP Server
-=============================
+Tutorial Part 2. HTTPサーバー
+==============================
 Version 0.1.0からデフォルトHTTPサーバーは[Hunchentoot](http://www.weitz.de/hunchentoot/)になりました。
 
 HTTPサーバーの起動と終了
