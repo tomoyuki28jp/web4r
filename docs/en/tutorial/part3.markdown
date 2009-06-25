@@ -1,6 +1,6 @@
-Tutorial Part 3. Defining a page
+Tutorial Part 3. Defining a web page
 =================================
-[defpage](http://web4r.org/en/api#defpage) is a macro to define a new page. Users can visit a defined page by accessing an uri like 'http://localhost:8080/PATHS'.
+[defpage](http://web4r.org/en/api#defpage) is a macro to define a web page. Users can visit a defined web page by accessing an uri like 'http://localhost:8080/PATHS'.
 
 Syntax:
 
@@ -9,7 +9,7 @@ Syntax:
 
 Arguments and Values:
 
-    paths---a base path of a page
+    paths---a base path of a web page
     parg---a relative uri path from the base PATHS
     garg---a symbol name of a get parameter
     parg---a symbol name of a post parameter

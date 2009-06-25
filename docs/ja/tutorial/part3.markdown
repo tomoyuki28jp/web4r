@@ -1,6 +1,6 @@
-Tutorial Part 3. ページの定義
-==============================
-[defpage](http://web4r.org/en/api#defpage)はページを定義する為のマクロです。ユーザーは'http://localhost:8080/ページパス'のようなURLにアクセスをすることにより、定義済みページを呼び出すことが出来ます。
+Tutorial Part 3. webページの定義
+=================================
+[defpage](http://web4r.org/en/api#defpage)はwebページを定義する為のマクロです。ユーザーは'http://localhost:8080/ページパス'のようなURLにアクセスをすることにより、定義済みwebページを呼び出すことが出来ます。
 
 文法:
 
@@ -9,7 +9,7 @@ Tutorial Part 3. ページの定義
 
 引数と値:
 
-    paths---ページのベースパス
+    paths---webページのベースパス
     parg---ベースパスからの相対URIパス
     garg---getパラメーターのシンボル名
     parg---postパラメーターのシンボル名
