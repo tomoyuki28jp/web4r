@@ -30,7 +30,7 @@ form/cont
 
 page-lambda
 ------------
-[page-lambda](http://web4r.org/en/api#page-lambda)はページ手続きを生成します。page-lambdaはパスやパラメーター等を束縛する為に利用します。
+[page-lambda](http://web4r.org/en/api#page-lambda)はページ手続きを生成します。page-lambdaはパスやget/postパラメーターを束縛する為に利用します。
 
 例:
 

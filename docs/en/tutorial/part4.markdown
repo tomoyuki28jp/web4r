@@ -30,7 +30,7 @@ Examples:
 
 page-lambda
 ------------
-[page-lambda](http://web4r.org/en/api#page-lambda) creates a page precedence which is used to bound arguments.
+[page-lambda](http://web4r.org/en/api#page-lambda) creates a page precedence which is used to bound paths and get/post parameters.
 
 Examples:
 
