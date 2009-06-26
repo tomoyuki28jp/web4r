@@ -115,7 +115,8 @@ Separating sml codes into another file
 ---------------------------------------
 The load-sml macro expands sml codes written in another file inside a lisp code at compile time.
 
-Examples:  
+Examples:
+
 */tmp/template.sml*
 
     [p x]
