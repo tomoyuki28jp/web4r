@@ -2,6 +2,11 @@ Tutorial Part 4. Continuation Passing Style (CPS)
 ==================================================
 web4r provides a way to write web applications in continuation passing style.
 
+Why to write web applications in CPS
+-------------------------------------
+- Easy to write control flow
+- Enables us to use free variables captured by closure instead of the session object to save state
+
 a/cont
 -------
 [a/cont](http://web4r.org/en/api#a/cont) embeds continuation within a link node.
