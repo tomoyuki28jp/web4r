@@ -186,20 +186,12 @@
            :thumbnail-uri
            ; --- http ---
            :with-new-cookie
-           :test
-           :http-regist
            :http-test-regist
-           :http-login
            :http-test-login
-           :http-logout
            :http-test-logout
-           :http-make-instance
            :http-test-make-instance
-           :http-update-instance
            :http-test-update-instance
-           :http-get-instance-by-oid
            :http-test-get-instance-by-oid
-           :http-drop-instance-by-oid
            :http-test-drop-instance-by-oid
            ; --- inflector ---
            :pluralize)

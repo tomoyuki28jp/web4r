@@ -12,7 +12,7 @@
       (let ((oid (ignore-errors
                    (http-make-instance class :title "title1" :body "body1"))))
         (is-true (not (null oid)))
-        (is-true (web4r:test (http-get-instance-by-oid class oid)))
-        (is-true (web4r:test (http-update-instance
-                              class oid '((title . "title1c") (body . "body1c")))))
-        (is-true (web4r:test (http-drop-instance-by-oid class oid)))))))
+        (is-true (http-test-get-instance-by-oid class oid))
+        (is-true (http-test-update-instance
+                  class oid '((title . "title1c") (body . "body1c"))))
+        (is-true (http-test-drop-instance-by-oid class oid))))))

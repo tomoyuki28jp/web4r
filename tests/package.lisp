@@ -6,8 +6,7 @@
   (:shadowing-import-from
    :hunchentoot :*header-stream* :cookie-path :cookie-expires
    :cookie-domain :parameter-error :cookie-name :cookie-value)
-  (:shadowing-import-from :web4r :pass)
-  (:shadowing-import-from :fiveam :test))
+  (:shadowing-import-from :web4r :pass))
 
 (in-package :web4r-tests)
 

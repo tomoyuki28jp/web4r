@@ -86,16 +86,16 @@
         (id   "user1")
         (pass "pass1"))
     (with-new-cookie
-      (is-true (web4r:test (http-regist `((id    . ,id)
-                                          (pass  . ,pass)
-                                          (email . "1@1.com")
-                                          (blog-title . "user1's blog")))))
-      (is-true (web4r:test (http-login :id id :pass pass)))
+      (is-true (http-test-regist `((id    . ,id)
+                                   (pass  . ,pass)
+                                   (email . "1@1.com")
+                                   (blog-title . "user1's blog"))))
+      (is-true (http-test-login :id id :pass pass))
       (let ((oid (ignore-errors
-                   (http-make-instance class :title "title1" :body "body1"))))
+                   (http-test-make-instance class :title "title1" :body "body1"))))
         (is-true (not (null oid)))
-        (is-true (web4r:test (http-get-instance-by-oid class oid)))
-        (is-true (web4r:test (http-update-instance
-                        class oid '((title . "title1c") (body . "body1c")))))
-        (is-true (web4r:test (http-drop-instance-by-oid class oid))))
-      (is-true (web4r:test (http-logout))))))
+        (is-true (http-test-get-instance-by-oid class oid))
+        (is-true (http-test-update-instance
+                  class oid '((title . "title1c") (body . "body1c"))))
+        (is-true (http-test-drop-instance-by-oid class oid)))
+      (is-true (http-test-logout)))))

@@ -101,18 +101,6 @@
   `(let ((*cookie-jar* (make-instance 'drakma:cookie-jar)))
      ,@body))
 
- (defmacro test (form)
-   (let ((args (cdr form)))
-     (case (car form)
-       (http-regist               `(http-test-regist ,@args))
-       (http-login                `(http-test-login ,@args))
-       (http-logout               `(http-test-logout ,@args))
-       (http-make-instance        `(http-test-make-instance ,@args))
-       (http-update-instance      `(http-test-update-instance ,@args))
-       (http-get-instance-by-oid  `(http-test-get-instance-by-oid ,@args))
-       (http-drop-instance-by-oid `(http-test-drop-instance-by-oid ,@args))
-       (otherwise (error "The test procedure for ~S is undefined." (car form))))))
-
 ; --- Via HTTP --------------------------------------------------
 
 (defun http-regist (args)
