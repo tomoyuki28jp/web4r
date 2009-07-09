@@ -78,20 +78,18 @@
   (let* ((c (make-instance 'cookie-jar))
          (u (cont/uri (http-request (page-uri "test") :cookie-jar c))))
     (is-false (string= "ok" (http-request u)))
-    (is       (string= "ok" (http-request u :cookie-jar c)))
-    (is-false (string= "ok" (http-request u :cookie-jar c)))))
+    (is       (string= "ok" (http-request u :cookie-jar c)))))
 
 (test form/cont
   (defpage test ()
     (let ((v "ok"))
-      (form/cont (p v) "click here")))
+      (form/cont (p v))))
   (let* ((cookie (make-instance 'cookie-jar))
          (cid    (cid (http-request (page-uri "test") :cookie-jar cookie)))
          (args   (list *host-uri* :method :post :parameters `(("cid" . ,cid))))
          (args/c (append args `(:cookie-jar ,cookie))))
     (is-false (string= "ok" (apply #'http-request args)))
-    (is       (string= "ok" (apply #'http-request args/c)))
-    (is-false (string= "ok" (apply #'http-request args/c)))))
+    (is       (string= "ok" (apply #'http-request args/c)))))
 
 (test last-post
   (defpage test ()

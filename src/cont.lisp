@@ -90,17 +90,12 @@
       (dolist (cid cids) (destroy-cont cid))
       (remhash sid *sid->cid*))))
 
-(add-hook 'after-calling-cont #'destroy-cont)
-
 (defun call-cont (cid)
-  "Calls a continuation associated with the CID (continuation id). By default,
- this function destroys the continuation after calling it. If you want to leave
- it, run this code: (rem-hook 'after-calling-cont #'destroy-cont)."
+  "Calls a continuation associated with CID (continuation id)."
   (awhen (get-cont cid)
-    ; Without unwind-protect, destroy-cont and cont-gc won't be 
-    ; executed if we call hunchentoot:redirect inside a cont.
+    ; Without unwind-protect, cont-gc won't be executed
+    ; if we call hunchentoot:redirect inside a cont.
     (unwind-protect (funcall it)
-      (run-hook-with-args 'after-calling-cont cid)
       (when (= (random *cont-gc-probability*) 0)
         (bordeaux-threads:make-thread
          (lambda () (cont-gc)))))))
