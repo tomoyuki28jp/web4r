@@ -1,6 +1,13 @@
 Change Log
 ====================
 
+Version 0.2.6 (2009-07-09)
+----------------------------
+- Modified documentations
+- Fixed to not to destroy a continuation after calling it (for back buttons)
+- Removed the test macro
+- Fixed to not to export 'http-* except 'http-test-*
+
 Version 0.2.5 (2009-06-20)
 ----------------------------
 - Added tutorial part 8, 9 and 10
