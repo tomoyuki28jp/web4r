@@ -32,15 +32,15 @@ Attributes
 Keyword parameters or any parameters inside (attr ...) appears before values become attributes.
 
 Examples:
-
-    ; All of the codes below generate this (x)html:
-    ;=> <p id="id1" class="class1">value</p>
     
     [p :id "id1" :class "class1" "value"]
     [p (attr :id "id1") (attr :class "class1") "value"]
     [p (attr "id" "id1") (attr "class" "class1") "value"]
     [p (attr :id "id1" :class "class1") "value"]
-    
+
+    ; All of the sml codes above generate the same (x)html:
+    ;=> <p id="id1" class="class1">value</p>
+
 Markup language
 ----------------
 You can change the markup language to generate by the \*markup-lang\* special variable which must be either one of :xhtml, :html or :xml. The default markup language is :xhtml.

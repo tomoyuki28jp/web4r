@@ -33,15 +33,15 @@ Attributes (属性)
 キーワード引数、もしくは(attr ...)内のパラメーターがattributes(属性)になります。
 
 例:
-
-    ; 下記全てのコードは同じ(x)htmlを生成します
-    ;=> <p id="id1" class="class1">value</p>
     
     [p :id "id1" :class "class1" "value"]
     [p (attr :id "id1") (attr :class "class1") "value"]
     [p (attr "id" "id1") (attr "class" "class1") "value"]
     [p (attr :id "id1" :class "class1") "value"]
-    
+
+    ; 上記全てのsmlコードは同じ(x)htmlを生成します
+    ;=> <p id="id1" class="class1">value</p>
+
 生成するマークアップ言語
 -------------------------
 生成するマークアップ言語は\*markup-lang\*の値によって変更をすることができます。有効な\*markup-lang\*の値は:xhtml, :html, :xmlのいずれかであり、デフォルトは:xhtmlです。
