@@ -24,14 +24,21 @@ form/cont
 *- To upload files, use [multipart-form/cont](http://web4r.org/en/api#multipart-form/cont) instead.*  
 *- form/cont and multipart-form/cont inserts a submit button if there isn't one.*
 
-Examples:
+Example1:
+
+    (defpage test ()
+      (form/cont [p "2nd page!"]))
+
+![cps2](http://web4r.org/cps2.png)
+
+Example2:
 
     (defpage test ()
       (form/cont (let ((foo (hunchentoot:post-parameter "foo")))
                    (a/cont [p "You said: " foo] "click here"))
         [input :type "text" :name "foo" /]))
 
-![cps2](http://web4r.org/cps2.png)
+![cps3](http://web4r.org/cps3.png)
 
 page-lambda
 ------------
