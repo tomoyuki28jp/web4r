@@ -43,13 +43,13 @@ genpagesマクロで作成したアプリケーションのテスト
           (http-test-update-instance class oid '((title . "title1c") (body . "body1c")))
           (http-test-drop-instance-by-oid class oid))))
 
-[Tutorial Part 9](http://web4r.org/en/tutorial9)で作成したアプリケーションのテスト
+[Tutorial Part 9](http://web4r.org/ja/tutorial9)で作成した認証付きblogアプリケーションのテスト
 -----------------------------------------------------------------------------------
 ### テストコード
 
     (let ((class 'blog)
-          (id   "user1")
-          (pass "pass1"))
+          (id    "user1")
+          (pass  "pass1"))
       (with-new-cookie
         (http-test-regist `((id    . ,id)
                             (pass  . ,pass)
