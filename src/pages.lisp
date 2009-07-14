@@ -45,7 +45,7 @@
           (per-page (param-per-page* ,items-per-page ,links-per-page)))
      (declare (ignorable web4r::maxlength web4r::per-page))
      (multiple-value-bind (items pager slots)
-         (items-per-page ,class ,index-slot
+         (items-per-page ,class ',index-slot
                         :items-per-page ,items-per-page
                         :links-per-page ,links-per-page)
        (load-sml (or ,sml (sml-path "pages/index.sml"))
