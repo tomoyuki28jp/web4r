@@ -151,7 +151,7 @@
  redirects the user to the REDIRECT-URI."
   (if (login-user)
       (redirect/msgs redirect-uri (login-msg :already-logged-in))
-      (edit-page (user-class) :redirect-uri redirect-uri)))
+      (edit-page (user-class) nil :redirect-uri redirect-uri)))
 
 (defun owner-p (class slot oid)
   "Returns true if the value of the SLOT in the CLASS specified

@@ -17,7 +17,7 @@
      (defpage ,(join "/" class 'show) (oid)
        (show-page ',class oid :sml ,show-sml))
      (defpage ,(join "/" class 'edit) (oid)
-       (edit-page ',class :oid oid :sml ,edit-sml))
+       (edit-page ',class oid :sml ,edit-sml))
      (defpage ,(join "/" class 'delete) (oid)
        (delete-page ',class oid))
      (defpage ,(join "/" 'ajax class 'unique) (oid)
@@ -60,7 +60,7 @@
      (load-sml (or ,sml (sml-path "pages/show.sml"))
                ,*web4r-package*)))
 
-(defmacro edit-page (class &key oid slot-values redirect-uri sml)
+(defmacro edit-page (class oid &key slot-values redirect-uri sml)
   "Displays an edit form for an instance specified by the OID in the CLASS.
  You can specify slot values by the SLOT-VALUES argument which must be an alist
  of a slot symbol/value paris. Users will be redirected to the REDIRECT-URI

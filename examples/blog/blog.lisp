@@ -45,7 +45,7 @@
 
 (defpage blog/edit (oid :auth)
   (when oid (blog-owner-check oid))
-  (edit-page 'blog-post :oid oid :slot-values `((user-oid . ,(login-user-oid)))
+  (edit-page 'blog-post oid :slot-values `((user-oid . ,(login-user-oid)))
              :redirect-uri (page-uri "blog" "index" (login-user-id))))
 
 (defpage blog/delete (oid :auth)
