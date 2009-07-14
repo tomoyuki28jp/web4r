@@ -11,23 +11,27 @@
  page by the LINKS-PER-PAGE argument."
   `(progn
      (defpage ,class (:get (slot ,index-slot))
-       (index-page ',class :index-slot slot :sml ,index-sml
+       (index-page ',class :index-slot slot
+                   :sml (or ,index-sml (sml-path "genpages/index.sml"))
                    :items-per-page ,items-per-page
                    :links-per-page ,links-per-page))
      (defpage ,(join "/" class 'show) (oid)
-       (show-page ',class oid :sml ,show-sml))
+       (show-page ',class oid
+                  :sml (or ,show-sml (sml-path "genpages/show.sml"))))
      (defpage ,(join "/" class 'edit) (oid)
-       (edit-page ',class oid :sml ,edit-sml))
+       (edit-page ',class oid
+                  :sml (or ,edit-sml (sml-path "genpages/edit.sml"))))
      (defpage ,(join "/" class 'delete) (oid)
        (delete-page ',class oid))
      (defpage ,(join "/" 'ajax class 'unique) (oid)
        (p (unique-p* ',class (get-parameters*) oid)))
      (defpage ,(join "/" 'ajax class 'list) (:get slot)
-       (item-list ',class :index-slot slot))
+       (item-list ',class :index-slot slot
+                  :sml (sml-path "genpages/list.sml")))
      (defpage ,(join "/" 'ajax class 'delete) (oid)
        (p (drop-instance-by-oid* ',class oid)))))
 
-(defmacro index-page (class &key (index-slot 'updated-at) (maxlength 20)
+(defmacro index-page (class &key index-slot (maxlength 20)
                       (items-per-page *items-per-page*)
                       (links-per-page *links-per-page*) plural sml)
   "Displays a list of the CLASS instances for the current page as (x)html order
@@ -45,7 +49,7 @@
           (per-page (param-per-page* ,items-per-page ,links-per-page)))
      (declare (ignorable web4r::maxlength web4r::per-page))
      (multiple-value-bind (items pager slots)
-         (items-per-page ,class ',index-slot
+         (items-per-page ,class ,index-slot
                         :items-per-page ,items-per-page
                         :links-per-page ,links-per-page)
        (load-sml (or ,sml (sml-path "pages/index.sml"))
@@ -185,13 +189,14 @@
     (concat "&items_per_page=" items-per-page
             "&links_per_page=" links-per-page)))
 
-(defun items-per-page (class index &key items-per-page links-per-page)
+(defun items-per-page (class &optional (index 'updated-at)
+                       &key items-per-page links-per-page)
   "Returns multiple values, a list of the persistent CLASS instances
  for the current page sorted by the INDEX slot, an instances of the
  pager class and excluded slots for the current page. You can set a
  number to display items per page by the ITEMS-PER-PAGE and a number
  to display links per page by the LINKS-PER-PAGE argument."
-  (let* ((index (order-slot-symbol class index))
+  (let* ((index (order-slot-symbol class (or index 'updated-at)))
          (slots (get-excluded-slots class))
          (type  (if (member index '(updated-at created-at))
                     'integer
