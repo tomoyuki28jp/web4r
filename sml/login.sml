@@ -15,4 +15,5 @@ $(document).ready(function() {
                   [h1 "Login"]
                   (msgs)
                   (form-for/cont (login/cont redirect-uri)
-                    :class 'user :submit "login")]))
+                    :class 'user :submit "login")
+                  [a :href (page-uri "regist") "Sign up"]]))
