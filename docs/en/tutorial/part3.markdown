@@ -5,7 +5,7 @@ Tutorial Part 3. Defining a web page
 Syntax:
 
     defpage paths ([parg ...] [:get garg ...] [:post parg ...]
-                  :auth :redirect uri :default) body
+                  :auth :default :redirect redirect) body
 
 Arguments and Values:
 
@@ -15,8 +15,8 @@ Arguments and Values:
     parg---a symbol name of a post parameter
     :auth---if :auth is supplied and the current user hasn't logged in,
             redirects the user to a login page
-    uri---an uri to redirect users after logging in
     :default---if :default is supplied, the page procedure is set to *default-handler*
+    redirect---an uri to redirect users after logging in
     body---a form
 
 Example1:  

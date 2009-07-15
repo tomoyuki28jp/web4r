@@ -5,7 +5,7 @@ Tutorial Part 3. webページの定義
 文法:
 
     defpage paths ([parg ...] [:get garg ...] [:post parg ...]
-                   :auth :redirect uri :default) body
+                   :auth :default :redirect redirect) body
 
 引数と値:
 
@@ -14,8 +14,8 @@ Tutorial Part 3. webページの定義
     garg---getパラメーターのシンボル名
     parg---postパラメーターのシンボル名
     :auth---:authが引数で渡されて、ユーザーがログインしていない場合、ユーザーはログインページにリダイレクトされます
-    uri---ユーザーのログイン後のリダイレクト先URI
     :default---:defaultが引数で渡された場合、現在のページ手続きが*default-handler*にセットされます
+    redirect---ユーザーのログイン後のリダイレクト先URI
     body---フォーム
 
 例1:  

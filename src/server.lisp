@@ -114,14 +114,15 @@
   "Creates a page procedure.
 
  Syntax:
-  page-lambda ([path ...] [:get garg ...] [:post parg ...] :auth :redirect uri) body
+  page-lambda ([path ...] [:get garg ...] [:post parg ...] :auth
+                 :redirect redirect) body
  Arguments and Values:
   path---an uri path
   garg---a symbol name of a get parameter
   parg---a symbol name of a post parameter
   :auth---if :auth is supplied and the current user hasn't logged in,
           redirects the user to the login page
-  uri---an uri to redirect users after logging in
+  redirect---an uri to redirect users after logging in
   body---a form
  Examples:
   (defpage said ()
@@ -154,7 +155,7 @@
 
  Syntax:
   defpage paths ([parg ...] [:get garg ...] [:post parg ...]
-                 :auth :redirect uri :default) body
+                 :auth :default :redirect redirect) body
  Arguments and Values:
   paths---a base path of a web page
   parg---a relative uri path from the base PATHS
@@ -162,8 +163,8 @@
   parg---a symbol name of a post parameter
   :auth---if :auth is supplied and the current user hasn't logged in,
           redirects the user to a login page
-  uri---an uri to redirect users after logging in
   :default---if :default is supplied, the page procedure is set to *default-handler*
+  redirect---an uri to redirect users after logging in
   body---a form
  Examples:
   (defpage test (path1 path2 :get get1 get2)
