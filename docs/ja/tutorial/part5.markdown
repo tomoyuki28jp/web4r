@@ -37,8 +37,8 @@ Elephantの詳細は[マニュアル](http://common-lisp.net/project/elephant/do
     (get-instances-by-range 'blog 'title 2 4)
     
     ; インスタンスの更新
-    (let ((i (get-instances-by-value 'blog 'title 5)))
-      (setf (title (car i)) 0))
+    (let ((i (get-instance-by-value 'blog 'title 5)))
+      (setf (title i) 0))
     
     ; 全てのクラスインスタンスを破棄
     (drop-instances (get-instances-by-class 'blog))

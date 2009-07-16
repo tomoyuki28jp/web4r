@@ -37,8 +37,8 @@ See the [Elephant user manual](http://common-lisp.net/project/elephant/doc/eleph
     (get-instances-by-range 'blog 'title 2 4)
     
     ; updating an instance
-    (let ((i (get-instances-by-value 'blog 'title 5)))
-      (setf (title (car i)) 0))
+    (let ((i (get-instance-by-value 'blog 'title 5)))
+      (setf (title i) 0))
     
     ; Removing all instances by a class
     (drop-instances (get-instances-by-class 'blog))
