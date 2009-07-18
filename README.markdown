@@ -1,6 +1,6 @@
 About
 ======
-web4r is a continuations-based web application framework written in Common Lisp. The goal of web4r is enabling users to develop web applications with the shortest codes. (The shortness is about the number of tokens.)
+web4r is a continuations-based web application framework written in Common Lisp. The goal of web4r is enabling users to develop web applications with the shortest codes. (The shortness is about a number of tokens.)
 
 #### The "Hello World" Application:
 
