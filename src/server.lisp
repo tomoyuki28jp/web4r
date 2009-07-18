@@ -155,7 +155,7 @@
 
  Syntax:
   defpage paths ([parg ...] [:get garg ...] [:post poarg ...]
-                 :auth :default :redirect redirect) body
+                   :auth :default :redirect redirect) body
  Arguments and Values:
   paths---a base path of a web page
   parg---a relative uri path from the base PATHS
