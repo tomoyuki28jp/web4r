@@ -67,9 +67,9 @@
  INDEX is a sequence index for *cid-generated-order*."
   (setf *cid-generated-order*
         (if index
-            (delete cid *cid-generated-order*
+            (delete* cid *cid-generated-order*
                     :test #'equal :start index :end (1+ index))
-            (delete cid *cid-generated-order* :test #'equal)))
+            (delete* cid *cid-generated-order* :test #'equal)))
   (awhen (gethash cid *cid->cont*)
     (setf (gethash (cont-sid it) *sid->cid*)
           (delete cid (gethash (cont-sid it) *sid->cid*) :test #'equal))
@@ -106,8 +106,9 @@
   (when (get-cont cid)
     (let ((cont (gethash cid *cid->cont*)))
       (setf (cont-generated-time cont) (get-universal-time)))
-    (vector-push-extend
-     cid (delete cid *cid-generated-order* :test #'equal))))
+    (setf *cid-generated-order*
+          (delete* cid *cid-generated-order* :test #'equal))
+    (vector-push-extend cid *cid-generated-order*)))
 
 (setf *session-removal-hook*
       #'(lambda (session)

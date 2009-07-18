@@ -126,3 +126,10 @@
             as r in  (list y m d h i s)
             do (setf format (regex-replace-all f format r)))
       format)))
+
+(defun delete* (item sequence &rest keys)
+  (let ((vector (apply #'delete item sequence keys)))
+    #-:allegro vector
+    #+:allegro (make-array (length vector)
+                           :initial-contents vector
+                           :fill-pointer t :adjustable t)))
