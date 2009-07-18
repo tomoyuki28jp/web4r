@@ -3,7 +3,7 @@ Install
 
 Supported Platforms
 --------------------
-Only tested with GNU/Linux x86-64 32bit SBCL 1.0.18 - 1.0.19
+Only tested with SBCL 1.0.18 - 1.0.19 and Allegro CL 8.1 on Linux x86 32bit 
 
 Library Dependencies
 ---------------------
