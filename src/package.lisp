@@ -200,7 +200,7 @@
 (in-package :web4r)
 
 (asdf-version<= :hunchentoot "1.0.0")
-(asdf-version<= :my-util     "0.0.4")
+(asdf-version<= :my-util     "0.0.5")
 (asdf-version<= :sml         "0.1.5")
 (asdf-version<= :inflector   "0.1.0")
 (asdf-version=  :elephant    "0.9")
