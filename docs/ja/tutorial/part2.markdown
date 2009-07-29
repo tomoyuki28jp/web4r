@@ -29,19 +29,19 @@ web4r:start-serverとweb4r:stop-serverはhunchentoot:startとhunchentoot:stopに
     - Storage: 64GB SSD
     
     * ソフトウェア:
-    - OS: Ubuntu 8.10 32bit
+    - OS: Ubuntu 9.04 32bit
     - SBCL: 1.0.18
-    - Apache: 2.2.9
+    - Apache: 2.2.11
     - hunchentoot 1.0.0
     - PHP: 5.2.6
 
     * 結果:
     +--------------------------------------------------------------+
-    | HTTP Server                      | small (28B) | big (477KB) |
+    | HTTP Server                      |  small (2B) | big (477KB) |
     +--------------------------------------------------------------+
-    | Hunchentoot stand alone          | 0.217       | 128.460     |
-    | Apache + mod_proxy + Hunchentoot | 0.105       |   5.077     |
-    | Apache + mod_php + php           | 0.083       |   5.095     |
+    | Hunchentoot stand alone          |      3.001  |      4.561  |
+    | Apache + mod_proxy + Hunchentoot |      0.108  |      5.694  |
+    | Apache + mod_php + php           |      0.099  |      5.102  |
     +--------------------------------------------------------------+
-    ※ bigは100000回ループでコンテンツを生成しています
+     bigは100000回ループでコンテンツを生成しています
 
