@@ -22,12 +22,28 @@ Library Dependencies
 - [closure-html](http://common-lisp.net/project/closure/closure-html/)
 - [fiveam](http://common-lisp.net/project/bese/FiveAM.html) (required by web4r-tests)
 
-Install
---------
-1. Install all the depending libraries above
-2. [Configure elephant](http://common-lisp.net/project/elephant/doc/elephant.html#Getting-Started)
-3. [Download](http://web4r.org/en/download) and install web4r
-   (make sure to create a symbolic link to *.asd in your load path)
+Installing on Ubuntu
+---------------------
+    sudo apt-get install build-essential sbcl cl-gd cl-base64
+    
+    # Install Berkeley DB 4.5
+    wget http://download.oracle.com/berkeley-db/db-4.5.20.tar.gz
+    tar -zxvf db-4.5.20.tar.gz && rm -f db-4.5.20.tar.gz
+    cd db-4.5.20/build_unix/
+    ../dist/configure
+    make && sudo make install
+    
+    # Install Elephant 0.9
+    mkdir -p ~/.sbcl/site/; mkdir -p ~/.sbcl/systems/; cd ~/.sbcl/site/
+    wget http://www.common-lisp.net/project/elephant/dist/elephant-0.9.tar.gz
+    tar -zxvf elephant-0.9.tar.gz && rm -f elephant-0.9.tar.gz
+    ln -s ~/.sbcl/site/elephant/*.asd ~/.sbcl/systems/
+    cp ~/.sbcl/site/elephant/config.sexp ~/.sbcl/site/elephant/my-config.sexp
+    
+    sbcl
+    (require :asdf-install)
+    (asdf-install:install :web4r)
+    (quit)
 
 For Emacs Users
 ----------------

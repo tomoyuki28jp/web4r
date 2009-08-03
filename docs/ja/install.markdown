@@ -2,11 +2,11 @@ Install
 ========
 
 プラットフォーム
---------------------
+-----------------
 Linux x86 32bit上のSBCL 1.0.18 - 1.0.19とAllegro CL 8.1でのみ動作確認済。
 
 依存ライブラリ
----------------------
+---------------
 - [asdf](http://www.cliki.net/asdf)
 - [my-util](http://github.com/tomoyuki28jp/my-util/tree/master)
 - [sml](http://github.com/tomoyuki28jp/sml/tree/master)
@@ -22,14 +22,30 @@ Linux x86 32bit上のSBCL 1.0.18 - 1.0.19とAllegro CL 8.1でのみ動作確認�
 - [closure-html](http://common-lisp.net/project/closure/closure-html/)
 - [fiveam](http://common-lisp.net/project/bese/FiveAM.html) (web4r-testsでのみ利用)
 
-インストール
-------------
-1. 上記の依存ライブラリを全てインストール
-2. [Elephantを設定](http://common-lisp.net/project/elephant/doc/elephant.html#Getting-Started)
-3. web4rを[ダウンロード](http://web4r.org/en/download) してインストール
-   (web4r/*.asdへのシンボリックリンクをロードパスに作成)
+Ubuntuにインストール
+----------------------
+    sudo apt-get install build-essential sbcl cl-gd cl-base64
+    
+    # Berkeley DB 4.5 インストール
+    wget http://download.oracle.com/berkeley-db/db-4.5.20.tar.gz
+    tar -zxvf db-4.5.20.tar.gz && rm -f db-4.5.20.tar.gz
+    cd db-4.5.20/build_unix/
+    ../dist/configure
+    make && sudo make install
+    
+    # Elephant 0.9 インストール
+    mkdir -p ~/.sbcl/site/; mkdir -p ~/.sbcl/systems/; cd ~/.sbcl/site/
+    wget http://www.common-lisp.net/project/elephant/dist/elephant-0.9.tar.gz
+    tar -zxvf elephant-0.9.tar.gz && rm -f elephant-0.9.tar.gz
+    ln -s ~/.sbcl/site/elephant/*.asd ~/.sbcl/systems/
+    cp ~/.sbcl/site/elephant/config.sexp ~/.sbcl/site/elephant/my-config.sexp
+    
+    sbcl
+    (require :asdf-install)
+    (asdf-install:install :web4r)
+    (quit)
 
 Emacs Lisp
-----------------
+-----------
 [web4r.el](http://github.com/tomoyuki28jp/web4r-el)
 はemacs上でweb4rコードを編集する為のelispです。
