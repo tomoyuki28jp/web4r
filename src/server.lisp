@@ -77,6 +77,10 @@
              ("/js/"     . ,(merge-pathnames "js/"     *public-dir*))))
   (push (create-folder-dispatcher-and-handler (car x) (cdr x)) *dispatch-table*))
 
+(push (create-static-file-dispatcher-and-handler
+       "/robots.txt" (merge-pathnames "robots.txt" *public-dir*))
+      *dispatch-table*)
+
 ; default page
 (setf *default-handler*
       #'(lambda ()
