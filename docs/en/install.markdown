@@ -22,8 +22,8 @@ Library Dependencies
 - [closure-html](http://common-lisp.net/project/closure/closure-html/)
 - [fiveam](http://common-lisp.net/project/bese/FiveAM.html) (required by web4r-tests)
 
-Installing on Ubuntu
----------------------
+Installing on Debian/Ubuntu
+----------------------------
     sudo apt-get install build-essential sbcl cl-gd cl-base64
     
     # Install Berkeley DB 4.5

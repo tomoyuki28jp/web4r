@@ -22,8 +22,8 @@ Linux x86 32bit上のSBCL 1.0.18 - 1.0.19とAllegro CL 8.1でのみ動作確認�
 - [closure-html](http://common-lisp.net/project/closure/closure-html/)
 - [fiveam](http://common-lisp.net/project/bese/FiveAM.html) (web4r-testsでのみ利用)
 
-Ubuntuにインストール
-----------------------
+Debian/Ubuntuにインストール
+----------------------------
     sudo apt-get install build-essential sbcl cl-gd cl-base64
     
     # Berkeley DB 4.5 インストール
