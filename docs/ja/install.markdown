@@ -43,7 +43,6 @@ Debian/Ubuntuにインストール
     sbcl
     (require :asdf-install)
     (asdf-install:install :web4r)
-    (quit)
 
 Emacs Lisp
 -----------

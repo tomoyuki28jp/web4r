@@ -43,7 +43,6 @@ Installing on Debian/Ubuntu
     sbcl
     (require :asdf-install)
     (asdf-install:install :web4r)
-    (quit)
 
 For Emacs Users
 ----------------
