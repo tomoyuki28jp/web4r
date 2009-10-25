@@ -3,7 +3,7 @@ Download
 
 最新安定版
 -----------
-    wget http://github.com/tomoyuki28jp/web4r/tarball/v0.2.8
+    wget http://github.com/tomoyuki28jp/web4r/tarball/v0.2.9
 
 最新開発版 (git版)
 -------------------
