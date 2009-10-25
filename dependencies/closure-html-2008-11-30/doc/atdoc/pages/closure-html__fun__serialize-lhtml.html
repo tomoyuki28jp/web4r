@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Function serialize-lhtml</title><link rel="stylesheet" type="text/css" href="../index.css"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><div id="header"><table cellspacing="0" cellpadding="0" width="100%"><tr><td valign="center">
+		  
+	      <b> Closure HTML</b></td><td valign="center" align="right"><b>API documentation</b></td></tr></table></div><div class="main"><div class="padded"><p class="noindent">
+	  Package:
+	  <a href="closure-html.html">closure-html</a></p><h2 class="page-title">
+	  Function
+	  serialize-lhtml</h2></div><table cellspacing="0" cellpadding="0" width="100%"><tr><td valign="top" width="60%"><div class="padded"><h3>Lambda List</h3><div class="indent"><tt>serialize-lhtml</tt> (<b>document</b> <b>handler</b> <b>&amp;key</b> <b>(name HTML)</b> <b>public-id</b> <b>system-id</b>)</div><h3>Arguments</h3><div class="indent"><ul><li><tt>document</tt> -- an LHTML list</li><li><tt>handler</tt> -- a HAX/SAX handler</li><li><tt>name</tt> -- root element name, a rod/string</li><li><tt>public-id</tt> -- nil or the Public ID, a rod/string</li><li><tt>system-id</tt> -- nil or the System ID/URI, a rod/string</li></ul></div><h3>Return Value</h3><div class="indent">The return value of this function is determined by the         <tt>handler</tt> argument; see below.</div><h3>Details<a name="details"></a></h3><div class="indent">                                          Serialize the LHTML document into HAX events, sent to the          specified HAX handler.<br><br>       <tt>handler</tt> can be a HAX handler       (see <a href="hax__class__abstract-handler.html"><tt>hax:abstract-handler</tt></a>) or a SAX handler (see the       <a href="http://common-lisp.net/project/cxml/sax.html#sax">SAX protocol in       cxml</a>).<br><br>       The result of calling <a href="hax__fun__end-document.html"><tt>hax:end-document</tt></a> on the handler will be
+       returned from this function.<br><br>       If <tt>system-id</tt> is specified, a doctype will be written       according to the arguments <tt>name</tt>, <tt>public-id</tt>, and       <tt>system-id</tt>.<br><br>
+       Use this function with a serialization sink to get a string or file
+       with a serialized HTML document, or with a HAX/SAX builder to
+       convert LHTML into a different representation, like DOM, PT, or
+       STP.<br><br>
+       Example:       <pre>
+ (let ((x '(:HTML NIL (:HEAD NIL) (:BODY NIL (:P NIL &quot;nada&quot;))))))
+   (chtml:serialize-lhtml x (chtml:make-string-sink))       </pre>       <tt>
+ =&gt; &quot;&lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;P&gt;nada&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;&quot;       </tt><br><br>              </div></div></td><td valign="top" width="5%">
+	     
+	  </td><td valign="top" width="35%"><h3>See also</h3><div class="indent"><table cellspacing="0" cellpadding="0"><tr><td><a href="hax__class__abstract-handler.html"><tt>hax:abstract-handler</tt></a></td></tr><tr><td><a href="hax__fun__end-document.html"><tt>hax:end-document</tt></a></td></tr><tr><td><a href="closure-html__fun__parse.html"><tt>parse</tt></a></td></tr><tr><td><a href="closure-html__fun__make-lhtml-builder.html"><tt>make-lhtml-builder</tt></a></td></tr></table></div></td></tr></table></div></body></html>

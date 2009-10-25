@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<preface id="preface">
+  <title>Preface</title>
+  <para>This reference guide describes the usage and features of
+  &uffi;.  The first chapter provides an overview to the design of
+  &uffi;.  Following that chapter is the reference section for all
+  user accessible functions of &uffi;. The appendix covers the
+  installation and implementation-specifc features of &uffi;.
+  </para>
+</preface>

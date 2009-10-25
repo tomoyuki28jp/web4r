@@ -1,0 +1,116 @@
+
+Active TODO:
+- secondary indices
+- variable size keys and values
+- lisp-based comparison function for serialized streams
+- transaction logging and transactions
+- page-level locks
+  (transactions are used to mark page-level rd/wr locks)
+  (on commit, transaction conflicts cause a transaction abort to be issued to appropriate threads)
+  (each transaction op can signal an abort condition)
+  (how to lock pages?)
+
+- direct serialization to lisp array (avoid memutil copy)
+- utilities for recovery, checkpointing, etc
+
+- large sets of objects
+- inverted index
+
+=========================
+
+Transaction arch for lisp backend:
+- store values during xaction in private lisp structure instead of buffer pool?
+  then multiple xactions share buffer pool until write & flush and no page dups
+  fast map oid+slotname to value on slot access and update on write
+- btree reads cached as: oid+key?
+  btree writes update map or add if not cached
+  btree delete is queued and checked on access
+  can bypass cache btree vals on map ops (linear traversal)
+  quick conflict check with other xactions!
+  how to handle combining writes to btree?
+- cursor ops cache all
+- single thread optimization?
+  cache values globally
+  update on commit
+
+
+High level lisp backend design:
+- Page storage, layout policy; lisp array or foreign data?
+  - key length limits
+  - ordering functions
+  - secondary index functions
+- Locking policy (in-memory)
+  - blocking or optimistic concurrency
+  - how to signal
+- Transaction ids
+- Logging transactions and side effects
+
+Performance considerations:
+- Slot access is usually local to objects
+- Variable length objects are fundamental
+- How to handle large blobs?
+
+Foreign array blocks?  Faster copies, 
+avoid GC overhead, easy to write to 
+disk, static type, fast pointer ops.
+
+Aligned data types to simplify pointers
+
+Index pages (btree catalogs)
+Object pages (sequences of slots)
+Blob pages
+
+PTHREAD mutex speed
+
+===========================
+
+A lisp backend will need:
+- read/write binary sequences
+- move/cache binary pages to/from disk
+- locking of structures/pages for multi-threaded use
+- transaction logging (context + primitives)
+- checkpointing, backup and log removal
+
+Want to build other data structures on this basic substrate:
+- large sets / persistent arrays
+- linear records
+- inverse index
+
+Can we store odd types?
+- Classes?
+- Closures?
+- Functions?
+(probably only with source access)
+
+Some constraints:
+- A binary file will allow for multiple internal btrees, will lock the root indices
+- Want to enable multiple possible allocation, layout and update algorithms; so each
+  file should describe its type?
+- Would like to allow multiple processes to have open file handles
+  Perhaps have a per-thread file handle?
+- Mixing types is possible if based on underlying page size, but performance will suffer
+
+;; read/write fields in an array
+;; parse/unparse from a stream or array
+
+;; instantiate a lisp version of the binary type
+;; associate a type with an array
+
+;; need binary versions of native lisp types
+
+;; (defgeneric parse-binary-value (type in &key)
+;;   (:documentation "Read a binary value from an array or stream"))
+
+;; (defmethod parse-binary-value ((type (eql 'u8)) (in stream) &key)
+;;   (read-byte in))
+
+;; (defmethod parse-binary-value ((type (eql 'u8)) (in array) &key (offset 0))
+;;   (declare (type fixnum offset))
+;;   (assert (subtypep (type-of in) '(array (unsigned 8) *)))
+;;   (aref in offset))
+
+;; (defmethod unparse-binary-value ((type (eql 'u8)) (out stream) (value (unsigned 8)) &key)
+;;   (write-byte value out))
+
+;; (defmethod unparse-binary-value ((type (eql 'u8)) (out array) (value (unsigned 8)) &key (offset 0))
+;;   (

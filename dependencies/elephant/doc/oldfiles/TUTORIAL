@@ -1,0 +1,425 @@
+========
+TUTORIAL
+========
+
+--------------------------------
+What is Berkeley DB?
+--------------------------------
+
+When someone says "database," most people think of SQL
+databases (oracle, postgresql, mysql).  Berekely DB is much
+simpler: there is no special SQL relational syntax, just
+access to BTrees and other datatypes.  It is a C library,
+not a server.  On the other hand it is quite robust, and has
+many features.  While you don't need to understand Sleepycat
+to use Elephant, reading the docs will certainly help you.
+
+http://www.oracle.com/database/berkeley-db.html
+
+---------------
+Getting Started
+---------------
+
+Make a directory to put your database environment in.
+That's all you need to set up your DB!  We'll assume in this
+tutorial you created a folder "testdb" in the current
+directory.
+
+Assuming you've managed to install Elephant properly,
+
+* if you are using Berkeley DB, type:
+  (asdf:operate 'asdf:load-op :ele-bdb)
+
+* or if you are using CL-SQL, type:
+  (asdf:operate 'asdf:load-op :ele-clsql)
+
+*  or if you are using SQLite3, type:
+  (asdf:operate 'asdf:load-op :ele-sqlite3)
+
+which will load the relevant files.
+
+* (use-package "ELE")
+
+will make all the necessary symbols available.  If you are
+using the package for the first time, you might get some
+symbol conflicts, which are safe to ignore.
+
+--------------------
+The Store Controller
+--------------------
+
+To create a store controller, try
+
+* (open-controller "testdb")
+=> #<STORE-CONTROLLER {49252F75}>
+
+The store controller holds the handles to the database
+environment and tables, and some other bookkeeping.  If for
+some reason you need to run recovery on the database (see
+Berkeley DB docs) you can specify that with the :recover and
+:recover-fatal keys.
+
+Alternatively,
+
+* (setq *store-controller* (make-instance 'store-controller :path "testdb"))
+=> #<STORE-CONTROLLER {49252F75}>
+
+* (open-controller *store-controller*)
+=> #<STORE-CONTROLLER {49252F75}>
+
+opens the environment and database.  *store-controller* is a
+special which is exported from the elephant package.  The
+persistent-* objects (see below) use the *store-controller*
+special.  (This is in part because slot accessors can't take
+additional arguments.)  If for some reason you want to
+operate on 2 store controllers, you'll have to do that by
+flipping the *store-controller* special.
+
+"close-store" closes the store controller.  Alternatively
+"close-controller" can be called on a handle.  Don't forget
+to do this or else you may need to run recovery later.
+There is a "with-open-controller" macro.  In practice, since
+opening and closing a controller is very expensive, it's
+probably not all that practical.
+
+Store controllers are by default thread-safe (set by the
+:thread key).  Recovery should only be run when there are no
+other controllers open (in other threads or processes.)
+
+--------
+The Root
+--------
+
+Liveness in the DB is determined by reachability from the
+root object.  (When garbage collection is implemented, dead
+objects will be collected on gc's.)  The root object is a
+BTree, which is like a hash-table with sorted keys.
+
+You can put something into the root object by
+
+* (add-to-root "my key" "my value")
+=> NIL
+
+and get things out via
+
+* (get-from-root "my key")
+=> "my value"
+=> T
+
+The root object is available as
+
+* (controller-root *store-controller*)
+=> #<BTREE {492AE37D}>
+
+It is an instance of a class "btree", which has methods
+"get-value" and "remove-kv".  "get-value" is setf-able.
+
+-------------
+Serialization
+-------------
+
+What can you put into the database?  An ever-growing list of
+things: numbers (except for complexes, which will be easy to
+support), symbols, strings, nil, characters, pathnames,
+conses, hash-tables, arrays, CLOS objects.  Nested and
+circular things are allowed.  You can serialize basically
+anything except lambdas, closures, structures, packages and
+streams.  (These may eventually get supported too.)
+
+Unfortunately Berekely DB doesn't understand Lisp, so Lisp
+data needs to be serialized to enter the database,
+(e.g. converted to byte arrays), and deserialized on the way
+out.  This introduces some caveats (not unique to Elephant):
+
+1) Lisp identity can't be preserved.  Since this is a store
+   which persists across invocations of Lisp, this probably
+   doesn't even make sense.
+
+* (setq foo (cons nil nil))
+=> (NIL)
+* (add-to-root "my key" foo)
+=> NIL
+* (add-to-root "my other key" foo)
+=> NIL
+* (eq (get-from-root "my key")
+      (get-from-root "my other key"))
+=> NIL
+
+2) Changing substructures is not automatically saved:
+
+* (setf (car foo) T)
+=> T
+* (get-from-root "my key")
+=> (NIL)
+
+You can of course manually re-input objects.
+
+3) Serialization and deserialization are pretty fast, but it
+   is still expensive to put in large aggregate objects
+   wholesale.  Also, since object identity is impossible to
+   maintain, deserialization must re-cons the entire object
+   every time.  Plus, one of the reasons to use a database
+   is if your objects can't fit into main memory all at
+   once, so lazy allocation is desirable.
+
+4) Merge-conflicts in heavily multi-process/threaded
+   situations.  More on this later.
+
+------------------
+Persistent Classes
+------------------
+
+Fortunately we can solve these problems.
+
+* (defclass my-persistent-class () 
+   ((slot1 :accessor slot1) 
+    (slot2 :accessor slot2))
+   (:metaclass persistent-metaclass))
+
+* (setq foo (make-instance 'my-persistent-class))
+=> #<MY-PERSISTENT-CLASS {492F4F85}>
+
+* (add-to-root "foo" foo)
+=> NIL
+* (add-to-root "bar" foo)
+=> NIL
+* (eq (get-from-root "foo")
+      (get-from-root "bar"))
+=> T
+
+What's going on here?  Persistent classes, that is, classes
+which use the persistent-metaclass metaclass, are given
+unique IDs (accessable through ele::oid.)  They are
+serialized simply by their OID and class.  Their slot values
+are stored in separate entries, keyed by OID and slot.
+Loading (deserializing) a persistent class
+
+* (get-from-root "foo")
+=> #<MY-PERSISTENT-CLASS {492F4F85}>
+
+instantiates the object or finds it from the cache, if it
+already exists.  (The cache is a weak hash-table, so gets
+flushed on GCs.)  The slot values are NOT loaded until you
+ask for them.
+
+* (setf (slot1 foo) "one")
+=> "one"
+* (setf (slot2 foo) "two")
+=> "two"
+* (slot1 foo)
+=> "one"
+* (slot2 foo)
+=> "two"
+
+Changes made to them propogate automatically:
+
+* (setf (slot1 foo) "three")
+=> "three"
+* (slot1 (get-from-root "bar"))
+=> "three"
+
+Although it is hard to see here, serialization /
+deserialization of persistent classes is fast, much faster
+than ordinary CLOS objects.  Finally, they do not suffer
+from merge-conflicts (more on this later.)
+
+------------------------------
+Rules about Persistent Classes
+------------------------------
+
+Using the persistent-metaclass metaclass declares all slots
+to be persistent by default.  To make a non-persistent slot
+use the :transient t flag.  Class slots are never persisted,
+for either persistent or ordinary classes.  (Is this the
+right behavior?)
+
+Readers, writers, accessors, and slot-value-using-class are
+instrumented.  Because slot-value is not a generic function,
+it is not guaranteed to work properly with persistent slots
+-- don't use it!
+
+Persistent classes may inherit from other classes.  slots
+inherited from persistent classes remain persistent.
+transient slots and slots inherited from ordinary classes
+remain transient.
+
+Ordinary classes cannot inherit from persistent classes --
+slots need to get stored!  Likewise, once a slot is declared
+persistent, it cannot later be changed to a transient slot.
+
+Note that the database is read every time you access a slot.
+This is a feature, not a bug, especially in concurrent
+situations: you want the most recent commits, right?
+(Berkeley DB will give isolation inside of transactions,
+though.)  In particular, if your slot value is not an
+immediate value, reading will cons the value.  Gets are not
+an expensive operation (I can do a million reads in 30
+seconds), but if you're concerned, cache values.  In the
+future we will provide automatic value caching -- "single
+user mode."
+
+Finally, if you for some reason make an instance with a
+specified OID which already exists in the database, initargs
+take precedence over values in the database, which take
+precedences over initforms.
+
+------------
+Transactions
+------------
+
+Elephant by default uses the Berkeley DB Transactional Data
+Store.  This means most destructive operations need to be
+protected by transactions.  By default Elephant does this:
+
+* *auto-commit*
+=> T
+
+Most real applications will want to control their own
+transactions.
+
+* (setq *auto-commit* nil)
+=> NIL
+
+The persistent objects look for transactions in the
+*current-transaction* special.  You can manually start a
+transaction as follows:
+
+* (setq *current-transaction* 
+        (db-transaction-begin (controller-environment
+                               *store-controller*)))
+
+All database interactions within the course of a transaction
+are ACID: atomic, consistent, isolated, and durable, if the
+transaction succeeds.
+
+* (setf (slot1 foo) 123456789101112)
+123456789101112
+* (setf (slot2 foo) "onetwothree...")
+"onetwothree..."
+* (db-transaction-commit)
+NIL
+
+If for some reason (like db error) you decide to abort, you
+can do so via (db-transaction-abort).
+
+All of this is packaged up in with-transaction.  It starts a
+new transaction, executes the body, then tries to commit the
+transaction.  If anywhere along the way there is a database
+error, the transaction is aborted, and it attempts to retry
+(a fixed number of times) by re-executing the whole body.
+
+-----------
+Collections
+-----------
+
+The btrees class are to hash-tables as persistent-objects
+are to ordinary objects.  btrees have a hash-table-like
+interface, but store their keys and values directy in a
+BDB btree.  Btrees may be persisted simply by their
+OID.  Hence they have all the nice properties of persistent
+objects: identity, fast serialization / deserialization, no
+merge conflicts.....
+
+* (defvar friends-birthdays (make-instance 'btree))
+=> FRIENDS-BIRTHDAYS
+
+* (add-to-root "friends-birthdays" friends-birthdays)
+=> #<BTREE {4951CF6D}>
+
+* (setf (get-value "Andrew" friends-birthdays) "12/22/1976")
+=> "12/22/1976"
+
+* (get-value "Andrew" friends-birthdays)
+=> "12/22/1976"
+=> T
+
+Because of serialization semantics, btrees hash on a value,
+not identity.  This is probably ok for strings, numbers, and
+persistent things, but not for ordinary aggregates.
+
+In the future there will be support for automatically
+generating secondary indicies to search or index into btrees
+with.
+
+---------
+Threading
+---------
+
+Berkeley DB plays well with threads and processes.  The store
+controller is thread-safe by default, that is, can be shared
+amongst threads.  Transactions may not be shared amongst
+threads except serially.  One thing which is NOT thread and
+process safe is recovery, which should be run when no one is
+else is talking to the database environment.  Consult the
+Berkeley DB docs for more information.
+
+Elephant uses some specials to hold parameters and buffers.
+If you're using a natively threaded lisp, you can initialize
+these specials to thread-local storage by using the
+"run-elephant-thread" function, assuming your lisp creates
+thread-local storage for let-bound specials.
+
+Persisting ordinary aggregate types suffers from something
+called "merge-conflicts."  Since updating one value of an
+aggregate object requires the entire object to be written to
+the database, in heavily threaded situations you may
+overwrite changes another thread or process has committed.
+This is not protected by transactions.
+
+Consider two processes operating on the same cons:
+
+-----start--read--update-car--write--commit-----------------
+-start------read--update-cdr-----------------write--commit--
+
+Although the first process successfully committed their
+transaction, their work (writing to the car) will be erased
+by the second process's transaction (which writes both the
+car and cdr.)
+
+Persistent classes and persistent collections do not suffer
+from merge-conflicts, since each slot / entry is a separate
+database entry.
+
+-----------
+Performance
+-----------
+
+Performance is usually measured in transactions per second.
+Database reads are cheap.  To get more transactions
+throughput, consider setting
+
+* (db-env-set-flags (controller-environment *store-controller*) 1
+                    :txn-nosync t)
+
+or look at other flags in the Berkeley DB docs.  This will
+greatly increase your throughput at the cost of some
+durability; I get around a 100x improvement.  This can be
+recovered with judicious use of checkpointing and
+replication, though this is currently not supported by
+Elephant -- see the Berkeley DB docs.
+
+The serializer is definitely fast on fixnums, strings, and
+persistent things.  It is fairly fast but consing with
+floats and doubles.  YMMV with other values, though I've
+tried to make them fast.
+
+Using *auto-commit* and not "with-transactions" is a great
+way to have a huge number of transactions.  You'll find that
+
+(dotimes (i 1000) (add-to-root "key" "value"))
+
+is way slower than
+
+(let ((*auto-commit* nil))
+ (with-transaction ()
+  (dotimes (i 1000) (add-to-root "key" "value"))))
+
+since there's only 1 transaction in the latter.
+
+Use the persistent classes and collections; if you're using
+transactions correctly they should be much faster.
+
+If you don't need transactions you can turn them off.
+Opening the DB in less concurrent / transctional modes will
+be supported very soon (it's just an argument change, I
+think.)

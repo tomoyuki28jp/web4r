@@ -1,0 +1,10 @@
+Conditions cleanup
+--This line, and those below, will be ignored--
+
+M    read.lisp
+M    packages.lisp
+M    streams.lisp
+M    doc/index.html
+M    CHANGELOG.txt
+M    input.lisp
+M    chunga.asd

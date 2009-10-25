@@ -1,0 +1,139 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header              
+@setfilename elephant.info
+@settitle Elephant User Manual
+@c %**end of header
+
+@setchapternewpage odd
+
+@copying
+@quotation
+Elephant System @*
+Original Version, Copyright @copyright{} 2004 Ben Lee and Andrew Blumberg. @*
+Version 0.5, Copyright @copyright{} 2006 Robert L. Read. @*
+Versions 0.6-0.9, Copyright @copyright{} 2006-2007 Ian Eslick and Robert L. Read @*
+Portions copyright respective contributors (see @file{CREDITS}). @*
+
+Elephant Manual @*
+Original Version, Copyright @copyright{} 2004 Ben Lee. @*
+Versions 0.5-0.6, Copyright @copyright{} 2006 Robert L. Read. @*
+Current Version, Copyright @copyright{} 2006-2007 Ian Eslick and Robert L. Read @*
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License.  See the
+Copyright and License chapter for details about copyright, license and
+warranty for this manual and the Elephant system.
+
+@end quotation
+@end copying
+     
+@titlepage
+@title Elephant User Manual
+@subtitle Elephant version 0.9
+@author By Ian Eslick with Robert Read and Ben Lee
+     
+@c  The following two commands
+@c  start the copyright page.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+     
+@ifnottex
+@node Top
+@comment  node-name,  next,  previous,  up
+@top Copyright
+     
+@insertcopying
+     
+@ifhtml
+@menu
+* Table of Contents::
+@end menu
+
+@chapheading Chapters
+
+@menu
+* Introduction::   Introduction to the Elephant Persistent Object System.
+* Tutorial::       A basic ``getting started'' tutorial.
+* Installation::   Installation and test-suite procedures.
+* User Guide::     In depth discussion of all Elephant facilities and features.
+* User API Reference:: Function and class documentation of the user API.
+* Design Patterns::    Design scenarios for Elephant applications.
+* Elephant Architecture::     An overview of elephant's internal architecture.
+* Data Store API Reference::  Function level documentation for data store implementors.
+* Copyright and License::     Your rights and freedoms.
+@end menu
+
+@chapheading Appendices
+
+@menu
+* Concept Index::
+* Object Index::     
+* Function / Macro Index::     
+* Variable Index::     
+* Colophon::     
+@end menu
+@end ifhtml
+
+@node Table of Contents
+@unnumbered
+@comment  node-name,  next,  previous,  up
+@contents
+
+@end ifnottex
+     
+@include intro.texinfo
+@include tutorial.texinfo
+@include installation.texinfo
+@include user-guide.texinfo
+@include reference.texinfo
+@include scenarios.texinfo
+@include elephant-design.texinfo
+@include data-store-reference.texinfo
+@include copying.texinfo
+
+@node Concept Index
+@comment  node-name,  next,  previous,  up
+@appendix Concept Index
+
+@printindex cp
+
+@node Object Index
+@comment  node-name,  next,  previous,  up
+@appendix Object Index
+
+@printindex tp
+
+@node Function / Macro Index
+@comment  node-name,  next,  previous,  up
+@appendix Function / Macro Index
+     
+@printindex fn
+
+@node Variable Index
+@comment  node-name,  next,  previous,  up
+@appendix Variable Index
+     
+@printindex vr
+
+@node Colophon
+@comment  node-name,  next,  previous,  up
+@unnumbered Colophon
+
+This manual is maintained in Texinfo, and automatically translated
+into other forms (e.g. HTML or pdf). If you're @emph{reading} this
+manual in one of these non-Texinfo translated forms, that's fine, but
+if you want to @emph{modify} this manual, you are strongly advised to
+seek out a Texinfo version and modify that instead of modifying a
+translated version. Even better might be to seek out @emph{the}
+Texinfo version (maintained at the time of this writing as part of the
+Elephant project at
+@uref{http://www.common-lisp.net/project/elephant/}) and submit a
+patch.
+
+@iftex
+@shortcontents
+@contents
+@end iftex
+@bye

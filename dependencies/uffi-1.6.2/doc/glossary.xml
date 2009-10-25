@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<glossary id="glossary">
+  <glossentry id="gloss-ffi">
+    <glossterm>Foreign Function Interface
+      <acronym>FFI</acronym>)
+    </glossterm>
+    <glossdef>
+      <para>
+        An interface to a C-compatible library.
+      </para>
+    </glossdef>
+  </glossentry>
+</glossary>
+
+

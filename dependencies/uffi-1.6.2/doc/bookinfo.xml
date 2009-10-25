@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<bookinfo>
+  <title>&uffi; Reference Guide</title>
+  <author>
+    <firstname>Kevin</firstname>
+    <othername>M.</othername>
+    <surname>Rosenberg</surname>
+    <affiliation>
+      <orgname>Heart Hospital of New Mexico</orgname>
+      <address>
+	<email>kevin@rosenberg.net</email>
+	<street>504 Elm Street N.E.</street>
+	<city>Albuquerque</city>
+	<state>New Mexico</state>
+	<postcode>87102</postcode>
+      </address>
+    </affiliation>
+  </author>
+  
+  <printhistory>
+    <simpara>$Id$</simpara>
+    <simpara>File $Date$</simpara>
+  </printhistory>
+  <copyright>
+    <year>2002-2003</year>
+    <holder>Kevin M. Rosenberg</holder>
+  </copyright>
+  <legalnotice>
+    <itemizedlist>
+      <listitem>
+	<para>The &uffi; package was designed and
+	  written by Kevin M. Rosenberg.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  Permission is granted to copy, distribute and/or modify this document
+	  under the terms of the GNU Free Documentation License, Version 1.1
+	  or any later version published by the Free Software Foundation;
+	  with no Invariant Sections, with the no
+	  Front-Cover Texts, and with no Back-Cover Texts.
+	  A copy of the license is included in the &uffi; distribution.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  <application>Allegro CL</application>&reg; is a registered
+	  trademark of Franz Inc.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  <application>Lispworks</application>&reg; is a registered
+	  trademark of Xanalys Inc.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  <application>Microsoft Windows</application>&reg; is a
+	  registered trademark of Microsoft Inc.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  Other brand or product names are the registered trademarks
+	  or trademarks of their respective holders.
+	</para>
+      </listitem>
+    </itemizedlist>
+  </legalnotice>
+</bookinfo>

@@ -1,0 +1,5 @@
+@anchor{Package elephant}
+@defvr {Package} elephant
+Elephant: an object-oriented database for Common Lisp with
+    multiple backends for Berkeley @code{db}, @code{sql} and others.
+@end defvr

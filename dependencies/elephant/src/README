@@ -1,0 +1,17 @@
+The organization of the new Elephant is as follows:
+
+Top directory contains:
+- A binary object serialization framework (serializer.lisp)
+- Code necessary to support different platform MOPs 
+  (to move to closer-to-MOP in 0.6.1) (cmu/openmcl-mop-patches.lisp)
+- Top level transaction model (transaction.lisp)
+- An environment model for 'current store' and multi-repository operation (controller.lisp)
+- The metaclass protocol for supporting persistent objects (metaclass.lisp, classes.lisp)
+- Interface specs for persistent btrees & cursors (collections.lisp)
+- Indexing support for the metaclass (indexing.lisp, index-utils.lisp)
+
+Backends provide support for:
+- A store controller w/ a persistent root index (*-controller.lisp)
+  - Includes support for slot operations in metaclass protocol
+- Collections defined via the specific controller (*-collections.lisp)
+- Transactions specific to the backend (*-transactions.lisp)

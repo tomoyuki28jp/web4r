@@ -1,0 +1,8 @@
+Three main approaches:
+
+1) Adapt elephant to support either RS or existing metaobject models 
+   (hard to migrate?)
+2) Create a single RS persistent-class to store slot values for an
+   elephant p-obj, borrow the rest of the mechanism (PROPOSAL)
+3) Write our own lisp backend using the heap, cache and btree code?
+   Depends on how deeply the cache is integrated with serializer, etc.

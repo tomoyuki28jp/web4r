@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<appendix id="installation">
+  <title>Installation</title>
+  <sect1 id="download">
+    <title>Download &uffi;</title>
+    <para>
+You need to download the &uffi; package from its web
+<ulink url="http://uffi.b9.com"><citetitle>home</citetitle></ulink>.
+You also need to have a copy of &asdf;. If you need a copy of
+&asdf;, it is included in the 
+  <ulink
+      url="http://www.sourceforge.net/projects/cclan">
+      <citetitle>CCLAN</citetitle></ulink> package. You can download
+the file <filename>defsystem.lisp</filename> from the CVS 
+<ulink url="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/cclan/asdf/asdf.lisp"><citetitle>tree</citetitle></ulink>.
+    </para>
+  </sect1>
+  <sect1 id="loading">
+    <title>Loading</title>
+    <para>
+      After downloading and installing &asdf;, simply
+      <function>push</function> the
+      directory containing &uffi; into
+      <varname>asdf:*central-registry*</varname> variable. Whenever you
+want to load the &uffi; package, use the form
+      <computeroutput>(asdf:operate 'asdf:load-op :uffi)</computeroutput>.
+    </para>
+  </sect1>
+</appendix>

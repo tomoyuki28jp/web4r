@@ -1,0 +1,14 @@
+
+This directory contains a quick and dirty sketch of an allegrocache
+backend, mostly to test out the new backend abstraction.  
+
+Basic btrees work fine but iteration (cursors) are very limited.
+I think the best way to go is reverse engineer the db.btree API
+and just implement the elephant backend on top of that API.  I
+may do this at some point, but not today...
+
+Or better yet, find someone willing to write a btree library in
+lisp.  John Fedaro said it wasn't a huge amount of work and can
+be done with very high performance in all Common Lisp.
+
+Ian

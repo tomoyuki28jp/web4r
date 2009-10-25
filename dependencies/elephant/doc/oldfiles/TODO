@@ -1,0 +1,234 @@
+
+Last updated: February 25th, 2007
+
+Ongoing release plan notes. 
+
+(Note: use of this file is deprecated after 0.6.1, see Trac site at 
+ http://trac.common-lisp.net/elephant)
+
+0.6.1 - performance, safety and portability 
+--------------------------------------------
+
+TASKS TO GET TO FINAL RELEASE:
+
+Bugs:
+- Validate OpenMCL 1.0 on Mac OS X
+- Lispworks on Linux
+- Verify install, build and test documentation and procedures
+
+0.6.1 - Features COMPLETED to date
+----------------------------------
+
+POST BETA CHECKINS:
+
+Bugs:
+x Fix duplicate opening of CLSQL db bug that caused errors in SQLite
+x Fix for persistent-object inheritance calculation when inheriting from standard classes
+x Remove problematic asserts in lisp-compare-eq make equal for strings instead of eq
+x Fix map over nils bug in map-index and get-instances-by-value; clarify map-index interface
+
+Tweaks:
+x Add bounds to map-btree
+x Change wipe-class-indexing so it can be called without the class object being created
+x add-to-root, etc now uses :sc instead of :store-controller for brevity
+x Remove hard coded paths in ele-clsql
+
+POST ALPHA CHECKINS:
+
+Major Bugs:
+x Derived indices fail to re-connect after reopening a database under :class synchronization policy (Ian)
+x Package translation to properly upgrade databases where packages were renamed (Robert)
+x Fix a bug where slot-makunbound on a persistent object failed to remove secondary index references
+  for class and slot indices.  Made a test to validate this. (Ian)
+x Fixed a bug in string serialization for char-code > #x7F (Henrik, Ties)
+x Fixed migrate bug where oid->oid map was reset on every migrate call, yikes! (Ian)
+
+Minor Bugs:
+x Fix class index slot option test
+x Enable with-transactions to properly process forms returning multiple values (Ian)
+x Fixed typos in SQL backend (Ian/Robert/Henrik)
+x Fixed build bug for linux (Henrik)
+x Fixed error condition while opening SQLITE3 in SQL backend (Robert)
+x Fixed idempotence problem in PREPARE-BDB test (Ian)
+x Review and document or address all NOTE comments in the code (Ian)
+x Review SBCL string serialization performance (false alarm, comparable to allegro)
+x Fixed a missing package export: translate-and-intern-symbol from elephant (Ties)
+
+Feature tweaking:
+x Migration: Improve support for nested persistent objects inside lists, arrays and hash tables (Ian)
+x Migration: Test embedded object support
+x Enabled 8-bit encoding of char-codes between #x7F and #xFF; enabled by earlier rewrite of memutil (Ian)
+x Orthogonal feature addition: map-index, map-class and map-instances to avoid consing (Ian)
+x Tests to validate new map interfaces on top of existing tests (Ian)
+x Added support and tests for serializing structure objects on all supported platforms (Ian)
+x Fixed cygwin-ming32 -mno-cygwin build for Windows for Lispworks and Allegro (Frank, Ian)
+x Migration: Validate that migrate can use either O(c) or O(n*c) where c approaches 0 memory for large DBs
+             Uses O(n*c) where C is the cost to store a persistent object reference and old oid reference
+
+DEVELOPMENT CHECKINS:
+
+February 13-17th, 2007:
+x Allow checkpoint of BDB via db-bdb::checkpoint
+x Fix BDB migration 0.6.0->0.6.1, improve nested transaction/store interactions
+x Legacy conversions issue for SQL (and BDB?) due to package rename (both)
+x Figure out how to compact a specific btree and/or key-range using optimize-storage.
+  Probably need to update keyword part of the API
+x User choice to run db_deadlock when opening a bdb backend?  Requires path to
+  functions and ability to launch shell command.  Closing the store stops the sub-process.
+x Resolve duplicate ordering issues (punting to future release; documentation fix)
+x Trace all paths to db-put or db-delete and ensure that there is a check or a 
+  default ensure-transaction around the primitive components - write a document 
+  clarifying transaction design & assumptions in the backend
+
+
+February 9th, 2007
+x Improve SQL secondary cursor performance (Robert)
+x Fix *dbconnection-spec* to support multiple controllers for multiple threads
+  for CLSQL backend (Robert)
+x Fix cur-del2 failure under SBCL (robert to reproduce and fix)
+
+February 3rd, 2007 checkins:
+x Finished char -> unsigned char for buffer streams to solve SBCL type problems
+x Finished new serializer-initialization and open-controller protocol to handle
+  subtle issues in database metadata and the user of the serializer
+
+Feburary 2nd, 2007 checkins:
+x Punted duplicate sorting to 0.7.0
+x Support locks in serializer for all systems
+  x Provide support for fast and slow critical sections by lisps: buffer-streams, 
+    circularity-arrays/hashes, shared controller side-effects... (see email)
+x Check for manual & automatic transactions running concurrently
+x Modify *current-transaction* to be null on default, allowing backends to choose the default format (vs. +NULL-VOID+)
+x Update BDB backend to properly provide result
+x Roll deprecation of *auto-commit* through code base so leaf functions stop referring to it; modify berkeley-db to not refer to auto-commit except where it's appropriate (open commands)
+x Ensure serialization is thread-safe and reasonably efficient
+x Resourced-byte-spec should be per-thread (or removed - ok to cons during bignum serialization)
+x Allow elephant threads to appropriately bind dynamic variables?
+x Thread safety for all global vars
+x Thread safe API option for user-managed store-controller?
+x Thread safe API for transactions
+x Ported to and tested with BDB 4.5
+x Full 64-bit support (arrays, native 64-bit fixnums, etc)
+  x Mark fixnums appropriately: 32-bit lisps can decode 64-bit fixnums as bignums (two 32-bit entities)
+  x char vs. uint8 in buffer-stream to read-out (See Marco e-mail)
+
+January 22, 2007 checkins:
+x Modularize serializers for easy upgrade
+x MCL 1.1 unicode support; clean up other lisp support for unicode
+x Simplify user-specific configuration parameters using config.sexp and my-config.sexp
+x Ensure thread safety in buffer-stream allocation!
+
+January 2007 checkins; minor fixes
+x Think through default *store-controller* vs. explicit parameter passing referencing all over the APIs 
+  (Enable explicit passing everywhere, maintain *store-controller* defaults.  This makes multi-threading
+   support simpler.  Users can pass the store controller or rely on a global *store-controller*)
+x New build interface; all-lisp compilation (sans win32), (help from elephant-devel)
+x Verify that operations such as indexing are thread safe
+x Diffs for lisp-controlled DB checkpointing (by Gabor Melis)
+x Improved optimization options to be more user controlled (Pierre Thierry)
+x Investigated gensym warnings in berkeley-db.lisp (caused by an FFI macro, no harm in it)
+x Remove warnings in libberkeley-db.c
+
+Prior to December 2006
+x BDB overwrite of values makes DB grow 
+  [So far I can only find that it grows on the 2nd write, but not after that...artifact of
+   page allocation or caching of memory pools?]
+x FEATURE: Investigate BDB record size; it's 2x larger than expected? 
+  [Ditto above]
+x Update to support BDB 4.4/4.5
+  x Add ability from within lisp to reclaim DB space after deleting btree key-value pairs
+x Should we delete slot-values in the db when redefining classes, currently those values
+  stay around - probably indefinitely unless we GC (no, we'll resolve this with a 
+  stop-and-copy GC - need to make migration bookkeeping more efficient)
+x MCL type-declaration compatibility
+x Remove sleepycat name.  Change sleepycat to db-bdb to reflect oracle ownership and avoid
+  confusion for new users
+
+========================================================
+========================================================
+
+June 20, 2006:
+
+Features completed in 0.6.0:
+-----------------------------------
+x Add a class-indexing class option to the metaclass so we can maintain class instances
+  index without any secondary indices or indexed slots 
+x Upgrade solution to 0.6.0, DB properties & version tag for future upgrades 
+x Validate migration
+x Documentation update
+x Indexing tutorial and tutorial review 
+x On class change, new slots should have their initform values pushed 
+  into the slot value as if the slot was being created the first time 
+  (currently this doesn't happen) [fixed in 0.6.0-rc1]
+
+
+Feb. 4, 2006:
+
+As of 0.5.0, we have seem to have a stable suite on 
+ACL, SBCL, and OpenMCL.
+
+The things I would most like to see improved are:
+
+1)  Robustness around error handling.
+2)  Ian Eslick has written some great indexing stuff in a branch 
+that I intend to merge in after this release.
+3)  The SQL serializer could be made more efficiently very 
+easily, greatly enhancing the speed of that as a back-end.
+
+In general, Elephant is very usable and modestly robust, 
+but heavier use, better documentation, and a good example
+application would help it a lot.
+
+Merge in the todos from the source and the NOTES!
+
+
+October 19, 2005:
+
+The SQL back-end stuff has only been tested with 
+Postgress and SBCL.
+
+Using SQLite and mysql would really expand the 
+usage of the system, I assume.
+
+The database-stuff is fairly slow since it 
+does normal serialization and then Base64 encoding.
+This is very safe and simple, but costs us a lot of bytes
+to and from the database; a better serializer would
+make things MUCH faster.
+
+
+Notes from original developers at time of handoff:
+(minus stuff recorded elsewhwere)
+--------------------------------------------------
+understand the profiler / timer, tweak performance of CLOS
+stuff
+
+tweak performance of transactions!  dynamic-extent in CMUCL
+/ SBCL.
+
+equality joins have to be done on the lisp side:
+end-of-table is not the same as end-of-btree.
+
+GC (need cursors)
+
+Lispworks stuff (fli:replace-foreign-array...)
+
+bignum fix: OpenMCL: check that ldb is non-consing (i think
+it is), look at %ldb-fixnum-from-bignum.  profile
+%bignum-ref on CMUCL / SBCL.
+
+serialize lambdas, closures, packages.....this is hard!
+
+openmcl lispy pointer arithmetic (profile sap-alien, etc).
+profile CMUCL / SBCL sap arithmetic.
+
+CMUCL, SBCL, Allegro? (NOT OpenMCL) can directly pass memory
+like foreign arrays.  Use these instead of foreign arrays?
+
+byte-ordering?  nah.....
+
+incorporate requirements from ICU license
+
+cursor-put : move the cursor after insert.
+
+change :transient flag to an allocation type (fix CMUCL!)

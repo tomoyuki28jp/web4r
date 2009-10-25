@@ -1,0 +1,93 @@
+body {
+    font-size: 16px;
+    font-family: Verdana,Sans-Serif,Arial;
+    line-height: 1.6em;
+}
+
+input, textarea     { font-size: 15px; color: #000000; }
+h1                  { font-size: 30px; color: #150517; }
+ul                  { font-weight: bold; }
+ul.msgs             { color: #0000FF; }
+ul.errors           { color: #F60; }
+span.form_comment   { color: #888888; margin-left: 5px; }
+span.required_mark  { font-weight: bold; color: #F60; }
+div                 { margin:8px; }
+table               { text-align:left; }
+th                  { font-weight: normal; vertical-align: middle; }
+th.sort a           { text-decoration: none; cursor:pointer; cursor:hand;
+                      font-weight: bold; color: #039; }
+th.sort img         { margin: 5px; }
+#table_list         { border-collapse:collapse; }
+#table_list th      { padding: 10px 8px; border-bottom: 2px solid #6678b1; }
+#table_list td      { border-bottom: 1px solid #ccc; padding: 6px 8px; }
+#table_list tbody tr:hover td
+                    { color: #009; }
+#table_show         { border-collapse:separate; }
+#table_show th, #table_show td
+                    { border-top: 1px solid #e8edff; padding: 6px 12px; }
+#table_show th      { color: #039; border-right: 1px solid #ccc; }
+
+label.error { 
+    font-size: 14px;
+    border: solid #BBB 1px;
+    border-top: none;
+    border-left: none;
+    -moz-border-radius: 4px;
+    padding: .5em 1em .5em .8em;
+    color: #F60;
+    background: #EDEDED;
+    font-weight: bold;
+    vertical-align: top;
+    margin-left: 5px;
+}
+
+div.page_links {
+    width:750px;
+}
+
+.page_links {
+    padding: 4px;
+}
+
+.page_links ul {
+    margin: 0;
+    padding: 0;
+    font-size: 15px;
+}
+
+.page_links li {
+    font-size:13px;
+    list-style-type: none;
+    display: inline;
+    padding-bottom: 1px;
+    padding: 0px  0px  5px 1px;
+}
+
+.page_links a:link, .page_links a:visited {
+    padding: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+    
+    border: 1px solid #a1c0d8;
+    text-decoration: none; 
+    color: #0066aa;
+    background-color: #ffffff;
+}
+
+.page_links a:hover, .page_links a:active {
+    border: 1px solid #2f9ae1;
+    color: #ffffff;
+    background-color: #2f9ae1;
+}
+
+.page_links span {
+    padding: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+
+    background-color: #1a9ad8; 
+    color: #ffffff;
+    border-color: #1a9ad8;
+    font-weight: bold;
+    cursor: default;
+}

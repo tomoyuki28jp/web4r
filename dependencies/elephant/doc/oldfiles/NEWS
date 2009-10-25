@@ -1,0 +1,64 @@
+April, 2006 - Elephant 0.6.0 released by 
+Robert Read and Ian Eslick.  Supports class slot
+indexing and benefits from a clean refactoring
+of backends and a host of other small changes.
+This is a solid BETA release.
+
+November 30, 2005 - Elephant 0.3.0 released by
+the new maintainer, Robert L. Read, providing 
+support for relational database backends, repository
+migration, and multi-repository operation.
+
+As of this release, the documentation provides a
+lot of information about installation and getting 
+things working; I wouldn't at all claim that it 
+is complete, smooth, or well organized.  The more 
+notes I get about the use of Elephant, the more 
+inclined I will be to invest time in improving 
+the documentation.
+
+October 7, 2004 - 
+
+Elephant 0.2.1 released.  Thanks to Bill Clementson,
+Elephant should compile on Win32 now.  Also, a few minor
+fixups.
+
+September 19, 2004 -
+
+Elephant 0.2 released.  This is an BETA release.
+
+New features:
+
+- Secondary indices and cursors
+- PPC Darwin OpenMCL / SBCL
+- Doc strings and improved documentation
+- An RT-based test suite
+- many bugfixes
+
+This release has been tested on CMUCL 19a, SBCL 0.8.14 and
+Allegro 6.2 on x86 Linux and FreeBSD, and OpenMCL 0.14.2-p1
+and SBCL 0.8.14 on PPC Darwin.
+
+September 2, 2004 -
+
+The bad news: there was a bug in 0.1 which made OID
+generation inside of manual transactions deadlock.
+
+The good news: this is fixed, and I've added OpenMCL
+support.  So I'm releasing 0.1-p1.
+
+August 30, 2004 - 
+
+Elephant 0.1 was released August 30th, 2004.  This is an
+ALPHA quality release, so claims about correctness,
+performance and safety should be taken with a grain of salt.
+This release has been tested on CMUCL 19a, SBCL 0.8.13 and
+Allegro 6.2 on x86 Linux and FreeBSD.  OpenMCL and Lispworks
+versions will come soon.  As a proof of concept I've
+compiled and run CL-IRC
+
+http:://www.common-lisp.net/project/cl-irc
+
+making all objects and slots persistent, except for the
+socket-streams.  It runs, and saves everything except for
+the socket-streams.

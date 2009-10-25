@@ -1,0 +1,275 @@
+@c -*-texinfo-*-
+
+@c *** FINISH ***
+@node Elephant Architecture
+@comment node-name, next, previous, up
+@chapter Elephant Architecture
+@cindex design
+
+Elephant's early architecture was tightly coupled to the Berkeley DB
+API.  Over time we've moved towards a more modular architecture to
+support easy upgrading, repository migration, shared functionality
+between data stores and general hygene.
+
+The architecture has been carefully modularized:
+
+@image{ArchDiagram,,4.5in,[Architecture Diagram],png}
+
+To get a feeling for what is happening inside elephant, it is probably
+best to walk through the various major protocols to see how these
+components participate in implementing them.
+
+@itemize
+@item Initialization of a store controller
+@item Creating a persistent object
+@item Operations on persistent slots
+@item Operations on persistent collections
+@item Implementing @code{with-transaction}
+@end itemize
+
+@section Initializing a store controller
+
+When the main elephant @code{open-store} function is called with a
+specification, it calls get-controller which first checks to see if a
+controller already exists for that spec.  
+
+If there is no controller, it calls @code{build-controller} to
+construct one.  If the data store code base is not present,
+@code{load-data-store} is called to ensure that any asdf dependencies
+are satisfied.  The associations for asdf dependencies are statically
+configured in @code{*elephant-data-stores*} for each data store type
+supported by elephant.
+
+While being loaded, the data store is responsible for calling
+@code{register-data-store-con-init} to register a data store
+initialization function for its spec type (i.e. :BDB or :CLSQL).  
+For example, from bdb-controller.lisp:
+
+@lisp
+(eval-when (:compile-toplevel :load-toplevel)
+  (register-data-store-con-init :bdb 'bdb-test-and-construct))
+@end lisp
+
+This mapping between spec types and initialization functions is
+accessed by @code{lookup-data-store-con-init} from within
+@code{build-controller}.  The function returned by
+@code{lookup-data-store-con-init} is passed the full specification and
+returns a @code{store-controller} subclass instance for the specified
+data store.
+
+The new controller is stored in the @code{*dbconnection-spec*} hash
+table, associating the object with its specification.  Finally
+Elephant calls open-controller to actually establish a connection to
+or create the files of the data store.
+
+Finally, if the default store controller @code{*store-controller*} is
+nil, it will be initialized with the new store controller, otherwise 
+the original value is left in @code{*store-controller*} until that 
+store controller is closed using @code{close-store}.
+
+The data store implementor has access to various utilities to aid
+initialization.
+
+@itemize
+@item @code{get-user-configuration-parameter} - Access symbol tags
+      in my-config.sexp to access data store specific user
+configuration.  You can also add special variables to variables.lisp
+and add a tag-variable pair to @code{*user-configurable-parameters*}
+in variables.lisp to automatically initialize it when the store
+controller is opened.
+@item @code{get-con} behavior when store is closed or lost
+@item @code{database-version} a store controller implements this
+      in order to tell Elephant what serializer to use.  Currently,
+      version 0.6.0 databases use serializer1 and all later database
+      use serializer version 2.  This is to ensure that a given version
+      of the Elephant code can open databases from prior versions in
+      order to properly upgrade to the new code base.
+@item Symbol conversions.  To aid in opening legacy databases, a 
+      symbol conversion facility is provided in controller.lisp to
+      be applied to any symbols extracted from the legacy data store.
+      (if, for instance, the type name of subclasses changed, such as
+       sleepycat-btree becoming bdb-btree)
+@end itemize
+
+At this point, all operations referencing the store controller should
+be able to proceed.
+
+At the end of a session, 
+
+@section Persistent Object Creation
+
+The only thing that a data store has to do to support new object
+creation, other than implement the slot protocol, is implement the
+method @code{next-oid} to return the next unique object id for the
+persistent object being created.
+
+Existing objects are created during deserialization of object
+references.  The serializer subsystem is built-into the core of
+elephant and can be used by data stores.  The serializer is abstracted
+so that multiple serializers can be co-resident and the data store can
+choose the appropriate one.  The abstraction boundary between the
+serializer, the data store, and the core Elephant system is not
+perfect, so be aware and refer to existing data store implementations
+if in doubt.
+
+A serializer takes as arguments the store-controller, lisp object and
+a @code{buffer-stream} from the memory utility library and returns the
+buffer-stream with the binary serialized object.  The deserializer
+reverses this process.  For all lisp objects except persistent
+classes, this means reallocating the storage space for the object and
+recreating all its contents.  Deserializing a standard object results
+in a new standard object of the same class with the same slot values.
+
+Persistent classes are dealt with specially.  When a persistent object
+is serialized, it's oid and class are stored in the
+@code{buffer-stream}.  On deserialization it uses the oid to check in
+the store-controller's cache for an existing placeholder object.  If
+the cache misses, then it creates a new placeholder object using the
+class and oid as described in @xref{Persistent Classes and Objects}.
+The store controller contains a cache instance that is automatically
+initialized by the core Elephant object protocol.
+
+Currently the serializer is selected by the core Elephant code based
+on the store controller's database version.  See the reference section
+for details on implementing the store-controller database version
+method.  It is a relatively small change to have the data store choose
+its own serializer, however we will have to tighten up and document
+the contracts between the Elephant core code, serializer and data store.
+
+@section Persistent Slot Protocol
+
+The core protocol that the data store needs to support is the slot
+access protocol.  During object initialization, these functions are
+called to initialize the slots of the object.  The four functions are:
+
+@itemize
+@item @code{persistent-slot-reader}
+@item @code{persistent-slot-writer}
+@item @code{persistent-slot-boundp}
+@item @code{persistent-slot-makunbound}
+@end itemize
+
+More details can be found in the data store api reference section.  In
+short, these functions specialize on the specific @code{store-controller} of
+the data store and take instances, values and slotnames as appropriate.
+
+Typically the oid will be extracted from the instance and be used to
+update a table or record where the oid and slotname identifies the
+value.  A slot is typically unbound when no value exists (as opposed to
+nil).
+
+@section Persistent Collection Protocols
+
+The BTree protocol is the most extensive interface that data stores must
+implement.  Data store implementations are required to subclass the 
+abstract classes @code{btree}, @code{indexed-btree}, and @code{index}
+and implement their complete APIs.  Each class type is constructed
+by Elephant using a @code{store-controller} that builds them.  These
+methods are @code{build-btree}, @code{build-indexed-btree} and 
+@code{build-index}.
+
+The @code{get-value} interface is similar to the persistent
+slot reader and writer, but instead of using oid and slotname to set
+values, it uses the btree oid and a key value as a unique identifier
+for a value.  
+
+The BTree protocol almost requires an actual BTree implementation to
+be at all efficient.  Keys and values need to be accessible via the
+cursor API, which means they need to be walked linearly in the sort
+order of the keys (described in @ref{Persistent BTrees}).
+
+An indexed BTree automatically maintains a hash table of the indices
+defined on it so that users can access them by mapping or
+lookup-by-name.  The data store also has access to this interface.
+
+A BTree index must also maintain a connection to its parent BTree so
+that an index value can be used as a primary tree key to retrieve the
+primary BTree value as part of the @code{cursor-pnext} and
+@code{cursor-pprev} family of methods.
+
+The contract of @code{remove-kv} is that the storage in the data store
+is actually freed for reuse.  
+
+Persistent set implemenation is optional.  A default BTree based
+implementation is provided by default
+
+@section Implementing Transactions
+
+One of the most important pieces of functionality remaining to discuss
+is implementing transactions.  In existing data stores, transactions
+are merely extensions of the underlying start, commit and abort
+methods of the 3rd party library or server being used.  The Elephant
+user interfaces to these functions in two ways: a call to
+@code{execute-transaction} or explicit calls to @code{controller-start-transaction},
+@code{controller-commit-transaction} and @code{controller-abort-transaction}.
+
+@subsection Implementing Execute Transaction
+
+The macros @code{with-transaction} and @code{ensure-transaction} wrap
+access to the data store's @code{execute-transaction}.  This function
+has a rich contract.  It accepts as arguments the store controller, a
+closure that executes the transaction body and a set of keywords.
+Keywords required to be supported by the method (or ignored without
+loss of semantics) are @code{:parent} and @code{:retries}.
+
+The semantics of @code{with-transaction} are that a new transaction
+will always be requested of the data store.  If a transaction exists,
+@code{ensure-transaction} will merely call the transaction closure.
+If not it will function as a call to @code{with-transaction}.
+
+@code{execute-transaction} is that it must ensure that the transaction
+closure is executed within a dynamic context that insures the ACID
+properties of any database operations (@code{pset},@code{btree} or
+persistent slot operations).  If there is a non-local exit during this
+execution, the transaction should be aborted.  If it returns normally,
+the transaction is committed.  The integer in the @code{:retries}
+argument dictates how many times @code{execute-transaction} should
+retry the transaction before failing.
+
+Elephant provides some bookkeeping to the data store to help with
+nested transactions by using the @code{*current-transaction*} dynamic
+variable.  In the dynamic context of the transaction closure, another
+call to @code{execute-transaction} may occur with the transaction
+argument defaulting to the value of @code{*current-transaction*}.  The
+data store has to decide how to handle these cases.  To support this,
+the first call to execute transaction can create a dynamic binding for
+@code{*current-transaction*} using the @code{make-transaction-record}
+call.  This creates a transaction object that records the store
+controller that started the transaction and any data store-specific
+transaction data.  
+
+The current policy is that the body of a transaction is executed with
+the @code{*store-controller*} variable bound to the store-controller
+object creating the transaction.  This is important for default
+arguments and generally helps more than it hurts, so is an
+implementation requirement placed on @code{execute-transaction}.
+
+If two nested calls to @code{with-transaction} are made successively
+in a dynamic context, the data store can create true nested
+transactions.  The first transaction is passed to the @code{:parent}
+argument of the second.  The second can choose to just continue the
+current transaction (the CLSQL data store policy) or to nest the
+transaction (the BDB data store policy).  
+
+@subsection Interleaving Multiple Store Transactions
+
+Finally, some provision is made for the case where two store
+controllers have concurrently active transactions in the same thread.
+This feature was created to allow for migration, where a read from one
+database happens in one transaction, and while active has to writes to
+another data store with a valid transaction.
+
+The trick is that @code{with-transaction} checks to see if the current
+transaction object is the same as the @code{store-controller} object
+passed to the @code{:store-controller} argument.  If not, a fresh
+transaction is started.
+
+Currently no provision is made for more than two levels of multi-store
+nesting as we do not implement a full transaction stack (to avoid
+walking the stack on each call to handle this rare case).  If a third
+transaction is started by the store controller that started the first
+transaction, it will have no access to the parent transaction which
+may be a significant source of problems for the underlying database.
+
+
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Closure HTML Manual</title>
+<link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+<div class="sidebar">
+<div class="sidebar-title"><a href="index.html">Closure HTML</a></div>
+<div class="sidebar-main"><ul class="main">
+<li>
+<a href="installation.html">Installing Closure HTML</a><ul class="sub">
+<li><a href="installation.html#download">Download</a></li>
+<li><a href="installation.html#compilation">Installation</a></li>
+</ul>
+</li>
+<li>
+<a href="examples.html">Examples</a><br> 
+	  </li>
+<li><a href="atdoc/index.html">API documentation</a></li>
+</ul></div>
+</div>
+<div id="header"><div style="margin-left: 30px"><b><span style="color: #9c0000">Closure HTML Manual</span></b></div></div>
+<div id="homepage" class="main">
+
+  <h3>Example</h3>
+
+  <p>Parse into LHTML:</p>
+<pre class="code">
+(<b>chtml:parse</b> "&lt;p&gt;nada&lt;/p&gt;" <b>(chtml:make-lhtml-builder)</b>)
+
+=&gt; (:HTML NIL (:HEAD NIL) (:BODY NIL (:P NIL "nada")))
+</pre>
+
+  <p>Serialize LHTML back into a string:</p>
+<pre class="code">
+(<b>chtml:serialize-lhtml</b> * (<b>chtml:make-string-sink</b>))
+
+=&gt; "&lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;P&gt;nada&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;"
+</pre>
+
+  <h3>Parsing</h3>
+  <p>
+    foo
+  </p>
+<!--
+  <pre class="code">
+CL-USER> <b>(chtml:parse #p"/path/to/example.html" nil)</b>
+#&lt;SGML:PT HTML ..>
+
+CL-USER> <b>(chtml:parse "&lt;p>nada&lt;/p>" nil)</b>
+#&lt;SGML:PT HTML ..>
+
+CL-USER> (chtml:parse "&lt;p>nada&lt;/p>" <b>(chtml:make-lhtml-builder)</b>)
+(:HTML NIL (:HEAD NIL) (:BODY NIL (:P NIL "nada")))
+
+CL-USER> (chtml:parse "&lt;p>nada&lt;/p>" <b>(cxml-dom:make-dom-builder)</b>)
+#&lt;RUNE-DOM::DOCUMENT {10048699E1}>
+
+CL-USER> (chtml:parse "&lt;p>nada&lt;/p>" <b>(stp:make-builder)</b>)
+#.(CXML-STP-IMPL::DOCUMENT
+   :CHILDREN '(#.(CXML-STP:ELEMENT
+                  #| :PARENT of type DOCUMENT |#
+                  :CHILDREN '...
+                  :LOCAL-NAME "html"
+                  :NAMESPACE-URI "http://www.w3.org/1999/xhtml")))
+</pre>
+-->
+
+<!--
+  <h3>Comparison to Closure XML</h3>
+  <p>
+    The Closure browser uses Closure XML and Closure HTML.  In turn,
+    both parsers depend on closure-common.
+  </p>
+  <table cellspacing="0">
+    <tr>
+      <td style="border-bottom: 2px solid black;
+		 border-right: 2px solid black;
+		 padding: 3px">
+      </td>
+      <td style="border-bottom: 2px solid black;
+		 border-right: 1px solid black;
+		 padding: 3px">
+	Closure XML
+      </td>
+      <td style="border-bottom: 2px solid black;
+		 padding: 3px">
+	Closure HTML
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid black;
+		 border-right: 2px solid black;
+		 padding: 3px">
+	Purpose
+      </td>
+      <td style="border-bottom: 1px solid black;
+		 border-right: 1px solid black;
+		 padding: 3px">
+	XML parser
+      </td>
+      <td style="border-bottom: 1px solid black;
+		 padding: 3px">
+	HTML parser
+      </td>
+    </tr>
+    <tr>
+      <td style="border-bottom: 1px solid black;
+		 border-right: 2px solid black;
+		 padding: 3px">
+	Strictness
+      </td>
+      <td style="border-bottom: 1px solid black;
+		 border-right: 1px solid black;
+		 padding: 3px">
+	Strictly correct (non-wellformed XML rejected)
+      </td>
+      <td style="border-bottom: 1px solid black;
+		 padding: 3px">
+	Lax (Tries to accept broken HTML)
+      </td>
+    </tr>
+  </table>
+-->
+</div>
+</body>
+</html>

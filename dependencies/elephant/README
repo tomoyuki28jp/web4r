@@ -1,0 +1,58 @@
+=================================================================================
+Elephant -- An persistent metaobject protocol and object database for Common Lisp
+=================================================================================
+
+Detailed information on Elephant with an introduction, supported platforms, 
+latest news and documentation can be found at:
+
+http://www.common-lisp.net/project/elephant
+
+-----------------------------
+Copyright, License + Warrenty
+-----------------------------
+
+See LICENSE
+
+-------------------
+Supported Platforms
+-------------------
+
+See the website: http://www.common-lisp.net/project/elephant/platforms.html
+
+------------
+Latest News
+------------
+
+See the website: http://www.common-lisp.net/project/elephant/news.html
+
+--------------
+Documentation 
+--------------
+
+HTML and PDF documentation can be found on the website, or built via a 
+Makefile (and SBCL) in the /doc directory
+
+------------
+Installation
+------------
+
+See the documentation, Chapter 3 (Installation)
+
+------------------------
+Design and Development
+------------------------
+
+See the documentation, Chapter 7 (Elephant Architecture) and 
+Chapter 8 (Data Store API) for some design internals.
+
+If you want to contribute, see the Trac website for current 
+feature release plans and other things that need to be done.
+
+http://trac.common-lisp.net/elephant
+
+-------
+Authors
+-------
+
+See CREDITS and LICENSE
+

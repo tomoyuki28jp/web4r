@@ -1,0 +1,103 @@
+@c -*-texinfo-*-
+
+@node Introduction
+@comment node-name, next, previous, up
+@chapter Introduction
+@cindex History
+@cindex Goals
+
+
+Elephant is a persistent object protocol and database for Common
+Lisp. The persistent protocol component of elephant overrides class
+creation and standard slot accesses using the Meta-Object Protocol
+(MOP) to render slot values persistent. Database functionality
+includes the ability to persistently index and retrieve ordered sets
+of class instances and ordinary lisp values.  Elephant has an
+extensive test suite and the core functionality is becoming quite
+mature.
+
+The Elephant code base is available under the LLGPL license. Data
+stores each come with their own, separate license and you will have to
+evaluate the implications of using them yourself.
+
+@section History
+
+Elephant was originally envisioned as a lightweight interface layer on
+top of the Berkeley DB library, a widely-distributed embedded database
+that many unix systems have installed by default.  Berkeley DB is ACID
+compliant, transactional, process and thread safe, and fast relative
+to relational databases.
+
+Elephant has been extended to provide support for multiple backends,
+specifically a relational database backend based on CL-SQL which has
+been tested with Postgres and SQLite 3, and probably support 
+other relational systems easily.  It supports, with some care,
+multi-repository operation and enables convenient migration of data
+between repositories.
+
+The support for relational backends and migration to the LLGPL was to 
+allow for broader use of Elephant in both not-for-profit and commercial
+settings.  Several additional backends are planned for future releases
+including a native Lisp implementation released under the LLGPL.
+
+Elephant's current development focus is to enhance the feature set
+including a native lisp backend, a simple query language, and flexible
+persistence models that selectively break one or more of the ACID
+constraints to improve performance.
+
+@section Elephant Goals
+
+@itemize
+@item @strong{Transparency:} most Lisp values are easy to persist without
+significant effort or special syntax.  You can interact with the DB
+entirely from Lisp.  There is no requirement to use domain-specific
+languages, such as SQL, to access persistent resources.  Elephant
+loads via ASDF and requires no external server (except for some SQL
+backends like Postgres).
+
+@item @strong{Simplicity:} a small library with few surprises for the
+programmer. Lisp and Berkeley DB together are an excellent substrate;
+Elephant tries to leverage their features as much as possible.
+Support for additional backends are load-time options and more or less
+transparent to the user.
+
+@item @strong{Safety:} ACID, transactions. Concurrent with good multi-user (BDB) and 
+multi-threaded semantics (BDB/SQL), isolation, locking and deadlock
+detection.  (Deadlock detection does require an external process to be
+launched for Berkeley DB)
+
+@item @strong{Performance:} leverage Berkeley DB performance and/or Relational database
+reliability.  In addition to fast concurrent / transactional modes,
+elephant will (eventually) offer an accelerated single-user as well as
+pure in-memory mode that should be comparable to prevalence style
+solutions, but employ a common programmer interface.
+
+@item @strong{Historical continuity:} Elephant does not try to innovate
+significantly over prior Lisp persistent object stores such as
+AllegroStore (also based on Berkeley DB), the new AllegroCache,
+the Symbolics system Statice and PLOB.  Anyone familiar with
+those systems will recognize the Elephant interface.
+
+@item @strong{License Flexibility:} Elephant is released under the LLGPL.
+Because it supports multiple implementation of the backend, one
+can choose a backend with licensing and other features appropriate 
+to your needs.
+
+@end itemize
+
+@section More Information
+
+Join the Elephant mailing lists to ask your questions and receive
+updates.  You can also review archives for past discussions and
+questions.  Pointers can be found on the Elephant website at
+
+@uref{http://www.common-lisp.net/project/elephant}.
+
+Installation instructions can be found in the @ref{Installation}
+section.  Bugs can be reported via the Elephant Trac system at
+
+@uref{http://trac.common-lisp.net/elephant/}.
+
+This also serves as a good starting point for finding out what new
+features or capabilities you can contribute to Elephant. The Trac
+system also contains a wiki with design discussions and a FAQ.

@@ -1,0 +1,285 @@
+@c -*-texinfo-*-
+
+@node Data Store API Reference
+@comment node-name, next, previous, up
+@chapter Data Store API Reference
+@cindex Data Store
+@cindex API
+
+This reference includes functions that need to be overridden, classes
+inherited from or other action taken to implement support for a new
+data store.  Included are the exported elephant functions that
+need methods defined on them as well as the data-store-only functions
+exported in data-store-api.lisp.  Some functions here are utilities from the
+main elephant package that support store implementations, but are not
+required.  Migration, class indices and query interfaces are
+implemented on top of the store API and require no special support by
+implementors.
+
+Because the number of data store implementors is small, this is a
+minimal documentation set intended to serve as an initial guide and a
+reference.  However, it is anticipated that some interaction will be
+needed with the developers to properly harden a datastore for release.
+
+The sections each contain a short guide and a list of functions
+relevant to them.
+
+@menu
+* Registration: DSR Registration. Register the data store for the appropriate controller specifications.
+* Store Controllers: DSR Store Controllers. Subclassing the store controller.
+* Handling Serialization: DSR Handling Serialization. Available facilities for serializing objects.
+* Persistent Objects and Slot access: DSR Persistent Objects and Slot Access. Support for metaprotocol slot access.
+* Collections: DSR Collections. BTrees and indices.
+* Cursors: DSR Cursors.  Traversing BTrees.
+* Transactions: DSR Transactions. Transaction implementation.
+* Multithreading Considerations: DSR Multithreading Considerations.  Multithreading considerations.
+@c * Memory Utilities: DSR Memory Utilities. Writing primitive C types.
+@c * Foreign Libraries: DSR Foreign Libraries. Using UFFI and ASDF to build or link foreign libraries
+@end menu
+
+@node DSR Registration
+@comment node-name, next, previous, up
+@section Registration
+@cindex Registration and Initialization
+
+Elephant looks at the first element of the specification list to
+determine which data store module to use.  The master table for this
+information is @code{*elephant-data-stores*} in elephant/controller.lisp.
+This will need to be augmented for every data store with the
+specification keyword tag to be used (such as @code{:BDB} or
+@code{:CLSQL}) and the required asdf dependencies.
+
+In addition, the data store source should use an eval-when statement to
+call the following function:
+
+@include includes/fun-elephant-data-store-register-data-store-con-init.texinfo
+
+If the data store requires any special user-specified configuration,
+augment the key types in config.sexp with what you need and use the
+following function to access.
+
+@include includes/fun-elephant-data-store-get-user-configuration-parameter.texinfo
+
+@node DSR Store Controllers
+@comment node-name, next, previous, up
+@section Store Controllers
+@cindex Store Controllers
+
+Subclass store-controller and implement store and close controller
+which are called by open-store and close-store respectively.
+
+@include includes/class-elephant-store-controller.texinfo
+@include includes/fun-elephant-data-store-open-controller.texinfo
+@include includes/fun-elephant-data-store-close-controller.texinfo
+@include includes/fun-elephant-data-store-connection-is-indeed-open.texinfo
+
+For upgrading and opening legacy databases it is important that a
+store be able to indicate which version of elephant was used to create
+it.  This governs the chosen serializer, mappings between elephant
+symbols used in an old vs. new version, etc.  Because this is called
+to initialize the serializer, it must directly implemented by the
+data store without using the serializer.
+
+@include includes/fun-elephant-data-store-database-version.texinfo
+
+There are some utilities for serializing simple data without a
+serializer using the memutil package.
+
+@include includes/fun-elephant-data-store-serialize-database-version-key.texinfo
+@include includes/fun-elephant-data-store-serialize-database-version-value.texinfo
+@include includes/fun-elephant-data-store-deserialize-database-version-value.texinfo
+
+
+@node DSR Persistent Objects and Slot Access
+@comment node-name, next, previous, up
+@section Slot Access
+@cindex Persistent Objects and Slot Access
+
+Persistence is implement with a metaclass and several required base
+classes.  
+
+@include includes/class-elephant-persistent-metaclass.texinfo
+@include includes/class-elephant-persistent.texinfo
+@include includes/class-elephant-persistent-object.texinfo
+
+Persistent objects can be queries for their home store controller so
+that functions such as map-btree do not need a store-controller
+argument.  (NOTE: Should this function be user visible?)
+
+@include includes/fun-elephant-data-store-get-con.texinfo
+
+All objects require a unique object identifier.  During new object
+creation the data store is asked to produce a unique id.
+
+@include includes/fun-elephant-data-store-next-oid.texinfo
+
+These functions are called by the metaclass protocol to implement the
+appropriate operations on persistent class slots.  Unless protected by
+a transaction, the side effects of these functions should be atomic,
+persistent and visible to other threads on completion.
+
+@include includes/fun-elephant-data-store-persistent-slot-writer.texinfo
+@include includes/fun-elephant-data-store-persistent-slot-reader.texinfo
+@include includes/fun-elephant-data-store-persistent-slot-boundp.texinfo
+@include includes/fun-elephant-data-store-persistent-slot-makunbound.texinfo
+
+@node DSR Collections
+@comment node-name, next, previous, up
+@section Collections
+@cindex Collections
+
+To support collections, the data store must subclass the following
+classes.
+
+@include includes/class-elephant-persistent-collection.texinfo
+
+@include includes/class-elephant-btree.texinfo
+@include includes/class-elephant-btree-index.texinfo
+@include includes/class-elephant-indexed-btree.texinfo
+
+To create the data store-appropriate type of btree, the data store
+implements this method (and possibly related methods) aginst their store-controller.
+@include includes/fun-elephant-data-store-build-btree.texinfo
+
+Most of the user-visible operations over BTrees must be implemented.
+Class indexing functions such as @code{map-class} and
+@code{get-instances-by-value} and related functions are all
+implemented using map-btree and map-index.
+
+@itemize
+@item @ref{Generic-Function elephant:get-value} (and @code{(setf get-value)})
+@c @item @ref{Generic-Function (setf elephant:get-value)}
+@item @ref{Generic-Function elephant:existsp}
+@item @ref{Generic-Function elephant:remove-kv}
+@item @ref{Generic-Function elephant:get-index}
+@item @ref{Generic-Function elephant:remove-index}
+@item @ref{Generic-Function elephant:map-btree}
+@item @ref{Generic-Function elephant:map-index}
+@end itemize
+
+Mapping over the indices of a btree is important to derived facilities
+such as class indexing and the query subsystem.
+
+@include includes/fun-elephant-map-indices.texinfo
+
+@node DSR Cursors
+@comment node-name, next, previous, up
+@section Cursors
+@cindex Cursors
+
+Data stores must subclass these cursor classes and implement all the
+methods described in @ref{DSR Cursors} except @ref{Macro
+elephant:with-btree-cursor}.
+
+@include includes/class-elephant-cursor.texinfo
+@include includes/class-elephant-secondary-cursor.texinfo
+
+@node DSR Transactions
+@comment node-name, next, previous, up
+@section Transactions
+@cindex Transactions
+
+These functions must be implemented or stubbed by all data stores.
+
+@include includes/fun-elephant-data-store-execute-transaction.texinfo
+
+@include includes/fun-elephant-data-store-controller-start-transaction.texinfo
+@include includes/fun-elephant-data-store-controller-commit-transaction.texinfo
+@include includes/fun-elephant-data-store-controller-abort-transaction.texinfo
+
+These are supporting functions and variables for implementing
+transactions.
+
+@include includes/var-elephant-data-store-star-current-transaction-star.texinfo
+@include includes/fun-elephant-data-store-make-transaction-record.texinfo
+@include includes/fun-elephant-data-store-transaction-store.texinfo
+@include includes/fun-elephant-data-store-transaction-object.texinfo
+
+;; Designer considerations:
+;; - with-transaction passes *current-transaction* or the user parameter to execute-transaction
+;;   in the parent keyword argument.  Backends allowing nested transactions can treat the transaction
+;;   as a parent, otherwise they can reuse the current transaction by ignoring it (inheriting the dynamic
+;;   value of *current-transaction*) or rebinding the dynamic context (whatever makes coding easier).
+;; - ensure-transaction uses *current-transaction* to determine if there is a current transaction
+;;   in progress (not null).  If so, it jumps to the body directly.  Otherwise it executes the body in a 
+;;   new transaction by calling ...
+;; - execute-transaction contract:
+;;   - Backends must dynamically bind *current-transaction* to a meaningful identifier for the 
+;;     transaction in progress and execute the provided closure in that context
+;;   - All non-local exists result in an abort; only regular return values result in a commit
+;;   - If a transaction is aborted due to a deadlock or read conflict, execute-transaction should 
+;;     automatically retry with an appropriate default amount
+;;   - execute-transaction can take any number of backend-defined keywords, although designers should 
+;;     make sure there are no semantic conflicts if there is a name overlap with existing backends
+;; - A typical design approach is to make sure that the most primitive interfaces to the backend 
+;;   database look at *current-transaction* to determine whether a transaction is active.  Users code can also
+;;   access this parameter to check whether a transaction is active.
+
+@node DSR Multithreading Considerations
+@comment node-name, next, previous, up
+@section Multithreading Considerations
+@cindex Multithreading
+
+This expands slightly on the multithreading discussion in
+@ref{Multi-threaded Applications}.
+
+Elephant provides a set of generic locking functions in
+@code{src/utils/locks.lisp} to help protect any shared structures.
+There are standard locking functions (@code{ele-with-lock}) and then
+a special locking interface called @code{ele-with-fast-lock} which
+on some lisps provides a faster locking option than the standard OS
+locks of the basic interface.  (i.e. under Allegro this uses 
+@code{without-interrupts} because Allegro still runs in a single
+OS process on all platforms, this is not true of SBCL).
+
+See the sections on Transaction handling, particularly the dynamic
+behavior of @code{*current-transaction*}.  Also read up on the
+store controller section in the User Guide to better understand the
+role of @code{*store-controller*}.  At this time there are no other
+global variables to worry about.
+
+@node DSR Handling Serialization
+@comment node-name, next, previous, up
+@section Handling Serialization
+@cindex Serializer
+
+Data stores must initialize @ref{Class elephant:store-controller} with
+internal serializer functions.  Packages @code{elephant-serializer1}
+and @code{elephant-serializer2} contains serialize and deserialize
+methods on buffer-streams as defined in @code{elephant-memutil}.  The
+elephant functions @code{serialize} and @code{deserialize} dispatch on
+the appropriate slot values of the store-controller.
+
+@verbatim
+NOTE: This should perhaps become entirely the job of the data store to
+decide how to serialize values and for a specific version, what
+serializer to use.  The elphant main package can define serializers
+for use by different data stores.
+@end verbatim
+
+@include includes/fun-elephant-data-store-serialize.texinfo
+@include includes/fun-elephant-data-store-deserialize.texinfo
+
+These utility functions are useful if a data store does not have the
+ability to store variable length binary data.  They are based on the
+@code{cl-base64} library.
+
+@include includes/fun-elephant-data-store-serialize-to-base64-string.texinfo
+@include includes/fun-elephant-data-store-deserialize-from-base64-string.texinfo
+
+@c @node DSR Memory Utilities
+@c @comment node-name, next, previous, up
+@c @section Memory utilities
+@c @cindex Memory utilities
+
+@c Details about memory utilities here.
+
+@c @node DSR Foreign Libraries
+@c @comment node-name, next, previous, up
+@c @section Foreign libraries
+@c @cindex Foreign libraries
+
+@c How foreign libraries are built and used via UFFI.  What functions are
+@c in the .asd files or main lisp code to build & load libraries?
+
+

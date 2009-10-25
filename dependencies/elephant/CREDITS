@@ -1,0 +1,72 @@
+
+Authors: Andrew Blumberg and Ben Lee 
+<ablumberg@common-lisp.net> and <blee@common-lisp.net>
+
+Current maintainers: Robert L. Read <read@robertlread.net>
+	             Ian S. Eslick <eslick@media.mit.edu>
+
+http://www.common-lisp.net/project/elephant
+
+The CL-SQL based backend was written by Robert L. Read.
+
+Thanks to:
+
+Sleepycat for Berkeley DB, especially Ron Cohen and Michael
+Cahill for answering my questions
+
+Kevin Rosenberg for UFFI, answering lots of questions and
+letting me patch
+
+Gary Byers for OpenMCL and answering my questions
+
+Richard Waters (and Paul Dietz, Kevin Rosenberg) for RT
+
+Rafal Strzalinski for the Makefile and package patch
+
+Bill Clementson for Win32 help and for publicity
+
+The common-lisp.net people for hosting
+
+The CMUCL and SBCL people for great compilers
+
+SLIME for a better environment
+
+Erik Enge (CL-IRC) for being an unwitting guinea pig
+
+Dan Barlow for ASDF
+
+IBM for ICU
+
+Paul Foley for his berkeley-db package (which we didn't use,
+once we settled on UFFI)
+
+Dan Knapp fixed the fact that nil's were indistinguishable from
+unbound slots, and proved the system works with SQLite3.
+
+Tayssir John Gabbour has found two bugs on Feb. 14, 2006.
+
+Ian Eslick wrote src/indexing.lisp, which added major convenience
+features for automatically indexing on slot values in a class.  He is
+also responsible for the refactoring and most of the bug fixes in the
+0.6.0 release.
+
+Vladimir Sedach for the upgrade to Berkeley DB 4.4.
+
+pinterface@gmail.com provided the basic support in the .asd
+files for removing the Makefile from the build process.
+
+Marco Baringer provided a partial patch for 64-bit support.
+
+Pierre Thierry for a *features* hack to turn off optimization as well as
+many suggestions and dicussions.
+
+Henrik Hjelte for a number of bug fixes and for testing as well as
+his wonderful postmodern data store!
+
+Edi Weisz for Lispwork and Win32 patches
+
+Mac Chan for his Hutchentoot blog tutorial 
+
+And many others for their comments, testing and suggestions -- we're sorry
+if we missed crediting you here.
+

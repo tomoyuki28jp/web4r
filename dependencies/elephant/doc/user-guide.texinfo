@@ -1,0 +1,1731 @@
+@c -*-texinfo-*-
+
+@node User Guide
+@comment node-name, next, previous, up
+@chapter User Guide
+@cindex User Guide
+
+@menu
+* The Store Controller:: Behind the curtain.
+* Serialization details:: The devil hides in the details.
+* Persistent Classes and Objects:: All the dirt on persistent objects.
+* Class Indices:: In-depth discussion about indexing objects.
+* Persistent Sets:: Using the persistent set collection.
+* Persistent BTrees:: Using the native btree collection.
+* BTree Cursors:: Low-level access to BTrees.
+* BTree Indexing:: Alternative ways to reference objects in btrees.
+* Index Cursors:: Low-level access to BTree indices.
+* Multi-threaded Applications:: What considerations are required for safe multi-threading
+* Transaction Details:: Develop a deeper understanding of transactions and avoid the pitfalls.
+* Multi-repository Operation:: Specifying repositories.
+* Multiple Processes and Distributed Applications:: Can elephant be run on multiple CPUs and multiple machines?
+* Repository Migration and Upgrade:: How to move objects from one repository to another.
+* Performance Tuning:: How to get the most from Elephant.
+* Garbage Collection:: How to recover storage and OIDs in long-lived repositories.
+* Berkeley DB Data Store:: Commands and concerns specific to the :BDB data store
+* CLSQL Data Store:: Commands and concerns specific to the :CLSQL data store
+* Postmodern Data Store:: 
+* Native Lisp Data Store::
+@end menu
+
+@node The Store Controller
+@comment node-name, next, previous, up
+@section The Store Controller
+
+An instance of the @code{store-controller} class mediates interactions
+between Lisp and a data store.  All elephant operations are performed
+in the context of a store controller.  To be more specific, a data
+store provides a subclass of @code{store-controller} specialized to
+that data store.  Typically this object contains pointers to the disk
+files, foreign memory regions and any other necessary bookkeeping
+information to support Elephant operations such as slot writes and
+btree operations.  The store also contains the root objects and other
+bookeeping common to all data stores.
+
+To obtain a @code{store-controller} object, call the function
+@code{open-store} with a store controller specification.  The current
+data store specification formats are:
+
+@itemize
+@item Berkeley DB: '(:BDB "/path/to/datastore/directory/")
+@item CLSQL: '(:CLSQL (<sql-db-name> <sql-connect-command>))
+@end itemize
+
+Valid CLSQL database tags for @code{<sql-db-name>} are
+@code{:SQLITE} and @code{:POSTGRESQL}.  The @code{<sql-connect-command>} is
+what you would pass to CLSQL's @code{connect} command.
+
+The open store function uses the first symbol in the specification
+(i.e. :BDB or :CLSQL) to dispatch instance creation to the specified
+data store which returns a specialized instance of
+@code{store-controller}.  @code{open-store} then initializes the store
+using an internal call to @code{open-controller}.
+
+The final step of @code{open-store} is to set the global variable
+@code{*store-controller*}.  This special variable is used as a default
+value in the optional or keyword arguments to number of operations
+such as:
+
+@itemize
+@item @code{make-instance} for persistent objects
+@item @code{get-from-root} and @code{add-to-root} for accessing a store's root
+@item @code{make-btree} for creating persistent index instances
+@end itemize
+
+Each of these functions also accepts an explicit store controller
+argument for use in multiple store environments.  Normal applications
+should only be aware that this global parameter is used.  For further
+discussion of @code{*store-controller*} @pxref{Multi-repository Operation}.
+
+Additionally, @code{open-store} accepts data store specific keyword
+arguments.  For example, you can force recovery to be run on Berkeley
+DB data stores:
+
+@lisp
+(open-store *my-spec* :recover t)
+@end lisp
+
+The data store sections of the user guide (@ref{Berkeley DB Data
+Store} and @ref{CLSQL Data Store}) list all the data-store specific
+options to various elephant functions.
+
+When you finish your application, @code{close-store} will close the
+store controller.  Failing to do this properly may lead to a need to
+run recovery on the data store during the next session.  Again, see
+the relevant data store sections for more detail.
+
+
+@node Serialization details
+@comment node-name, next, previous, up
+@section Serialization details
+
+There are consequences to trying to move values from lisp memory onto
+disk in order to persist them.  The first consequence is that that
+pointers cannot be guaranteed to be valid and so references to lisp
+objects cannot be maintained.  This is very similar to the problems
+with passing references in foreign function interfaces.  The second,
+and more frustrating limitation is that lisp operations that commit
+side effects on aggregate objects, such as objects, arrays, etc,
+cannot be trapped and replicated on the disk representation.  This
+leads up to a very important consequence: all lisp objects are stored
+by @emph{value}.  This policy has a number of consequences which are
+detailed below.
+
+@subsection Restrictions of Store-by-Value
+
+@enumerate
+@item @strong{Lisp identity can't be preserved}.  
+      Since this is a store which persists across invocations of Lisp,
+this probably doesn't even make sense.  However if you get an object
+from the index, store it to a lisp variable, then get it again - they
+will not be eq:
+
+@lisp
+(setq foo (cons nil nil))
+=> (NIL)
+(add-to-root "my key" foo)
+=> (NIL)
+(add-to-root "my other key" foo)
+=> (NIL)
+(eq (get-from-root "my key")
+      (get-from-root "my other key"))
+=> NIL
+@end lisp
+
+@item @strong{Nested aggregates are serialized recursively into a single buffer}.  
+If you store an set of objects in a hash table you try to store a hash
+table, all of those objects will get stored in one large binary buffer
+with the hash keys.  This is true for all aggregates that can store
+type T (cons, array, standard object, etc).
+
+@item @strong{Circular References}.
+One benefit provided by the serializer is that the recursive
+serialization process does not lead to infinite loops when they
+encounter circular references among aggregate types.  It accomplishes
+this by assigning an ID to any non-atomic object and keeping a mapping
+between previously serialized objects and these ids.  This same
+mapping is used to reconstruct references in lisp memory on
+deserialization such that the original structure is properly
+reproduced.
+
+@item @strong{Storage limitations}.
+The serializer writes sequentially into a contiguous foreign byte
+array before passing that array to a given data store's API.  There
+are practical limits to the size of the foreign buffer that lisp can
+allocate (usually somewhere on the order of 10-100MB due to address
+space fragmentation).  Moreoever, most data stores will have a
+practical limit to the size of a transaction or the size of key or
+value they will store.  Either of these considerations should
+encourage you to plan to limit the size of objects that you serialize
+to disk.  A good rule of thumb is to stay under a handful of
+megabytes.  We have successfully serialized arrays over 100MB in the
+past, but have not tested the robustness of these large values over
+time.
+
+@item @strong{Mutated substructure does not persist}.
+
+@lisp
+(setf (car foo) T)
+=> T
+(get-from-root "my key")
+=> (NIL)
+@end lisp
+
+This will affect all aggregate types: objects, conses, hash-tables, et
+cetera.  (You can of course manually re-store the cons.)  In this
+sense elephant does not automatically provide persistent collections.
+If you want to persist every access, you have to use Persistent Sets
+(@pxref{Persistent Sets}) or BTrees (@pxref{Persistent BTrees}).
+
+@item @strong{Serialization and deserialization can be costly}. While 
+serialization is pretty fast, but it is still expensive to store large
+objects wholesale.  Also, since object identity is impossible to
+maintain, deserialization must re-cons or re-allocate the entire
+object every time increasing the number of GCs the system does.  This
+eager allocation is contrary to how most people want to use a
+database: one of the reasons to use a database is if your objects
+can't fit into main memory all at once.
+
+@item @strong{Merge-conflicts in heavily multi-process/threaded situations}.  
+This is the common read-modify-write problem in all databases.  We will talk
+more about this in the @ref{Transaction Details} section.
+
+@item @strong{Byte Ordering}.  
+      The primitive elements such as integers are written to disk in
+the native byte ordering of the machine on which the lisp runs.  This
+means that little endian machines cannot read values written by big
+endian machines and vice a versa. 
+
+@item @strong{Unicode codes and Serialized Strings}.
+      The characters and strings stored to disk can store and recover
+lisp character codes that implement unicode, but the character maps
+are the lisp character maps (produced by @code{char-code}) and not
+strict unicode codes so lisps may not be able to interoperably read
+characters unless they have identical character code maps for the
+character sets you are reading and writing.  All standard ASCII
+strings should be portable.  Here is what we know about specific
+lisps, but this should not be taken as gospel.
+@itemize 
+@item SBCL: In versions with the :sb-unicode feature (after 0.8.17) @code{char-code}
+            produces proper Unicode codes
+@item Allegro: In the interational version, @code{char-code} produces proper Unicode codes for codes < 2^16
+@item OpenMCL: OpenMCL 1.1 supports unicode, we are unsure about earlier versions
+@item Lispworks: Lispworks 5 does not, to our knowledge, produce proper Unicode characters.  
+(@emph{This can be fixed on request iff users ask for it and are willing to pay the performance hit})
+@end itemize
+
+@end enumerate
+
+@subsection Atomic Types
+
+Atomic types have no recursive substructure.  That is they cannot
+contain arbitrary objects and are of a bounded size.  (Bignums are an
+exception, but they have a predictable structure and cannot reference
+or otherwise encapsulate other objects).  The following is a list of
+atoms and a discussion of how they are serialized.
+
+@itemize
+@item @strong{@code{nil}}: 
+      nil has it's own special tag in the serializer so it is easily
+identifiable.  @code{nil} is an awkward value as it is also a boolean.
+The boolean value @code{t} is stored as the symbol 'T.
+@item @strong{fixnums}:
+      The serializer will store both 32-bit and 64-bit fixnums.  Both
+types of fixnums are readable by a 32-bit or 64-bit lisp, but 64-bit
+fixnums are only written if the underlying lisp is supports fixnums
+between 32 and 64 bits.
+@item @strong{bignums}:
+      Bignums are broken into a sequence of fixnum-sized chunks and
+assembled by masking words onto the bignum.  This is awfully
+expensive, but it's always correct and fully portable.
+@item @strong{small-float}:
+      Supported only on Lispworks 5 where type @code{small-float} is
+not equivalent to type @code{single-float} as it is on all other
+supported platforms.  Written to disk and deserialized as a single
+float so any memory footprint savings of @code{small-float} is lost.
+@item @strong{single-float}:
+      32-bit floating point numbers
+@item @strong{double-float}:
+      64-bit floating point numbers
+@item @strong{rational}:
+      A rational is merely a ratio of two integers stored as fixnums or bignums.
+@item @strong{complex}:
+      A complex is a pair of floating point values, rationals or integers.
+@item @strong{char}:
+      Standalone chars are represented by their char-code and are
+stored in 32-bit format to ensure that all lisps are stored correctly.
+@item @strong{strings}:
+      Strings can be represented as 8, 16 or 32 bit sequences
+depending on the character sizes used in the underlying lisp.  Because
+strings can be such a large percentage of on-disk space, Elephant uses
+a peculiar method of encoding strings.  Strings are converted from
+their in-memory representation using @code{char-code}.  The size of
+the first character dictates the word width used for encoding.  If a
+character violates the word width, the string encoding is aborted and
+the next larger width is chosen.  The rationale here is that many
+strings consist of Latin characters with codes less than 256.  Strings
+stored in other character sets tend to all be of codes > 256.
+Therefore it is likely that the first character will properly
+determine the word size of the string.  (@emph{On request, we can easily make
+a configuration option to fix the word width for encoding})
+@item @strong{pathname}:
+      A pathname is merely the @code{namestring} of the path object
+stored as a string.  The path object is reconstructed from the
+namestring using @code{parse-namestring} during deserialization.
+@item @strong{symbol}: 
+      Symbols are stored as two strings, the package name and the symbol name in that package.  When deserialized, the target package is searched for and the symbol is interned in that package.
+@end itemize
+
+@subsection Aggregate Types
+
+The next list are @emph{aggregate} types, meaning that elements of
+that type can contain references to elements of type @code{T}.  That
+means, in theory, that storing an aggregate type to disk that refers
+to other objects can copy every reachable object!  This is a direct
+and dire consequence of the ``store-by-value'' restriction.
+(@pxref{Persistent Classes and Objects} for how to design around the
+store-by-value restriction).
+
+This list describes how aggregates are handled by the serializer.
+
+@itemize
+@item @strong{cons}:
+      Cons is simply stored as a cons record containing two nested
+elements.  Linear lists are not treated specially (i.e. no cdr-coding)
+by the serializer.
+@item @strong{array}:
+      Arrays are stored as sequences of nested, serialized elements.
+The array parameters are also stored so that arrays with fill
+pointers, adjustable arrays can be stored and reconstructed.  The only
+arrays that cannot be reproduced are displaced arrays, which are
+copied by value and reconstructed as standard arrays during
+deserialization.
+@item @strong{hash-table}:
+      Hash tables are stored as a sequence of key-value pairs, where
+the key and value can be any serializable value.  On deserialization,
+the reconstructed key and value quantities are written incrementally
+into the hash table.  The hash table does remember it's test, rehash
+size and threshold and it's total count.  The final size of the new
+hash table is set to @code{(* (/ size reshash-threshold) rehash-size)}.
+@item @strong{struct}:
+      Structure objects are serialized using the metaprotocol.  Each
+slot where the value is bound is serialized by serializing the slot
+name and the value in sequence.  The underlying lisp must support the
+@code{struct-constructor} method so that a new, empty instance of the
+structure can be created and then populated by the stored keys and
+values.
+@item @strong{object}:
+      Instances of subclasses of standard-object are stored almost
+identically to structs.  The type of the object is stored and the
+object slots with bound values are serialized as slotname-value pairs.
+To read an object of this type, the lisp image must have the class
+defined and it must have at least the slots that are stored on disk.
+There is no good method for schema evolution (redefining objects to
+have less slots) of ordinary classes.
+@end itemize
+
+One final strategic consideration is to whether you plan on sharing the binary
+database between machines or between different lisp platforms on the
+same machine.  This is almost possible today, but there are some
+restrictions.  In the section @ref{Repository Migration and Upgrade}
+we will discuss possible ways of migrating an existing database across
+platforms and lisps.
+
+@node Persistent Classes and Objects
+@comment node-name, next, previous, up
+@section Persistent Classes and Objects
+
+Persistent classes are instances of the @code{persistent-metaclass}
+metaclass.  All persistent classes keep track of which slots are
+@code{:persistent}, @code{:transient} and/or @code{:indexed} and are
+used as specializers in the persistence meta-object protocols
+(initialization of slots, slot-access, etc).
+
+All persistent classes create objects that inherit from the
+@code{persistent} class.  The @code{persistent} class provides two
+slots that contain a unique object identifier (oid) and a reference to
+the @code{store-controller} specification they are associated with.
+Persistent slots do not take up any storage space in memory, instead
+the @code{persistent-metaclass} slot access protocol redirects slot
+accesses into calls to the store controller.  Typically, the
+underlying data store will then perform the necessary serialization,
+deserialization to read and write data to disk.
+
+When a reference to a @code{persistent} instance itself is written to
+the database, for example as a key or value in a @code{btree}, only
+the unique ID and class of the instance is stored.  When read, a
+persistent object instance is re-created (see below).  This means that
+serialization of persistent objects is exceedingly cheap compared to
+standard objects.  The subsection on instance creation below will
+discuss the lifecycle of a persistent object in more detail.
+
+@subsection Persistent Class Definition
+
+To create persistent classes, the user needs to specify the
+@code{persistent-metaclass} to the class initarg @code{:metaclass}.
+
+@lisp
+(defclass my-pclass ()
+   ((slot1 :accessor slot1 :initarg :slot1 :initform 1))
+   (:metaclass persistent-metaclass))
+@end lisp
+
+The only differences between the syntax of standard and persistent
+class definitions is the ability to specify a slot storage policy and
+an index policy.  Slot value storage policies are specified by a
+boolean argument to the slot initargs @code{:persistent},
+@code{:transient} and @code{:indexed}.  Slots are @code{:persistent}
+and not @code{:indexed} by default.
+
+The @code{defpclass} macro is provided as a convenience to hide the
+@code{:metaclass} slot option.
+
+@lisp
+(defpclass my-pclass ()
+   ((pslot1 :accessor pslot1 :initarg :pslot1 :initform 'one)
+    (pslot2 :accessor pslot2 :initarg :pslot2 :initform 'two 
+            :persistent t)
+    (tslot1 :accessor tslot1 :initarg :tslot1 :initform 'three 
+            :transient t)))
+@end lisp
+
+In the definition above the class @code{my-pclass} is an instance of
+the metaclass @code{persistent-metaclass}.  According to this
+definition @code{pslot1} and @code{pslot2} are persistent while
+@code{tslot1} is transient and stored in memory.
+
+Slot storage class implications are straightforward.  Persistent slot
+writes are durably stored to disk and reads are made from disk and can
+be part of a ACID compliant transaction .  Transient slots are
+initialized on instance creation according to initforms or initargs.
+Transient slot values are never stored to nor loaded from the database
+and their accesses cannot be protected by transactions.  (Ordinary
+multi-process synchronization would be required instead).
+
+The @code{:index} option tells Elephant whether to maintain an
+inverted index that maps slot values to their parent objects.  The
+behavior of indexed classes and class slots are discussed in depth in
+@ref{Class Indices}.
+
+Persistent classes have their metaobject protocols modified through
+specializations on @code{persistent-metaclass}.  These specializations
+include the creation of special slot metaobjects:
+@code{transient-slot-definition}, @code{persistent-slot-definition}
+and direct and effective versions of each.  For the MOP aficionado the
+highlights of the new class initialization protocols are as follows:
+
+@itemize
+@item @code{shared-initialize :around} ensures that this class inherits from 
+      @code{persistent-object} and @code{persistent} if it doesn't
+      already and that the class option @code{:index} results in class indexes
+      being indexed;.
+@item @code{direct-slot-initialization-class} returns the appropriate slot 
+      metaobject based on the values of the @code{:transient} and @code{:persistent}
+      slot definition keywords.  It also does some simple error checking for invalid
+      combinations, for example, indexed transient slots.
+@item @code{effective-slot-definition-class} performs the same role as the above for
+      effective slots.
+@item @code{slot-definition-allocation} returns the @code{:database} allocation for
+      persistent slot definitions so the underlying lisp will not allocate instance or
+      class storage under some lisps.  
+@item @code{compute-effective-slot-definition-initargs} performs some error checking 
+      to ensure a subclass does not try to make an inherited persistent slot transient.
+@item @code{finalize-inheritance} called before the first instance is created in order 
+      to finalize the list of persistent slots to account for any
+      forward referenced classes in the inheritence list.  Similarly the
+      list of indexed slots is computed.  This function is also called by the class indexing
+      code if any calls are made that depend on knowing which slots are indexed.
+@end itemize
+
+Reinitialization is discussed in the section on class redefinition.
+
+@subsection Instance Creation
+
+Persistent objects are created just like standard objects, with a call
+to @code{make-instance}.  Initforms and slot initargs behave as the
+user expects.  The call to @code{make-instance} of a persistent class
+will fail unless there is a default @code{store-controller} instance
+in the variable @code{*store-controller*} or the @code{:sc} keyword
+argument is provided a valid store controller object.  The store
+controller is required to provide a unique object id, initialize the
+specification pointer of the instance and to store the values of any
+initialized slots.  The initialization process is as follows:
+
+@itemize
+@item @code{initialize-instance :before} is called to initialize the 
+      @code{oid} slot and the data store specification slot @code{dbcn-spc-pst}.
+      The oid is set by the argument @code{:from-oid} or by calling the store
+      controller for a new oid.
+@item @code{shared-initialize :around} is called to ensure that the underlying
+      lisp does not bypass the metaobject protocol during slot
+      initialization by manually initializing the persistent slots 
+      and passing the transient slots to the underlying lisp.  
+      Finally it adds the instance to the class index so that any inverted indicies 
+      are updated appropriately.  
+@end itemize
+
+Persistent slots are initialized only under the following conditions:
+
+@itemize
+@item An initarg is provided to @code{make-instance}
+@item The database slot value is unbound, an initform exists and from-oid was not specified
+@end itemize
+
+After initialization the persistent instance is added to its host
+store controller's object cache.  This cache is a weak hash table that
+maps oids to object instances.  So after initialization the following
+state has been created:
+
+@itemize
+@item @strong{Placeholder Instance:} An instance of the class is in memory, containing storage for
+      the oid, the specification reference, lisp instance data and any
+  transient slot values.  We call this the placeholder instance which 
+  mediates access to persistent values, but does not itself persist.
+@item @strong{Cached Reference:} A weak reference to the instance is in the store controller object cache
+@item @strong{Memory References:} A normal reference to the instance is (maybe) retained by the caller of
+      @code{make-instance}.
+@item @strong{Database Slot Values:} The data store contains the persistent slot values that were initialized,
+      indexed by the object id and slot name.
+@item @strong{Database References:} If the resulting placeholder instance was written to a persistent slot,
+      added to a btree or the class is indexed, a @strong{reference}
+to the instance was written into the data store.  Today this reference
+consists of an oid and a class name.  If this reference is reachable,
+then the persistent object can be reconstructed using the
+@code{:from-oid} argument.
+@end itemize
+
+If you mnanually create an object using an OID which already exists in
+the database, @code{initargs} to @code{make-instance} take precedence
+over existing values in the database, which in turn take precedence
+over any @code{initforms} defined in the class.
+
+@subsection Persistent Instance Lifecycle
+
+The distributed nature of persistent instance storage results in some
+interesting behaviors, especially with respect to transient slots.
+The prior section detailed the state of the system after the original
+initialization of an object.  The object can then be in a number of
+different states:
+
+@itemize
+@item @strong{Resident:} The canonical state of an in-use persistent
+      object as described in the initialization section above.
+@item @strong{Unreferenced, Unreclaimed:} All memory references to the 
+      object have been dropped but the placeholder instance has not yet
+      been garbage collected.  The weak pointer still exists in the cache.
+      If a database reference is fetched from the data store, the cached
+      value will be used.
+@item @strong{Non-resident:} The object only exists as reachable database
+      references and slot values.  This is the state after garbage collection
+      of the placeholder instance.
+@item @strong{Recreated:} An intermediary state where a non resident object
+      is fetched from the data store and its placeholder object must be
+      recreated prior to the object enter the resident state.
+@end itemize
+
+The garbage collection of the placeholder instance is an important
+feature.  This means that we can have more objects in our system than
+are currently resident in memory.  If this were not the case, what
+would be the point of an object database?
+
+The recreated state deserves to be discussed in more detail.  We
+learned earlier that the database reference contains the oid and class
+of the object, and of course we know the store-controller the
+reference is stored into@footnote{If you attempt to store an object
+from one store into another, the system will issue an error condition
+called @code{cross-reference-error}}, so this information is
+sufficient to reconstruct the placeholder instance.
+
+When the reference is deserialized, its oid is used to look up the
+object in the store controller's object cache.  If this fails, then
+the instance is created with a call much like this:
+
+@lisp
+(make-instance 'pclass :from-oid 2000 :sc *store-controller*)
+@end lisp
+
+The @code{:from-oid} argument to @code{make-instance} overrides some
+of the normal make-instance behavior by inhibiting all initform
+initialization as the object's slots are assumed to be properly
+initialized from the original call to @code{make-instance}.
+
+@subsection Using Transient Slots
+
+What about transient slots?  Transients slots are tied to the
+placeholder object where their storage is allocated.  While the
+persistent slots are permanently stored in the data store, transient
+slots can be garbage collected when all memory references have been
+dropped, even if database references exist.
+
+After collection, if you retrieve an object from the store, its
+transient slots will be reset to the slot initforms from the class
+definition.  You can only reliably use @code{:initargs} to initialize
+transient or persistent slots during the initial call to
+@code{make-instance} or when manually creating the instance from an oid.
+
+Here is an example illustrating the ephemeral nature of transient
+slots:
+
+@lisp
+(setf pobj1 (make-instance 'my-pclass :pslot1 1 :tslot3 3))
+=> #<MY-PCLASS>
+
+(pslot1 pobj1) => 1
+(pslot2 pobj1) => 'two
+(tslot1 pobj1) => 3
+
+(add-to-root 'pobj1 pobj1)
+
+(setf pobj2 (get-from-root 'pobj1))
+=> #<MY-PCLASS>
+
+(pslot1 pobj2) => 1
+(pslot2 pobj2) => 'two
+(tslot1 pobj2) => 3
+
+(setf pobj1 nil)
+(setf pobj2 nil)
+(gc)
+
+(setf pobj3 (get-from-root 'pobj1))
+(pslot1 pobj2) => 1
+(pslot2 pobj2) => 'two
+(tslot1 pobj2) => 'three
+@end lisp
+
+The implications of this behavior is that you need to think carefully
+about how to use employ transient values.  Essentially you cannot make
+assumptions about the state of transient values in objects loaded from
+the store unless you know that they were loaded at some point in time
+and cannot be GC'ed (i.e. they are stored in a list or hash table).
+
+A good policy is to initialize transient values using an @code{:after}
+method on @code{initialize-instance}.  This allows you to initialize
+transient values using either system defaults or persistent slot
+values.  That way you can ensure that the transient slots are always
+in a consistent state when accessed by the application, regardless of
+when the placeholder object was recreated.  
+
+In general, transient slots are a good place for intermediate values
+in a computation or to cache frequently read items to avoid
+deserialization overhead.  @code{indexed-btree} is an example of this
+approach, an in-memory hash is cached in the transient slot for reads
+and writes are mirrored to a serialized hash in a persistent slot.
+The @code{:after} method just copies the persistent hash value to the
+transient slot.
+
+@subsection Using Persistent Slots
+
+Persistent slot use is straightforward.  You can read from them, write
+to them or make them unbound.  Remember that every access goes to the
+data store.  This makes reads relatively expensive as they may result
+in a disk seek.  Writes can be doubly expensive, especially outside a
+transaction, as the write will result in a synchronous disk synch
+operation.
+
+Reads and writes require the home store controller to be valid and
+open.  The placeholder object's specification pointer is used to
+retrieve the @code{store-controller} object.  If this object is closed
+or mising, the system will give you a restart option to reopen the
+controller and continue.
+
+Persistent slot behavior is implemented by overloading the relevant
+MOP functions controlling slot access:
+
+@itemize
+@item @code{slot-value-using-class} 
+@item @code{(setf slot-value-using-class)}
+@item @code{slot-boundp-using-class} 
+@item @code{slot-makunbound-using-class}
+@end itemize
+
+Each of these functions retrieves the home store-controller for the
+instance and then calls a method specialized on the class of that
+store controller.  This method is responsible for mapping the oid and
+slotname of the slot access to the appropriate value in the data
+store.
+
+@subsection Class Redefinition
+
+Class redefinition is problematic in the current (0.9) version of
+Elephant.  The usual CLOS mechanisms are properly implemented, but
+updating instances will only work for those instances that are in
+memory at the time.  Instances that are non-resident will not be
+updated.  This is usually not as big a problem as it seems, because
+the slot values are stored independently.  An outline of the update
+procedure follows:
+
+The function @code{update-instance-for-redefined-class} is called by
+CLOS whenever @code{defclass} is re-evaluated and results in a change
+in the list of slots.  
+
+For transient slots the behavior is the same as it is in CLOS for
+all in-memory slots.
+
+@itemize
+@item Added slots: are added to the object and their initforms
+      called just as if they were created without initargs
+@item Discarded slots: are dropped and their values lost
+@end itemize
+
+Persistent slots have a slightly different behavior, as only resident
+(those with valid placeholder objects) objects are updated.
+
+@itemize
+@item Added slots (resident): are added to the object and the initforms
+      are called only on in-memory objects, as in an empty call to
+      @code{make-instance}
+@item Added slots (non-resident): the added slots will have unbound values
+@item Discarded slots (resident): slots are dropped from the class and become 
+      inaccessible, but their values are not deleted from the database.  This
+      is a precautionary measure as losing persistent data because of an 
+      accidental re-evaluation while editing a defclass could be painful.  If
+      you add the slot back, the original value will be accessible regardless of
+      the initform.
+@item Discarded slots (non-resident): This has the same behavior as resident objects, 
+      as no side effects are made on the objects or their slots
+@end itemize
+
+There are additional considerations for matching class indexing
+options in the class object to the actual indices in the database.
+The following section will discuss synchronizing these if they
+diverge.
+
+@emph{(Note: release 0.9.1 should fix this by providing an oid->class map that allows
+the system to cheaply iterate over all objects and update them appropriately.  This 
+hasn't been done yet due to performance implications.  See Trac system for the appropriate
+tickets)}
+
+@subsection Support for @code{change-class}
+
+Elephant also supports the @code{change-class} by overloading
+@code{update-instance-for-different-class}.  The handling of slots in
+this case is identical to the class redefinition above.  Persistent
+and transient slot values are retained if their name matches a
+slotname in the new class and initforms are called on newly added
+slots.  Valid initargs for any slot will override this default behavior
+and set the slot value to the initarg value.
+
+Because the instance is guaranteed to be resident, the operation has none of the
+resident/non-resident conflicts above.
+
+Change class cannot convert between persistent and non-persistent classes and will
+flag an error if you try to do so.  @emph{(Note: this could be implemented in the
+future if users request it)}
+
+@node Class Indices
+@comment node-name, next, previous, up
+@section Class Indices
+
+You can enable/disable class indexing for an entire class.  When you disable
+indexing all references to instances of that class are lost.  If you re-enable
+class indexing only newly created classes will be stored in the class index.
+You can manually restore them by using @code{find-class-index} to get the 
+clas index BTree if you have an alternate in-memory index.
+
+You can add/remove a secondary index for a slot.  So long as the class index
+remains, this can be done multiple times without losing any data.
+
+There is also a facility for defining 'derived slots'.  These can be non-slot
+parameters which are a function of the class's persistent slot values.  For
+example you can use an index to keep an alternate representation available
+for fast indexing.  If an object has an x,y coordinate, you could define a
+derived index for r,theta which stored references in polar coordinates.
+These would be ordered so you could iterate over a class-index to get objects
+in order of increasing radius from the origin or over a range of theta.
+
+Beware, however, that derived indices have to compute their result every
+time you update any persistent instance's slot.  This is because there is 
+no way to know which persistent slots the derived index value(s) depends
+on.  Thus there is a fairly significant computational cost to objects
+with frequent updates having derived indices.  The storage cost, however,
+may be less as all that is added is the index value and an OID reference
+into the class index.  To add a slot value you add a serialized 
+OID+class-ref+slotname to index value which can be much larger if you
+use long slotnames and package names and unicode.
+
+Thus, the question of if and how a given class should be indexed is 
+very flexible and dynamic, and does not need to be determined at the 
+beginning of your development.  This represents the ability to ``late bind''
+the decision of what to index.  
+
+In general, there is always a tradeoff: an indexed slot increases storage
+associated with that slot and slows down write operations.  Reads however remain
+as fast as for unindexed persistent slots.  The Elephant system
+makes it simple to choose where and when one wants to utilize this tradeoff.
+
+Finally, that file @file{src/elephant/classindex-utils.lisp} documents 
+tools for handling class redefinitions and the policy that should be 
+used for synchronizing the classes with the database.  This process is
+somewhat user customizable; documentation for this exists in the source
+file referenced above.
+
+@subsection Synchronizing Classes and Data Stores
+
+Sometimes you may change a defclass form and then connect to a
+database with instances that do not match the current defclass
+definition.  Because of the defclass behavior above, there is no need
+to detect this case as the behavior will be as if all instances were
+non-resident at redefinition time.  However, this is an issue for
+indexed classes as the cost of indexing is high.  There is a
+synchronization policy which updates either the class or the online
+class indexing mechanism at the time you try to perform an index
+operation (i.e. when @code{find-class-index} is called).
+
+A policy is selected by setting the value of
+@code{*default-indexed-class-synch-policy*} with the appropriate
+policy:
+
+@itemize
+@item :class - The class is the master, and indices are deleted for any slots
+               that are no longer indexed
+@item :db - The database is the master and the class indexing annotations are
+            updated so that the slots that satisfy @code{class-indexedp-by-name}
+            are isomorphic to the existing indices in the db.
+@item :union - This does what you would expect, updates the class to match any
+               existing indices and creates new indices.
+@end itemize
+
+Derived slots can be problematic as they may depend on slot values
+that no longer exist in the changed defclass.  This will result in an
+error, so for now you will have to manage any mismatches such as this
+yourself.
+
+@emph{Note: release 0.9.1 should fix both mismatches and performance issues related
+to derived indices by allowing the user to provide hints as to which slot values the
+index depends.  This will allow the system to only update when the appropriate slots
+change and to delete or inhibit derived indicies when slots are deleted.  We will also
+improve error handling for this case, so you can delete the derived index and continue
+performing the write to a persistent object that flagged the error.}
+
+@node Persistent Sets
+@comment node-name, next, previous, up
+@section Persistent Sets
+
+Persistent sets are fairly straightforward and are well-introduced by
+the tutorial, please review the tutorial or read the reference section
+for persistent sets.
+
+@node Persistent BTrees
+@comment node-name, next, previous, up
+@section Persistent BTrees
+
+A BTree is a data structure designed for on-disk databases.  It's
+design goal is to minimize the number of disk seeks while traversing
+the tree structure.  In contrast to a binary tree, the BTree exploits
+the properties of memory/disk data heirarchies.  Disk seeks are
+expensive while loading large blocks of data is relatively inexpensive
+and in-memory scanning of a block of memory is much cheaper than a
+disk seek.  This means a few, large nodes containing many keys is 
+a more balanced data structure than 
+
+The BTree, or derivatives, are the basis of most record-oriented
+database including SQL servers, Berkeley DB and many others.  Elephant
+directly exposes the BTree structure to the user so the user can
+decide how best to manage and traverse it.  Many of Elephant's other
+facilities, such as the class indexing discussed above, are
+implemented on top of the BTree.
+
+The basic interface to the BTree is via the @code{get-value} method.
+Both the key and the value are serialized and then the BTree is
+traversed according to the sorted order of the key and the value
+inserted in its sorted order.  Insertion, access and deletion (via
+@code{remove-kv}) are all O(log N) complexity operations.
+
+Sorting in BTrees requires some discussion.  The sorting constraints
+on btrees are dictated by the original implementation on Berkeley DB.
+The Berkeley DB data store sorts keys based on their serialized
+representation.  The CLSQL implementation has to sort based on the
+deserialized lisp value, so sorted traversals require reading all the
+objects into memory.  This places some limitations on systems that
+exploit the CLSQL implementation (@pxref{CLSQL Data Store} for more
+information).
+
+Sorting is done first by primitive type (string, standard-class,
+array, etc) and then by value within that type.  The type order and
+internal sorting constraint is:
+
+@enumerate
+@item Numbers.  All numbers are sorted as a class by their numeric value.  Effectively 
+all numbers are coerced into a double float and sorted relative to each other.
+@item Strings.  Because the serializer stores strings in variable width structures.  Each width type is sorted separately, then sorted lexically.  (NOTE: This should get fixed for 1.0.  Strings should be sorted together)
+@item Pathnames.  Sorted by their string radix then lexically.
+@item Symbols.  Sorted by string radix, then lexically.
+@item Aggregates.  Sorted by type in the following order, then arbitrarily internally.  Persistent instance references, cons, hash-table, standard objects, arrays, structs and then nil.
+@end enumerate
+
+String comparisons are case insensitive today, so @code{"Adam" =
+"adam" > "Steve" }.  When unicode support is finalized, comparisons
+will be case sensitive.
+
+Like persistent sets, BTrees are not garbage collected so to recover
+the storage of a BTree, just run the function @code{drop-btree} to
+delete all the key-value pairs and return their storage to the
+database for reuse.  The oid used by the btree, however, will not be
+recovered.
+
+@node BTree Cursors
+@comment node-name, next, previous, up
+@section BTree Cursors
+
+Aside from getting, setting and dropping key-value pairs from the
+database, you can also traverse the BTree structure one key-value pair
+at a time.  
+
+Cursors must be created in the context of an active transaction
+(i.e. a @code{with/ensure-transaction} body).  A cursor is made
+through a call to the @code{make-cursor} method of the BTree you wish
+to traverse.  
+
+An existing cursors can also be duplicated within the same transaction
+by calling @code{cursor-duplicate} which avoids the overhead of
+setting a second cursor to the same location.
+
+Cursors can be in two states: initialized and uninitialized.
+@ref{BTree Cursor API} for details.
+
+To initialize a cursor, you have to use one of the initializing
+functions to select a key-value pair in the btree.
+
+@itemize
+@item @code{cursor-first} and @code{cursor-last}: initialize the 
+cursor to the first and last element of the btree, respectively.
+@item @code{cursor-set} and @code{cursor-set-range}: Sets the cursor
+to the first key-pair values according to the specified key.  If the
+set fails, the cursor will remain uninitialized.  The ranged set will
+set it to the first key-value pair where the key is equal to or
+greater than the key argument.
+@end itemize
+
+A valid cursor will return multiple values: @code{(exists? key
+value)}.  The first argument tells whether or not the cursor is
+initialized and pointing at a proper value.  The second two arguments
+are self-explanatory.
+
+@code{cursor-current} returns the current state of the cursor, nil if
+it is uninitialized.
+
+Once a cursor is properly initialized, it can be incremented or
+decremented, a simple constant-time operation on BTrees.  
+
+@code{cursor-next} and @code{cursor-prev} move the cursor a single step
+forward or back across the sorted key-value pairs.  @code{cursor-next}
+moves in ascending order, @code{cursor-prev} in descending order.
+
+Finally cursors can be used for side effects on the current key-value
+pair.  The function @code{cursor-put} replaces the value (but does not
+increment the current value) and @code{cursor-delete} deletes the
+key-value pair and become uninitialized.  It is a valid operation to
+use the @code{(setf get-value)} method while the cursor is active to
+change the value at the current cursor.
+
+If cursors take place within a transaction, what happens when
+traversing a very large BTree?  This depends on the data store policy
+regarding whether a cursor read locks its entire btree (or the subset
+that is being iterated over) or allows changes to any pairs its
+transaction has not changed.  See your data store documenation for
+details.
+
+@node BTree Indexing
+@comment node-name, next, previous, up
+@section BTree Indexing
+
+One powerful feature of Elephant is the ability to add indexes to
+BTrees.  An indexed btree is a subclass of the standard @code{btree}
+called @code{indexed-btree}.  The indexed btree maintain a set of
+indices (instances of @code{btree-index}) which provide alternative
+ways of indexing into the values of the main btree.
+
+Each index is itself a btree, but with the property that its values
+are matched to the keys of the main btree.  That is if you have a btree
+with key-value pairs:
+
+@lisp
+("henry" . #<name: Henry, age: 45>)
+("larry" . #<name: Larry, age: 29>) 
+@end lisp 
+
+You can define an index that is populated by the age of the person object:
+
+@lisp
+(29 . "Larry") 
+(45 . "Henry")
+@end lisp
+
+Now when you call @code{(get-value 29 index)} you get back
+@code{#<name: Larry, age: 29>}!  Note also that these new pairs are
+ordered by age, the opposite of the alphabetic ordering of the names
+in the first two pairs.  If you read through the tutorial, you may
+have guessed by now that this is the mechanism used to implement the
+class indexing capabilities previously described.  
+
+An index is created by using the @code{add-index} function.  This
+function takes the @code{indexed-btree} you wish to index, an symbolic
+name for the index and a key-form which dictates how the index
+populates it's keys as a function of the main btree's keys and values.
+(It is a function of three arguments: the index itself, the key and
+the value).
+
+A simple, contrived example is shown in the figure below:
+
+@center @image{IndexedBtrees1,,4.0in,[BTree Index Diagram],png}
+
+Here we have a primary, indexed btree with a set of keys and values
+represented by symbols.  We'll declare the function @code{val} to take
+a value symbol and extract it's number.  The key-form in the
+@code{mod5 * 2} index is:
+
+@lisp
+(lambda (k v)
+  (if (= 0 (mod (val v) 5))
+      (values t (* 2 (val v)))
+      (values nil nil)))
+@end lisp
+
+When a key-value pair is written to the primary btree, the index is
+automatically updated through a call to the key-form.  If the key-form
+above is called with @code{key1} and @code{value1}, @code{val} will
+return 1 which fails the if test.  The second values statement,
+@code{(values nil nil)} indicates that this pair is not to be indexed.
+If I pass @code{key5} and @code{value5} to this same key form, I get
+back 10 as the @code{(val 'value5)} is 5 and @code{(= 0 (mod 5 5))} so
+the form returns @code{(values t 10)} meaning the index should add an
+index entry of 10 (@code{(* 2 5)}) associated with the key value
+@code{key5}.
+
+So, of course, making the call @code{(get-value 10 index-mod5)} will
+return @code{value5}.
+
+The second index in our little example calculates the number of bits
+in all odd numbered values.  This illustrates an important property of
+the @code{btree-index}: it allows duplicate keys.  Standard
+@code{btree} and @code{indexed-btree} classes are not allowed to have
+duplicate elements.  The odd index allows us to ask simple questions
+like: ``what are all the odd values with ids that fit into 4 bits?''.
+
+To extract this set, we have to use cursor functions specifically
+designed for the index that iterate over duplicate values.
+ 
+@node Index Cursors
+@comment node-name, next, previous, up
+@section Index Cursors
+
+Index cursors are just like BTree cursors except you can get the main
+BTree value instead of the index value.  There are also a parallel set
+of operations such as @code{cursor-pnext} instead of
+@code{cursor-next} which returns @code{exists}, @code{key},
+@code{primary-btree-value} and @code{index-value = primary-btree-key}.
+
+Operations that have the same behavior, but return primary btree
+values and keys are:
+
+@multitable @columnfractions .3 .1 .35
+@headitem BTree Cursor Function @tab @tab Index Cursor Function
+
+@item @code{cursor-first}
+@tab =>
+@tab @code{cursor-pfirst}
+
+@item @code{cursor-last }
+@tab =>
+@tab @code{cursor-plast}
+
+@item @code{cursor-current }
+@tab =>
+@tab @code{cursor-pcurrent}
+
+@item @code{cursor-next }
+@tab =>
+@tab @code{cursor-pnext} 
+
+@item @code{cursor-prev}
+@tab =>
+@tab @code{cursor-pprev}
+
+@item @code{cursor-set}
+@tab =>
+@tab @code{cursor-pset}
+
+@item @code{cursor-set-range}
+@tab =>
+@tab @code{cursor-set-prange}
+@end multitable
+
+The big difference between btree cursors and index cursors is that 
+indices can have duplicate key values.  This means we have to choose
+between incrementing over elements, unique key-values or only within
+a duplicate segment.  There are cursor operations for each:
+
+@itemize
+@item Simple move. Standard btree operations work plus @code{cursor-pnext} and @code{cursor-pprev}
+@item Move to a different key value. @code{cursor-pnext-nodup} and @code{cursor-pprev-nodup}
+@item Move to next duplicate key value. @code{cursor-pnext-dup} and @code{cursor-pprev-dup}
+@end itemize
+
+After incrementing through a set of duplicate items using a
+@code{xxx-dup} function, the last next operation returns nil
+indicating there are no more duplicates.  The consequence of this is
+that the cursor is now uninitialized (@code{cursor-initialized-p}) and
+needs to be reset by a set or set both call.
+
+@xref{Index Cursor API} for further details.
+
+@node Multi-threaded Applications
+@comment node-name, next, previous, up
+@section Multi-threaded Applications
+
+Elephant is thread-safe by design.  Users should not have to think
+about threading except to follow a couple of simple rules.
+
+@enumerate
+@item Do not perform transactions across multiple threads
+@item Do not perform add/remove index operations on indexed-btrees 
+in more than one thread.
+@end enumerate
+
+This and common coding sense should be sufficient!  Elephant's
+internal design for thread safety employs a number of policies
+to try to minimize using lisp locks and simplify analysis of
+multi threaded interactions:
+
+@enumerate
+@item @strong{Rely on the thread safety of the data store databases}
+@item @strong{Ensure transaction isolation}
+@item @strong{Minimize dependency on thread-local special variables}
+@item @strong{Protect shared resources for a given store controller}.
+@item @strong{A use policy for shared objects (above)}
+@end enumerate
+
+@subsection Shared Resources
+
+Elephant has a few shared resources which are protected by standard locks.
+These are:
+
+@itemize
+@item The store controller connection table
+@item The instance cache
+@item The circularity buffer pool for the serializer
+@item The buffer-stream pool in memutils
+@end itemize
+
+In some cases, and on some lisp platforms, we try to use a fast lock
+strategy for frequently accessed items (the resource pools and
+instance cache especially).
+
+@subsection Data Store Thread Safety and Transactions
+
+Both CLSQL and Berkelely DB backends are thread safe.  In CLSQL this
+is by ensuring that every thread has it's own handle into the SQL 
+libraries or sockets.  Berkeley DB is reentrant and handles locking
+internally.
+
+Elephant depends on these guarantees especially for the isolation
+properties of transactions.  All operations in the context of a 
+given transaction should be isolated and atomic.  It is important
+that a transaction not be shared across threads, however.
+
+@subsection Minimize Dependency on Thread-Local Specials
+
+Elephant uses several global variables as default arguments.  Most 
+of these were removed leaving only a couple to handle:
+
+@itemize
+@item @strong{@code{*store-controller*}}.  Store controller objects can
+be shared between threads and if a user resets this variable in a local
+thread to another controller, there is no problem with that either.
+Users of multiple concurrent stores can specify the store controller to
+all elephant API commands that don't get it from a persistent object
+implicitely.
+@code{*current-transaction*}.  This is always set to the proper null
+value globally and should not be reset in local threads.  Instead,
+transactions take place in a dynamic context that rebinds this variable
+as a special with the current transaction.  This allows for a dynamic
+transaction stack for data stores that can nest transactions or when
+two datastores are both doing transactions concurrently.
+@end itemize
+
+@node Transaction Details
+@comment node-name, next, previous, up
+@section Transaction Details
+
+Transactions are dynamic contexts in which all side effects to
+persistent slots and other persistent objects such as BTrees are
+guaranteed to have the ACID properties: atomicity, consistency,
+isolation and durability.  On a normal exit from context, the
+side effects are committed as a group.  On a non-local exit,
+the transaction is aborted.
+
+For most users, the tutorial section @ref{Using Transactions} is the
+best introduction to transactions.  This section adds to that by 
+exposing some of the details of how it is implemented.
+
+To reiterate, there are a few important restrictions to adhere to:
+
+@itemize
+@item @code{*current-transaction*} is reserved for use by the transaction system.  Users should not override, manipulate or close over this variable.
+@item The body of a transaction cannot throw, signal or jump without aborting the transaction.  Any non-local exit is considered an aborting event.  Catch signals inside the transaction and return a value instead.
+@item The dynamic extent of a transaction body must stay within the same thread
+@end itemize
+
+@subsection @code{with-transaction} internals
+
+The @code{with-transaction} macro wraps the body expression with an
+anonymous lambda expression.  This closure is passed to a call to the
+@code{execute-transaction} generic function which is specialized to
+the current data store.  
+
+The only bookkeeping done by the macro is ensuring that the
+@code{:parent} argument is checked for the current dynamic transaction
+context.  If it is not owned by the default or provided store
+controller, then it is not passed to @code{execute-transaction}.  This
+maintains a continuous dynamic stack transactions through the
+with/ensure transaction macros, but allows for a single leaf
+transaction to another store controller.  
+
+Be very careful about mixing transactions between store controller.
+This facility was only added to ensure that migrate worked correctly.
+
+The macro processes keywords arguments @code{:store-controller}
+(defaults to @code{*store-controller*}), @code{:parent} (defaults to
+@code{*current-transaction*}) and @code{:retries} and passes the
+remaining keywords to the call to @code{execute-transaction} allowing
+the user to pass data store specific transaction keywords to their
+preferred data store.  The consumed keywords are analyzed and then
+passed on to @code{execute-transaction}.
+
+Any non-standard keywords for a given data store will be ignored by
+other data store implementation of @code{execute-transaction} so
+portable programs should not use keywords that change the semantics of
+the transaction.
+
+@code{ensure-transaction} only calls @code{execute-transaction} if 
+it needs to create a fresh transaction.  If the transaction in 
+@code{*current-transaction*} exists and belongs to the store controller
+passed to @code{ensure-transaction} then it merely calls the transaction
+closure, relying on the environment that created the transaction to
+handle any exit procedures and determining whether to abort or commit.
+
+@code{*current-transaction*} contains transaction records during the
+dynamic execution of a transaction.  These records capture any data
+store specific bookkeeping as well as the store-controller that the
+transaction is associated with.
+
+@subsection @code{execute-transaction} internals
+
+See the @ref{Elephant Architecture} section for details on how
+execute-transaction works.  It will provide some deeper insight 
+into the transaction system.
+
+@subsection Building your own transactional framework
+
+Data stores are required to implement three primitive transaction
+methods: @code{controller-start-transaction},
+@code{controller-abort-transaction} and
+@code{controller-commit-transaction}.  These are wrappers for the data
+store's primitive transaction mechanism.  If you use these, it is up
+to you to make sure that you properly manage nested transactions,
+maintain the state of @code{*current-transaction*} handle any
+automated retries you might want, and handle detecting
+
+If you use these, you are on your own - it is easy to make mistakes with
+transactions and create very complex bugs that are hard to track down.
+Most users are much better off sticking with the two transaction macros
+and the underlying @code{execute-transaction} method.
+
+@subsection Analyzing Dynamic Transaction Behavior
+
+You can trace @code{elephant::execute-transaction} to see the sequence
+of calls that occur dynamically and detect where and how many
+transactions are and are not happening. 
+
+@c IT WOULD BE GOOD TO EXPAND ON THIS REGARDING HOW TO SOLVE COMMON PROBLEMS
+
+@node Multi-repository Operation
+@comment node-name, next, previous, up
+@section Multi-repository Operation
+
+Elephant maintains a small hashtable that maps ``database
+specifications'' into actual @code{store-controller} objects.
+
+The basic strategy is that the ``database specification'' object is
+stored in every persistent object and collection so that the
+repository can be found.  In this way, objects that reside in
+different repositories can coexist within the LISP object space,
+allowing data migration or multiple user stores.
+
+All persistent instances store their oid and a store-controller
+reference in internal slots.  Slot access and other protocols use
+this to provide access.  This executes an auto-transaction or joins
+a surrounding transaction if the @code{transaction-record} in
+@code{*current-transaction*} matches the store.
+
+When operating with multiple stores and nested transactions there are
+some subtle issues to work around: how to avoid writing one store with
+a transaction created in the context of another.  A nested or ensured
+transaction is only indicated in the call to
+@code{execute-transaction} if the store controllers match, otherwise a
+new transaction for that store is created.  
+
+@c A PICTURE OF THE DYNAMIC CONTEXT WOULD BE USEFUL HERE
+
+
+
+@node Multiple Processes and Distributed Applications
+@comment node-name, next, previous, up
+@section Multiple Processes and Distributed Applications
+
+Just start up two lisp images and connect to the same database.
+Transactions will ensure there is no interaction between processes.
+This has not been extensively tested, but should work without any
+problem.  Any field experience will get reflected in this section of the manual
+
+Distributed applications may be supported if the underlying SQL server
+or an appropriate Berkeley DB database is used.  We provide no
+documentation nor have we heard of this use-case.  This remains
+fertile ground for future investigation.
+
+@node Repository Migration and Upgrade
+@comment node-name, next, previous, up
+@section Repository Migration and Upgrade
+
+This version of Elephant supports migration between store controllers of
+any backend type.
+
+The tests @code{migrate1} - @code{migrate5} are demonstrations of this 
+capability.
+
+There is a single generic function @code{migrate} that is used to copy
+different object types to a target repository.  It is assumed that typically
+migrate will be called on two repositories and all live objects (those
+reachable in the root or class-root) will be copied to the target repository
+via recursive calls to migrate for specific objects.
+
+When persistent instances are copied, their internal pointer will be updated
+to point to the new repository so after migration the lisp image should be
+merely updated to refer to the target repository in the *store-controller* 
+variable or whatever variable the application is using to store the primary
+controller instance.
+
+There are some limitations to the current migration implementation:
+@enumerate
+@item Migrate currently will not handle circular list objects
+
+@item Migrate does not support arrays with nested persistent objects
+
+@item Indexed classes only have their class index copied if you use the
+   top level migration.  Objects will be copied without slot data if you
+   try to migrate an object outside of a store-to-store migration due to
+   the class object belonging to one store or another
+
+@item Migrate assumes that after migration, indexed classes belong to the
+   target store. 
+
+@item In general, migration is a one-time activity and afterwards (or after
+   a validation test) the source store should be closed.  Any failures
+   in migration should then be easy to catch.
+
+@item Each call to migration will be good about keeping track of already
+   copied objects to avoid duplication.  Duplication shouldn't screw
+   up the semantics, just add storage overhead but is to be avoided.  
+   However this information is not saved between calls and there's no 
+   other way to do comparisons between objects across stores (different
+   oid namespaces) so user beware of the pitfalls of partial migrations...
+
+@item Migrate keeps a memory-resident hash of all objects; this means
+   you cannot currently migrate a store that has more data than your 
+   main memory.  (This could be fixed by keeping the oid table in
+   the target store and deleting it on completion)
+
+@item Migration does not maintain OID equivalence so any datastructures which
+   index into those will have to have a way to reconstruct themselves (better
+   to keep the object references themselves rather than oids in general)
+   but they can overload the migrate method to accomplish this cleanly
+@end enumerate 
+
+Users can customize migration if they create unusual datastructures that
+are not automatically supported by the existing @code{migrate} methods.
+For example, a datastructure that stores only object OIDs instead of
+serialized object references will need to overload migrate to ensure
+that all referenced objects are in fact copied (otherwise the OIDs will
+just be treated as fixnums potentially leaving dangling references.
+
+To customize migration overload a version of migrate to specialize on
+your specific persistent class type.  
+
+@lisp
+(defmethod migrate ((dst store-controller) (src my-class)))
+@end lisp
+
+In the body of this method you can call @code{(call-next-method)}
+to get a destination repository object with all the slots copied over
+to the target repository which you can then overwrite.  To avoid the
+default persistent slot copying, bind the dynamic variable 
+@code{*inhibit-slot-writes*} in your user method using 
+@code{with-inhibited-slot-copy} a convenience macro.
+
+@node Performance Tuning
+@comment node-name, next, previous, up
+@section Performance Tuning
+
+Performance is usually measured in transactions per second.  Database
+reads are cheap.  To get more transactions throughput, consider
+setting
+
+@lisp
+(db-env-set-flags (controller-environment *store-controller*) 
+                  1 :txn-nosync t)
+@end lisp
+
+or look at other flags in the Berkeley DB docs.  This will greatly
+increase your throughput at the cost of some durability; I get around
+a 100x improvement.  Durability can be recovered with judicious use of
+checkpointing and replication, though this is currently not supported
+directly by Elephant -- see the sleepycat docs.
+
+The serializer is definitely fast on fixnums, strings, and persistent
+things.  It is fast but consing with floats and doubles.  YMMV with
+other values, though I've tried to make them fast.
+
+Use @code{with-transactions} to avoid many automatic transactions, for
+example you'll find that this construct
+
+@lisp
+(dotimes (i 1000) (add-to-root "key" "value"))
+@end lisp
+
+is much slower than
+
+@lisp
+(with-transaction ()
+ (dotimes (i 1000) (add-to-root "key" "value"))))
+@end lisp
+
+since there's only 1 transaction in the latter.  However storing 
+transaction state requires allocated main memory of which there is
+a finite amount so do not make your transactions too large.
+
+Use the persistent classes and collections; if you're using
+transactions correctly they should be much faster.
+
+If you don't need transactions you can turn them off.  Opening the DB
+in less concurrent / transactional modes will be supported very soon
+(it's just an argument change, I think.)  However you will need to
+ensure that multiple threads do not interleave access so single user
+mode is not suitable for use in web servers or other typically
+multi-threaded applications.
+
+@node Garbage Collection
+@comment node-name, next, previous, up
+@section Garbage Collection
+
+Garbage collection is not implemented as part of the persistent object
+protocol.  However, the migration (@pxref{Repository Migration and
+Upgrade}) mechanism will consolidate storage and recover OIDs which is
+an effective offline GC.  No online solution is currently anticipated.
+
+@node Berkeley DB Data Store
+@comment node-name, next, previous, up
+@section Berkeley DB Data Store
+
+This section briefly describes special facilities of the Berkeley DB
+data store and explains how persistent objects map onto it.  Elephant
+was originally written targeting only Berkeley DB.  As such, the
+design of Elephant was heavily influenced by the Berkeley DB architecture.
+
+Berkeley DB is a C library that very efficiently implements a database
+by allowing the application to directly manipulate the memory pools
+and disk storage without requiring communication through a server as
+in many relational database applications.  The library supports
+multi-threaded and multi-process transactions through a shared memory
+region that provides for shared buffer pools, shared locks, etc.  Each
+process in a multi-process application is independently linked to the 
+library, but shares the memory pool and disk storage.
+
+The following subsections discuss places where Berkeley DB provides
+additional facilities to the Elephant interfaces described above.
+
+@subsection Architecture Overview
+
+The Berkeley DB data store (indicated by a @code{:BDB} in the data
+store specification) supports the Elephant protocols using Berkeley DB
+as a backend.  The primary features of the BDB library that are used
+are BTree databases, the transactional subsystem, a shared buffer pool
+and unique ID sequences.
+
+All data written to the data store ends up in a BTree slot using a
+transaction.  There are two databases, one for persistent slot values
+and one for btrees.  The mapping of Elephant objects is quite simple.  
+
+Persistent slots are written to a btree using a unique key and the
+serialized value being written.  The key is the oid of the persistent
+object concatenated to the serialized name of the slot being written.
+This ordering groups slots together on the disk
+
+@subsection Opening a Store
+
+When opening a store there are several special options you can invoke:
+
+@itemize
+@item @strong{@code{:recover}} tells Berkeley DB to run recovery on the
+      underlying database.  This is reasonably cheap if you do not need
+      to run recovery, but can take a very long time if you let your log
+      files get too long.  This option must be run in a single-threaded
+      mode before other threads or processes are accessing the same database.
+@item @strong{@code{:recover-fatal}} runs Berkeley DB catastrophic recovery (see BDB documentation).
+@item @strong{@code{:thread}} set this to nil if you want to run single threaded, 
+      it avoids locking overhead on the environment.  The default is
+      to run @emph{free-threaded}.
+@item The @strong{@code{:deadlock-detect}} launches a background process via
+      the run-shell commands of lisp.  This background process connects to a Berkeley
+      DB database and runs a regular check for deadlock, freeing locks as appropriate
+      when it finds them.  This can avoid a set of annoying crashes in Berkeley DB,
+      the very crashes that, in part, motivated Franz to abandon AllegroStore and write
+      the pure-Lisp AllegroCache.
+@end itemize
+
+@subsection Starting a Transaction
+
+Berkeley DB transactions have a number of additional keyword
+parameters that can help you tune performance or change the semantics
+in Berkeley DB applications.  They are summaried briefly here, see the
+BDB docs for detailed information:
+
+@itemize
+@item @strong{@code{:degree-2}} This option provides for cursor stability, that is whatever
+      object the cursor is currently at will not change, however prior
+values read may change.  This can significantly enhance performance if
+you frequently map over a btree as it doesn't lock the entire btree,
+just the current element.  All transactions running concurrently over
+the btree can commit without restarting.  The global parameter
+@code{*map-using-degree2*} determines the default behavior of this
+option.  It is set to true by default so that map has similar
+semantics to lists.  This violates both @emph{Atomicity and
+Consistency} depending on how it is used.
+@item @strong{@code{:read-uncommitted}} Allows reading data that has been written by other 
+transactions, this avoids the current thread blocking on a read access
+(for example you are merely dumping a btree for inspection) so long as
+you don't care whether the data you read changes or not.  This
+violates @emph{Atomicity and Consistency} depending on how it is used
+@item @strong{@code{:txn-nosync}} Do not flush the log when this transaction completes.  This means
+that you lose the @emph{Durability} of a transaction, but gain performance by avoiding the expensive
+sync operation.
+@item @strong{@code{:txn-nowait}} If a lock is unavailable, have the underlying database return a 
+deadlock message immediately, rather than blocking, so that the transaction restarts.
+@item @strong{@code{:txn-sync}} This is the default behavior and specifies that the transaction log
+of the current transaction is flushed to disk before the transaction commit routine returns.  This
+provides full ACID compliance.
+@item @strong{@code{:transaction}} This argument is for advanced use.  It tells
+      the Berkeley DB transaction subsystem the transaction it should use rather
+than to create a new one.  The @code{:parent} argument provides a parent transaction
+that can result in a true nested transaction.
+@end itemize
+
+@subsection Special Commands
+
+The berkeley DB data store exports some special facilities that are not
+currently supported by other data stores.
+
+@itemize
+@item @strong{@code{optimize-layout}}.  This function provides an interface
+     to tell Berkeley DB to try to reclaim freed storage from the file
+system.  This is of limited utility as it can only shrink database by
+the number of empty pages at the end of the file.  Depending on what
+storage you have deleted, this can end up being only a handful or even
+zero pages.  This will work well if you recently ran an experiment
+where you created a bunch of new data, then deleted it all and want to
+reclaim the space (i.e. you had runaway loop that was creating endless
+objects).
+@item @strong{@code{db-bdb:checkpoint}}. This internal function forces
+the transaction log to be flushed and all active data to be written to
+the database so that the logs and database are in synch.  This is good
+to run when you want to delete old log files and backup your database
+files as a coherent, recoverable set.  Run checkpoing, close the
+database and then manually run ``db_archive -d'' on the database to
+remove old logs.  Finally, copy the resulting data to stable storage.
+Read the Berkeley DB docs for more details of backing up and
+checkpointing.
+@end itemize
+
+@subsection Performance Tuning
+
+Performance tuning for Berkeley DB is a complex topic and we will not
+cover it here.  You need to understand the Berkeley DB data store
+architecture, the transaction architecture, the serializer and other
+such parameters.  The primary performance related parameters are
+described in config.sexp.  They are:
+
+@itemize
+@item @code{:berkeley-db-map-degree2} - Improve the efficiency of cursor traversals
+  in the various mapping functions.  Defaults to true, meaning a value
+you just read while mapping may change before the traversal is done.
+So if you operate only on the current cursor location, you are
+guaranteed that it's value is stable.
+@item @code{:berkeley-db-cachesize} - Change the size of the buffer cache
+for Berkeley DB to match your working set.  Default is 10MB, or about
+twenty thousand indexed class objects, or 50k standard persistent
+objects.  You can save memory by reducing this value.
+@end itemize
+
+@node CLSQL Data Store
+@comment node-name, next, previous, up
+@section CLSQL Data Store
+
+Elephant uses Kevin Rosenberg's excellent @uref{http://clsql.b9.com, CLSQL}
+ CLSQL lisp binding to relational databases 
+(it does not use the ORM functionality offered by that package.)  
+CLSQL interfaces to many databases (Postgres, MySQL, Oracle, 
+ODBC, SQLite3, Microsoft SQL Server (via ODBC)).  Right now, Elephant has
+been tested with Postgress and SQLite3.  Probably getting it to work with
+one of the others will take a small amount of debugging; in principle there
+is no reason it won't work out of the box.  We invite users to try 
+other database, and will quickly incorporate patches needed to make them 
+work.
+
+Because CLSQL is very generic, the CLSQL interface does not offer any
+special feature as discussed in the previous section @ref{Berkeley DB Data Store}.
+
+@subsection Basic CLSQL Implementation
+
+The CLSQL uses base64 encoding to store binary data as text directly.  This
+has the advantage that it works with all databases, which tend to differ 
+widely in their treatment of Binary Large Objects (BLOBs.)  It imposes some
+obvious overhead.
+
+The CLSQL implementation is structurally exactly the same as the BDB implementation.
+A single table is created to hold all (key,value) pairs.  An index on the key column
+provides efficient key lookup.  No additional indexing offered by the underlying 
+databases is used.  This has the advantage that the API is exactly the same as the 
+BDB api, and all of the functional indexes, cursors, and secondary indexes work exactly 
+the same way.  It does not exploit the performance that a database-specific solution 
+would offer (see @ref{Postmodern Data Store} for an example of such a system.
+
+Our basic strategy is to leave the CLSQL interface as simple as possible, in order to 
+work with as many databases as possible.  When there is enough motivation to support 
+a backend that is specific to one database (and therefore probably faster), such an 
+interface can be placed into the ``contrib'' directory and migrated into the main 
+code base as time allows the complete integration with the test suite.
+
+@node Postmodern Data Store
+@comment node-name, next, previous, up
+@section Postmodern Data Store
+
+The postmodern data store is not yet integrated.  It should be
+documented for the forthcoming release 0.9.1 or 0.9.2.
+
+This backend will presumably be much faster, when used against PostGres, than the 
+generic CLSQL store.
+
+@node Native Lisp Data Store
+@comment node-name, next, previous, up
+@section Native Lisp Data Store
+
+The native lisp data store is unimplemented.  It is tentatively
+planned for a 1.1 release sometime in the distant future.  Yes,
+this is a deliberatively vague declaration.
+
+@c @node Querying persistent instances
+@c @comment node-name, next, previous, up
+@c @section Querying persistent instances
+@c 
+@c A SQL select-like interface is in the works, but for now queries are
+@c limited to manual mapping over class instances or doing small queries
+@c with @code{get-instances-*} functions.  One advantage of this is that
+@c it is easy to estimate the performance costs of your queries and to
+@c choose standard and derived indices that give you the ordering and
+@c performance you want.
+@c 
+@c There is, however, a quick and dirty query API example that is not
+@c officially supported in the release but is intended to invite comment.
+@c This is an example of a full query system that would automatically
+@c perform joins, use the appropriate indices and perhaps even adaptively
+@c suggest or add indices to facilitate better performance on common
+@c queries.
+@c 
+@c There are two functions @ref{Function elephant:get-query-instances}
+@c and @ref{Function elephant:map-class-query} which accept a set of
+@c constraints instead of the familiar value or range arguments.
+@c 
+@c We'll use the classes @code{person} and @code{department} to
+@c illustrate how to perform queries over a set of objects that may be
+@c constrainted by their relationships to other objects.
+@c 
+@c @lisp
+@c (defpclass person ()
+@c   ((name :initarg :name :index t)
+@c    (salary :initarg :salary :index t)
+@c    (department :initarg :dept)))
+@c 
+@c (defmethod print-object ((p person) stream)
+@c   (format stream "#<PERS: ~A>" (slot-value p 'name)))
+@c 
+@c (defun print-name (inst)
+@c   (format t "Name: ~A~%" (slot-value inst 'name)))
+@c 
+@c (defpclass department ()
+@c   ((name :initarg :name)
+@c    (manager :initarg :manager)))
+@c 
+@c (defmethod print-object ((d department) stream)
+@c   (format stream "#<DEPT ~A, mgr = ~A>"
+@c           (slot-value d 'name)
+@c           (when (slot-boundp d 'manager)
+@c                 (slot-value (slot-value d 'manager) 'name))))
+@c @end lisp
+@c 
+@c Here we have a simple employee database with managers (also of type
+@c person) and departments.  This simple system will provide fodder for
+@c some reasonably complex constraints.  Let's create a few departments.
+@c 
+@c @lisp
+@c (setf marketing (make-instance 'department :name "Marketing"))
+@c (setf engineering (make-instance 'department :name "Engineering"))
+@c (setf sales (make-instance 'department :name "Sales"))
+@c @end lisp
+@c 
+@c And manager @code{people} for the departments.
+@c 
+@c @lisp
+@c (make-instance 'person :name "George" :salary 140000 :department marketing)
+@c (setf (slot-value marketing 'manager) *)
+@c 
+@c (make-instance 'person :name "Sally" :salary 140000 :department engineering)
+@c (setf (slot-value engineering 'manager) *)
+@c 
+@c (make-instance 'person :name "Freddy" :salary 180000 :department sales)
+@c (setf (slot-value sales 'manager) *)
+@c @end lisp
+@c 
+@c And of course we need some folks to manage
+@c 
+@c @lisp
+@c (defparameter *names*
+@c   '("Jacob" "Emily" "Michael" "Joshua" "Andrew" "Olivia" "Hannah" "Christopher"))
+@c 
+@c (defun random-element (list)
+@c   "Choose a random element from the list and return it"
+@c   (nth (random (length list)) list))
+@c 
+@c (with-transaction ()
+@c   (loop for i from 0 upto 40 do
+@c     (make-instance 'person
+@c       :name (format nil "~A~A" (random-elephant *names*) i)
+@c       :salary (floor (+ (* (random 1000) 100) 30000))
+@c       :department (case (random 3)
+@c                     (0 marketing)
+@c                     (1 engineering)
+@c                     (2 sales)))))
+@c @end lisp
+@c 
+@c 
+@c Now we can look at a few queries.
+@c 
+@c @lisp
+@c (defun get-managers ()
+@c   (get-query-instances `((person
+@c 
+@c For those familiar with SQL, if an instance of @code{person} has a
+@c pointer to an instance of @code{department} then that relation can be
+@c used to perform a join.  Of course joins in the object world won't
+@c return a table, instead they will return conjunctions of objects that
+@c satisfy a mutual set of constraints.
+

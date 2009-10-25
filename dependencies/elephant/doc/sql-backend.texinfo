@@ -1,0 +1,327 @@
+@c -*-texinfo-*-
+
+@node SQL back-end
+@comment node-name, next, previous, up
+@chapter SQL back-end
+@cindex SQL back-end
+
+@menu
+* SQL-Introduction:: The design and status of the SQL back-end extention.
+* Extention Status:: The current status of the SQL back-end extention.
+* Back-compatibility:: Issues if you have already been using Elephant
+* Multi-repository Operation:: Specifying repositories
+* Setting up PostGres:: An example
+* Repository Migration:: How to move objects from one repository to another
+@end menu
+
+@node SQL-Introduction
+@comment node-name, next, previous, up
+@section SQL-Introduction
+
+Although originally designed as an interface to the BerkeleyDB system,
+the original Elephant system has been experimenetally extended to 
+support the use of relational database management systems as the
+implementation of the persistent store.  This relies on Kevin Rosenberg's
+CL-SQL interface to relational systems.
+
+Although the BerkeleyDB system is an ideal object store for LISP objects,
+one might prefer the licensing of a different system.  For example, at 
+the time of this writing, it is my interpretation that one cannot use
+the BerkeleyDB system behind a public website 
+http://www.sleepycat.com/download/licensinginfo.shtml#redistribute
+unless one releases the entire web application as open source.
+
+Neither the PostGres DBMS nor SQLite 3 has any such restriction.  Elephant itself is released
+under the GPL.  It is somewhat debatable if the GPL allows one to construct
+to construct a non-open-source web application but the preponderance of 
+opinion appears to be that it does.  Thefore using Elephant and the other
+GPLed software that it depends upon allows one to host a a non open-source
+web application.  This might be a reason to use Elephant on PostGres of SQLite rather
+than Elephant on BerkeleyDB.
+
+Other reasons to use a relational database system might include:
+familiarity with those systems, the fact that some part of your application
+needs to use the truly relational aspects of those systems, preference for
+the tools associated with those systems, etc.
+
+The SQL back-end extention of Elephant provides a function for migrating
+data seamlessly between repositories.  That is, one can quite easily move
+data from a BerkeleyDB repository to a PostGres repository, and vice versa.
+In fact, one of the most important aspects of the extention is that it 
+makes Elephant a multi-repository system, rather than a single repository
+system, as addition to allowing different implementation strategies for 
+those repositories.  This offers at least the possiblity than once 
+can develop using one backend, for example BerkeleyDB, and then later
+move to MySQL.
+
+At the time of this writing, the basic strategy for the SQL implementation
+is quite simple.  The same serializer used for the Sleepycat implementation
+is employed, the byte-string is base64 encoded, and placed in a single 
+table which is managed by Elephant.
+
+As of Elephant 0.3, Elephant has been tested to work with both Postgres, and 
+SQLite 3, thanks do Dan Knapp.
+
+@node Extention Status
+@comment node-name, next, previous, up
+@section Extention Status
+
+As far as is known at this writing, all functionality except nested transaction
+support and cursor-put's that is supported by the BerkeleyDB backend is supported by the CL-SQL
+based back-end.  Concurrency and transaction atomicity has not been tested well
+for the CL-SQL based system.
+
+Additionally, it is NOT the case that the Elephant system currently provides
+transaction support across multiple repositories; it provides the transaction
+support provided by the underlying repository to the user in a per-repository
+basis.
+
+The PostGres backend is as currently employed is about 5 times slower than 
+the BerkeleyDB backend.  This could probably change with continued development.
+
+CL-SQL supports a lot of DBMS systems, but only PostGres has been tested.
+
+The SQL back-end extention has only been tested under SBCL 0.8.18.
+
+The SQL back-end is as easy to use as the BerkeleyDB back-end.  However,
+the multi-repository version somewhat complicates the underlying 
+persistent object management.  At the time of this writing, the 
+community has not decided if this extention will be a part of 
+Elephant proper or a separate branch; if it is not made a part of 
+Elephant proper, a user might prefer the simpler (and better maintained?)
+system if they only want to use the BerkeleyDB back-end.
+
+
+@node Back-compatibility
+@comment node-name, next, previous, up
+@section Back-compatibility
+
+The CL-SQL based extention is very back-compatible with any existing Elephant
+application, except for two items.
+
+First, the routines ``build-btree'' and ``build-index-btree'' should be used
+in place of the previous approach to direct calls to make-instance.  This is
+necessary, because the underlying class of the object depends on what repository
+it is stored in.  These routines, like make-instance on persistent objects directly,
+allow you to specify the store controller at creation time.  However, build-btree
+and build-index-btree will use the global *store-controller* if no keyword
+argument is provided.
+
+Secondly, in addition to executing:
+@lisp
+(asdf:operate 'asdf:load-op :elephant)
+@end lisp
+to load elephant, one must at least one of:
+@lisp
+(asdf:operate 'asdf:load-op :ele-clsql)
+(asdf:operate 'asdf:load-op :ele-bdb)
+@end lisp
+
+To use SQLLite3, you must execute:
+@lisp
+(asdf:operate 'asdf:load-op :ele-sqlite3)
+@end lisp
+
+depending on whether or not you wish to use the clsql backend or the BerkeleyDB 
+backend, or both.
+
+You will have to have the CL-SQL package installed.  Following the 
+documentation for CL-SQL under the section ``How CLSQL finds and loads foreign
+libraries'' you may need to do something like:
+@lisp
+(clsql:push-library-path "/usr/lib/")
+@end lisp
+
+before doing
+@lisp
+(asdf:oos 'asdf:load-op :clsql-postgresql-socket)
+@end lisp
+
+in order for clsql to find the PostGres library libpq.so, for example.
+
+Without modifcation, Elephant uses this as it's lib path:
+@lisp
+/usr/local/share/common-lisp/elephant-0.3/
+@end lisp
+
+So you could put a symbolic link to libpq.so there, where libmemutil.so and 
+libsleepycat.so will also reside.
+
+Versions of CL-SQL older than 3.2.3 might require something different.
+
+@node Multi-repository Operation
+@comment node-name, next, previous, up
+@section Multi-repository Operation
+
+Elephant now keeps a small hashtables that maps ``database specifications'' into
+actual database connections.
+
+If a database spec is a string, it is assumed to be a BerkeleyDB path.
+If it is a list, it is a assumed to be a CL-SQL connection specification.
+For example:
+@lisp
+ELE-TESTS> *testdb-path*
+"/home/read/projects/elephant/elephant/tests/testdb/"
+ELE-TESTS> *testpg-path*
+(:postgresql "localhost.localdomain" "test" "postgres" "")
+ELE-TESTS> 
+@end lisp
+
+
+The tests now have a function @code{do-all-tests-spec} that take a spec and 
+based on its type attempt to open the correct kind of store controller and 
+perform the tests.
+
+The routine @code{get-controller} takes this specifiation.
+
+The basic strategy is that the ``database specification'' object is stored in
+every persistent object and collection so that the repository can be found.
+
+In this way, objects that reside in different repositories can coexist within
+the LISP object space, allowing data migration.
+
+
+
+
+@node Setting up PostGres
+@comment node-name, next, previous, up
+@section Setting up PostGres
+
+
+To set up a PostGres based back end, you should:
+
+@enumerate
+@item Install postgres and make sure postmaster is running.
+
+@item Create a database called ``test'' and set its permissions
+to be reached by whatever connection specification you intend to use.  The
+tests use: 
+
+@lisp
+(defvar *testpg-path*
+'(:postgreql "localhost.localdomain" "test" "postgres" ""))
+@end lisp
+
+meaning that connections must be allowed to the database test, user ``postgres'',
+no password, connected from the same machine ``localhost.localdomain''.
+(This would be changed to something more secure in a real application.)
+Typically you edit the file : pg_hba.conf to enable various kinds of connections
+in postgres.
+
+@item  Be sure to enable socket connection to postgres when you invoke the postmaster.
+
+@item  Test that you can connect to the database with these credentials by running:
+
+@code{ psql -h 127.0.0.1 -U postgres test}
+
+Before you attempt to connect with Elephant.
+@end enumerate
+
+
+meaning that connections must be allowed to the database test, user ``postgres'',
+no password, connected from the same machine ``localhost.localdomain''.
+(This would be changed to something more secure in a real application.)
+
+Furthermore, you must grant practically all creation/read/write privileges 
+to the user postgres on this schema, so that it can construct the tables 
+it needs.
+
+Upon first opening a CL-SQL based store controller, the tables, indexes,
+sequences, and so on needed by the Elephant system will be created in the 
+schema named ``test'' automatically.
+
+To run the tests, execute:
+
+@lisp
+(asdf:operate 'asdf:load-op :elephant)
+(asdf:operate 'asdf:load-op :ele-clsql)
+(asdf:oos 'asdf:load-op :clsql-postgresql-socket)
+(in-package "ELEPHANT-TESTS")
+(do-all-tests-spec *testpg-path*)
+@end lisp
+
+This should produce a small number of errors (about 7) for those test having 
+to do with migration and the BerkeleyDB system specifically.
+
+If you execute:
+
+@lisp
+(asdf:operate 'asdf:load-op :ele-bdb)
+@end lisp
+
+Then connection to the BerkeleyDB system will be enabled, and you should 
+be able to execute both
+
+@lisp
+(do-all-tests-spec *testpg-path*)
+(do-all-tests-spec *testdb-path*)
+@end lisp
+
+with no errors in either case.
+
+At present the system has only been tested under PostGres. Some code
+parametrization would be required to work with other databases.
+
+Setting up SQLite3 is even easier.  Install SQLite3 (I had to use
+the source rather than the binary install, in order to get the dynamic
+libraries constructed.)
+
+An example use of SQLLite3 would be:
+@lisp
+(asdf:operate 'asdf:load-op :elephant)
+(asdf:operate 'asdf:load-op :ele-clsql)
+(asdf:operate 'asdf:load-op :ele-sqlite3)
+(in-package "ELEPHANT-TESTS")
+(setq *test-path-primary* '(:sqlite3 "testdb"))
+(do-all-tests-spec *test-path-primary*)
+@end lisp
+
+The file RUNTESTS.lisp, although possibly not exactly what you want,
+contains useful example code.
+
+You can of course migrate between the three currently supported repository
+strategies in any combination: BDB, Postgresql, and SQLite3.
+
+In all probability, other relational datbases would be very easy to 
+support but have not yet been tested.  The basic pattern of 
+the ``path'' specifiers is (cons clsqal-database-type-symbol (normal-clsql-connection-specifier)).
+
+@node Repository Migration
+@comment node-name, next, previous, up
+@section Repository Migration
+
+
+This version of Elephant supports migration betwen store controllers,
+whether of the same implementation strategy or not.
+
+The tests @code{migrate1} - @code{migrate5} are demonstrations of this techinque.
+
+The functions for performing these migrations are:
+
+@code{migraten-pobj}
+
+The name of this function is meant to imply that it is 
+destructive of the object in question, mutating it to 
+point at the new repository.
+
+Which requies that you provide a copy-function to copy whatever 
+slots you want from the persistent object as deeply or as shallowly 
+as you desire.
+
+Data collections (btree's) can be move with the function:
+
+@code{migrate}
+
+A simple object that does not inherit from ``persistent'' but is 
+attached to a key (on the root) can be copied with the routine
+
+@code{copy-from-key}
+
+It is hoped that these routines would allow, with some labor,
+a user to use one repository, and later decide to start using 
+a different implementation strategy, and easily migrate the 
+objects to the the new repository.  The old repository could
+then be abandoned, or multiple repositories could be used
+at the same time.
+
+ 

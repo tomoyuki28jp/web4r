@@ -1,0 +1,1230 @@
+@c -*-texinfo-*-
+
+@node Tutorial
+@comment node-name, next, previous, up
+@chapter Tutorial
+@cindex Tutorial
+
+@menu
+* Overview:: Overview of elephant's features.
+* Getting Started:: Opening and accessing a store.
+* The Store Root:: Accessing persistent data.
+* Serialization:: Storage semantics for lisp values.
+* Persistent Classes:: Persistent semantics for objects.
+* Rules about Persistent Classes:: What you need to know.
+* Persistent collections:: Keep track of collections of values.
+* Indexing Persistent Classes:: Simple way to keep track of persistent instances.
+* Using Transactions:: Providing ACID database properties.
+* Advanced Topics:: Additional Elephant features covered in the User Guide.
+@end menu
+
+@node Overview
+@comment node-name, next, previous, up
+@section Overview
+
+Elephant is a Persistence Metaprotocol and Database for Common Lisp.
+It provides the ability for users to define and interact with
+persistent objects and to transparently store ordinary lisp values.
+Persistent objects are CLOS instances that overload the ordinary slot
+access semantics so that every write to a slot is passed through and
+written to disk.  Non-persistent lisp objects and values can be
+written to slots and will be automatically persisted.  In addition,
+Elephant provides a persistent index which maintains an ordered
+collection of lisp values or persistent object references.
+
+The use of persistent objects makes coding concise, convenient, and 
+powerful, and makes persistence almost invisible to the programmer.
+However, Elephant also allows the same basic data dictionary of
+key/value retrieval that BerkeleyDB provides.
+
+When someone says "database," most people think of SQL Relational Data
+Base Management Systems (e.g. Oracle, Postgresql, MySql).  Those
+systems store data in statically typed tables with unique shared
+values to connect rows in separate tables.  Objects can be mapped into
+these tables in an object-relational mapping that assigns objects to
+rows and slot values to columns in a row's table.  If a slot
+references another type of object, a unique ID can be used to
+reference that object's table.  CL-SQL, for example, provides
+facilities for this kind of object-relational mapping and there are
+many systems for other languages that do the same (i.e. Hibernate for
+Java).  
+
+While Elephant can use either RDBMSs or Berkeley DB as a data store,
+the model it supports is that of objects stored in persistent indices.
+Unlike systems such as Hibernate for Java, the user does not need to
+construct or worry about a mapping from the object space into the
+database.  Elephant relies on LISP rather than SQL for its data
+manipulation language.  Elephant is designed to be a simple and
+convenient tool for the programmer.
+
+Elephant consists of a small universe of basic concepts:
+
+@itemize
+@item @strong{Store controller:} the interface between lisp and a data store.  
+Most operations require or accept a store controller, or a default
+store controller stored in @code{*store-controller*} to function.
+@item @strong{Persistent Sets:} A simple persistent collection is provided
+which allows the creation of persistent sets.
+@item @strong{BTrees:} Elephant provides a persistent key-value 
+abstraction based on the BTree data structure.  Values can be written
+to or read from a BTree and are stored in a sorted order.  
+@item @strong{Stored values:} most lisp values, including standard objects, arrays, etc
+can be used as either key or value in a persistent BTree.
+@item @strong{Persistent objects:} An object where most slot values are stored in
+the data store and are written to or retrieved from disk on slot
+accesses.  Storing a persistent object stores only a reference,
+allowing for object identity.
+@item @strong{Object indexing:} The ability to lookup and sort objects by their slot
+values rather than by explicit inclusion in a collection.
+@item @strong{Transactions:} a dynamic context for executing operations on objects
+or collections such that the side effects exhibit the ACID (atomicity, consistency,
+isolation and durability) properties of database.
+@end itemize
+
+There are a set of more advanced concepts you will learn about later,
+but these basic concepts will serve to acquaint you with Elephant.
+
+If you do not already have Elephant installed and building correctly,
+read the @ref{Installation} section of this manual and then move on to
+@ref{Getting Started}.
+
+@node Getting Started
+@comment node-name, next, previous, up
+@section Getting Started 
+
+The first step in using elephant is to open a store controller.  A
+store controller is an object that coordinates lisp program access
+to the chosen data store.
+
+To obtain a store controller, you call @code{open-store} with a store
+specification.  A store specification is a list containing a backend
+specifier (@code{:BDB} or @code{:CLSQL}) and a backend-specific
+reference.
+
+For :BDB, the second element is a string or pathname that references a
+local directory for the database files.  This directory must be
+created prior to calling open-store.
+
+@lisp
+(open-store '(:BDB ``/users/me/db/my-db/''))
+@end lisp
+
+For :CLSQL the second argument is another list consisting of a
+specific SQL database and the name of a database file or connection
+record to the SQL server.  Examples are:
+
+@lisp
+(open-store '(:CLSQL (:SQLITE "/users/me/db/sqlite.db")))
+(open-store '(:CLSQL (:POSTGRESQL "localhost.localdomain" 
+                                  "mydb" "myuser" ""))))
+@end lisp
+
+We use Berkeley DB as our example backend.  To open a BDB
+store-controller we can do the following:
+
+@lisp
+(asdf:operate 'asdf:load-op :elephant)
+(use-package :elephant)
+(setf *test-db-spec*
+      '(:BDB "/home/me/db/testdb/"))
+(open-store *test-db-spec*)
+@end lisp
+
+We do not need to store the reference to the store just now as it is
+automatically assigned to the variable, @code{*store-controller*}.
+For a deeper discussion of store controller management see the
+@ref{User Guide}.
+
+When you're done with your session, release the store-controller's
+resources by calling @code{close-store}.
+
+Also there is a convenience macro @code{with-open-store} that will
+open and close the store, but opening the store is an expensive
+operation so it is generally better to leave the store open until your
+application no longer needs it.
+
+@node The Store Root
+@comment node-name, next, previous, up
+@section The Store Root
+
+What values live between lisp sessions is called @emph{liveness}.
+Liveness in a store is determined by whether the value can be reached
+from the root of the store.  The root is a special BTree in which
+other BTrees and lisp values can be stored.  This BTree has a special
+interface through the store controller.  (There is a second root BTree
+called the class root which will be discussed later.)
+
+You can put something into the root object by
+
+@lisp
+(add-to-root "my key" "my value")
+=> "my value"
+@end lisp
+
+and get things out via
+
+@lisp
+(get-from-root "my key")
+=> "my value"
+=> T
+@end lisp
+
+The second value indicates whether the key was found.  This is
+important if your key-value pair can have nil as a value.  
+
+You can perform other basic operations as well.
+
+@lisp
+(root-existsp "my key")
+=> T
+(remove-from-root "my key")
+=> T
+(get-from-root "my key")
+=> NIL
+=> NIL
+@end lisp
+
+To access all the objects in the root, the simplest way is to 
+simply call @code{map-root} with a function to apply to each
+key-value pair.
+
+@lisp
+(map-root 
+  (lambda (k v) 
+     (format t "key: ~A value:~A~%" k v)))
+@end lisp            
+
+You can also access the root object directly.
+
+@lisp
+(controller-root *store-controller*)
+=> #<DB-BDB::BDB-BTREE @ #x10e86042>
+@end lisp
+
+It is an instance of a class "btree"; @pxref{Persistent BTrees}.
+
+@node Serialization
+@comment node-name, next, previous, up
+@section Serialization
+
+What can you put into the store besides strings?  Almost all lisp
+values and objects can be stored: numbers, symbols, strings, nil,
+characters, pathnames, conses, hash-tables, arrays, CLOS objects and
+structs.  Nested and circular things are allowed.  Nested and circular
+things are allowed.  You can store basically anything except compiled
+functions, closures, class objects, packages and streams.  Functions
+can be stored as uncompiled lambda expressions.  (Compiled functions
+and other kinds of objects may eventually get supported too.)
+
+Elephant needs to use a representation of data that is independant of
+a specific lisp or data store.  Therefore all lisp values that are
+stored must be @emph{serialized} into a canonical format.  Because
+Berkeley DB supports variable length binary buffers, Elephant uses a
+binary serialization system.  This process has some important
+consequences that it is very important to understand:
+
+@enumerate
+@item @strong{Lisp identity can't be preserved}.  Since this is a store which
+persists across invocations of Lisp, this probably doesn't even make
+sense.  However if you get an object from the index, store it to a
+lisp variable, then get it again - they will not be eq:
+
+@lisp
+(setq foo (cons nil nil))
+=> (NIL)
+(add-to-root "my key" foo)
+=> (NIL)
+(add-to-root "my other key" foo)
+=> (NIL)
+(eq (get-from-root "my key")
+      (get-from-root "my other key"))
+=> NIL
+@end lisp
+
+@item @strong{Nested aggregates are stored in one buffer}.  
+If you store an set of objects in a hash table you try to store a hash
+table, all of those objects will get stored in one large binary buffer
+with the hash keys.  This is true for all other aggregates that can
+store type T (cons, array, standard object, etc).
+
+@item @strong{Mutated substructure does not persist}.
+
+@lisp
+(setf (car foo) T)
+=> T
+(get-from-root "my key")
+=> (NIL)
+@end lisp
+
+This will affect all aggregate types: objects, conses, hash-tables, et
+cetera.  (You can of course manually re-store the cons.)  In this sense
+elephant does not automatically provide persistent collections.  If you 
+want to persist every access, you have to use BTrees (@pxref{Persistent BTrees}).
+
+@item @strong{Serialization and deserialization can be costly}. While 
+serialization is pretty fast, but it is still expensive to store large
+objects wholesale.  Also, since object identity is impossible to
+maintain, deserialization must re-cons or re-allocate the entire
+object every time increasing the number of GCs the system does.  This
+eager allocation is contrary to how most people want to use a
+database: one of the reasons to use a database is if your objects
+can't fit into main memory all at once.
+
+@item @strong{Merge-conflicts in heavily multi-process/threaded situations}.  
+This is the common read-modify-write problem in all databases.  We will talk
+more about this in the @ref{Using Transactions} section.
+
+@end enumerate
+
+This may seem terribly restrictive, but don't despair, we'll solve
+most of these problems in the next section.....
+
+@node Persistent Classes
+@comment node-name, next, previous, up
+@section Persistent Classes
+
+The Common Lisp Object System and the Metaobject Protocol, gives us
+the tools to solve these problems for objects:
+
+@lisp
+(defclass my-persistent-class () 
+  ((slot1 :accessor slot1) 
+   (slot2 :accessor slot2))
+  (:metaclass persistent-metaclass))
+
+(setq foo (make-instance 'my-persistent-class))
+=> #<MY-PERSISTENT-CLASS @{492F4F85@}>
+
+(add-to-root "foo" foo)
+=> NIL
+(add-to-root "bar" foo)
+=> NIL
+(eq (get-from-root "foo")
+    (get-from-root "bar"))
+=> T
+@end lisp
+
+What's going on here?  Persistent classes, that is, classes which use
+the @code{persistent-metaclass} metaclass, are given unique IDs
+(accessable through @code{ele::oid}).  They are serialized simply by
+their OID and class.  Slot values are stored separately (and invisible
+to the user) keyed by OID and slot.  Loading (deserializing) a
+persistent class
+
+@lisp
+(get-from-root "foo")
+=> #<MY-PERSISTENT-CLASS @{492F4F85@}>
+@end lisp
+
+instantiates the object or finds it in a memory cache if it already
+exists.  (The cache is a weak hash-table, so gets flushed on GCs if no
+other references to the persistent object are kept in memory).  The
+slot values are NOT loaded until you ask for them.  In fact, the
+persisted slots don't have space allocated for them in the instances,
+because we're reading from the database.
+
+@lisp
+(setf (slot1 foo) "one")
+=> "one"
+(setf (slot2 foo) "two")
+=> "two"
+(slot1 foo)
+=> "one"
+(slot2 foo)
+=> "two"
+@end lisp
+
+Changes made to them propogate automatically:
+
+@lisp
+(setf (slot1 foo) "three")
+=> "three"
+(slot1 (get-from-root "bar"))
+=> "three"
+@end lisp
+
+You can also create persistent classes using the convenience macro
+@code{defpclass}.  
+
+@lisp
+(defpclass my-persistent-class () 
+  ((slot1 :accessor slot1) 
+   (slot2 :accessor slot2)))
+@end lisp
+
+Although it is hard to see here, serialization / deserialization of
+persistent classes is fast, much faster than ordinary CLOS objects.
+Finally, they do not suffer from merge-conflicts when accessed within
+a transaction (see below).  In short: persistent classes solve the
+problems associated with storing ordinary CLOS objects.  We'll see
+later that BTrees solve the problems associated with storing
+hash-tables.
+
+@node Rules about Persistent Classes
+@comment node-name, next, previous, up
+@section Rules about Persistent Classes
+
+Using the @code{persistent-metaclass} metaclass declares all slots to
+be persistent by default.  To make a non-persistent slot use the
+@code{:transient t} flag.  Class slots @code{:allocation :class} are
+never persisted, for either persistent or ordinary classes.  (Someday,
+if we choose to store class objects, this policy may change).
+
+Persistent classes may inherit from other classes.  Slots inherited
+from persistent classes remain persistent.  Transient slots and slots
+inherited from ordinary classes remain transient.  Ordinary classes
+cannot inherit from persistent classes -- otherwise persistent slots 
+could not be stored!
+
+@lisp
+(defclass stdclass1 ()
+  ((slot1 :initarg :slot1 :accessor slot1)))
+
+(defclass stdclass2 (stdclass1)
+  ((slot2 :initarg :slot2 :accessor slot2)))
+
+(defpclass pclass1 (stdclass2)
+  ((slot1 :initarg :slot1 :accessor slot1)
+   (slot3 :initarg :slot3 :accessor slot3)))
+
+(make-instance 'pclass1 :slot1 1 :slot2 2 :slot3 3)
+=> #<PCLASS1 @{x10deb88a@}>
+
+(add-to-root 'pinst *)
+=> #<PCLASS1 @{x10deb88a@}>
+
+(slot1 pinst)
+=> 1
+
+(slot2 pinst)
+=> 2
+
+(slot3 pinst)
+=> 3
+@end lisp
+
+Now we can simulate a new lisp session by flushing the instance cache,
+reloading our object then see what slots remain.  Here persistent
+slot1 should shadow the standard slot1 and thus be persistent.  Slot3
+is persistent by default and slot2, since it is inherited from a
+standard class should be transient.
+
+@lisp
+(elephant::flush-instance-cache *store-controller*)
+=> #<EQL hash-table with weak values, 0 entries @{x11198a02@}>
+
+(setf pinst (get-from-root 'pinst))
+=> #<PCLASS1 @{x1119b652@}>
+
+(slot1 pinst)
+=> 1
+
+(slot-boundp pinst slot2 pinst)
+=> nil
+
+(slot3 pinst)
+=> 3
+@end lisp
+
+Using persistent objects has implications for the performance of your
+system.  Note that the database is read every time you access a slot.
+This is a feature, not a bug, especially in concurrent situations: you
+want the most recent commits by other threads, right?  This can be
+used as a weak form of IPC.  But also note that in particular, if your
+slot value is not an immediate value or persistent object, reading
+will cons or freshly allocate storage for the value.
+
+Gets are not an expensive operation; you can perform thousands to tens
+of thousands of primitive reads per second.  However, if you're
+concerned, cache large values in memory and avoid writing them back to
+disk as long as you can.
+
+@node Persistent collections
+@comment node-name, next, previous, up
+@section Persistent collections
+
+The remaining problem outlined in the section on @ref{Serialization}
+is that operations which mutate collection types do not have
+persistent side effects.  We have solved this problem for objects, but
+not for collections such as as arrays, hashes or lists.  Elephant
+provides two solutions to this problem: the @code{pset} and
+@code{btree} classes.  Each provides persistent addition, deletion and
+mutation of elements, but the pset is a simple data structure that may
+be more efficient in memory and time than the more general btree.
+
+@subsection Using PSets
+
+The persistent set maintains a persistent, unordered collection of
+objects.  They inherit all the important properties of persistent
+objects: identity and fast serialization.  They also resolve the
+mutated substructure and nested aggregates problem for collections.
+Every mutating write to a @code{pset} is an independent and persistent
+operation and you can serialize or deserialize a @code{pset} without
+serializing any of it's key-value pairs.
+
+The @code{pset} is also a very convenient data structure for enabling
+a persistent slot contain a collection that can be updated without
+deserializing and/or reserializing a list, array or hash table on
+every access.
+
+Let's explore this data structure through a (very) simple social
+networking example.
+
+@lisp
+(defpclass person ()
+  ((name :accessor person-name :initarg :name))
+  ((friends :accessor person-friends :initarg :friends)))
+@end lisp
+
+Our goal here is to store a list of friends that each person has, this
+simple graph structure enables analyses such as who are the friends of
+my friends, or do I know someone who knows X or what person has the
+minimum degree of separation from everyone else?
+
+Without psets, we would have to do something like this:
+
+@lisp
+(defmethod add-friend ((me person) (them person))
+  (let ((friends (person-friends me)))
+    (pushnew them friends)
+    (setf (person-friends me) friends)))
+
+(defmethod remove-friend ((me person) (them person))
+  (let ((remaining-friends (delete them (person-friends me))))
+    (setf (person-friends me) remaining-friends)))
+
+(defmethod map-friends (fn (me person))
+  (mapc fn (person-friends me)))
+@end lisp
+
+Ouch!  This results in a large amount of consing.  We have to
+deserialize and generate a freshly consed list every time we call
+@code{person-friends} and then reserialize and discard it on every 
+call to @code{(setf person-friends)}.
+
+Instead, we can simply use a @code{pset} as the value of friends and
+implement the add and remove friend operations as follows:
+
+@lisp
+(defpclass person ()
+  ((name :accessor person-name :initarg :name))
+  ((friends :accessor person-friends :initarg :friends 
+            :initform (make-pset))))
+
+(defmethod add-friend ((me person) (them person))
+  (insert-item them (person-friends me)))
+
+(defmethod remove-friend ((me person) (them person))
+  (remove-item them (person-friends me)))
+
+(defmethod map-friends (fn (me person))
+  (map-pset fn (person-friends me)))
+@end lisp
+
+If you want a list to be returned when the user calls person-friends
+themselves, you can simply rejigger things like this:
+
+@lisp
+(defpclass person ()
+  ((name :accessor person-name :initarg :name))
+  ((friends :accessor person-friends-set :initarg :friends 
+            :initform (make-pset))))
+
+(defmethod person-friends ((me person))
+  (pset-list (person-friends-set me)))
+@end lisp
+
+If you just change the person-friends calls in our prior functions,
+the new set of functions removes @code{(setf person-friends)}, which
+doesn't make sense for a collection slot, allows users to get a list
+of the friends for easy list manipulations and avoids all the consing
+that plagued our earlier version.
+
+You can use a @code{pset} in any way you like just like a persistent
+object.  The only difference is the api used to manipulate it.
+Instead of slot accessors, we use insert, remove, map and find.
+
+There is one drawback to persistent sets and that is that they are not
+garbage collected.  Over time, orphaned sets will eat up alot of disk
+space.  Therefore you need to explicitly free the space or resort to
+more frequent uses of the migrate procedure to compact your database.
+The pset supports the @code{drop-pset} 
+
+However, given that persistent objects have the same explicit storage
+property, using psets to create collection slots is a nice match.
+
+@subsection Using BTrees
+
+BTrees are collections of key-value pairs ordered by key with a log(N)
+random access time and a rich iteration mechanism.  Like persistent
+sets, they solve all the collection problems of the prior sections.
+Every key-value pair is stored independently in Elephant just like
+persistent object slots.
+
+The primary interface to @code{btree} objects is through
+@code{get-value}.  You use @code{setf} @code{get-value} to store
+key-value pairs.  This interface is very similar to @code{gethash}.
+
+The following example creates a btree called
+@code{*friends-birthdays*} and adds it to the root so we can retrieve
+it during a later sessions.  We then will add two key-value pairs
+consisting of the name of a friend and a universal time encoding their
+birthday.
+
+@lisp
+(defvar *friends-birthdays* (make-btree))
+=> *FRIENDS-BIRTHDAYS*
+     
+(add-to-root 'friends-birthdays *friends-birthdays*)
+=> #<BTREE @{4951CF6D@}>
+     
+(setf (get-value "Ben" *friends-birthdays*)
+      (encode-universal-time 0 0 0 14 4 1973))
+=> 2312600400
+
+(setf (get-value "Andrew" *friends-birthdays*)
+      (encode-universal-time 0 0 0 22 12 1976))
+=> 2429071200
+     
+(get-value "Andrew" *friends-birthdays*)
+=> 2429071200
+=> T
+     
+(decode-universal-time *)
+=> 0
+   0
+   0
+   22
+   12
+   1976
+   2
+   NIL
+   6
+@end lisp
+
+In addition to the hash-table like interface, @code{btree} stores
+pairs sorted by the lisp value of the key, lowest to highest.  This is
+works well for numbers, strings, symbols and persistent objects, but
+due to serialization semantics may be strange for other values like
+arrays, lists, standard-objects, etc.  
+
+Because elements are sorted by value, we can iterate over all the
+elements of the BTree in order.  Notice that we entered the data in
+reverse alphabetic order, but will read it out in alphabetical order.
+
+@lisp
+(map-btree (lambda (k v) 
+             (format t "name: ~A utime: ~A~%" k 
+               (subseq (multiple-value-list 
+                         (decode-universal-time v)) 3 6)))
+           *friends-birthdays*)
+"Andrew"
+"Ben"
+=> NIL
+@end lisp
+
+But what if we want to read out our friends from oldest to youngest?
+One way is to employ another btree that maps birthdays to names, but
+this requires multiple @code{get-value} calls for each update,
+increasing the burden on the programmer.  Elephant provides several
+better ways to do this.
+
+The next section @ref{Indexing Persistent Classes} shows you how to
+order and retrieve persistent classes by one or more slot values.  
+
+
+@node Indexing Persistent Classes
+@comment node-name, next, previous, up
+@section Indexing Persistent Classes
+
+Class indexing simplifies the storing and retrieval of persistent
+objects.  An indexed class stores every instance of the class that is
+created, ensuring that every object is automatically persisted between
+sessions.
+
+@lisp
+(defpclass friend ()
+  ((name :accessor name :initarg :name)
+   (birthday :initarg :birthday))
+  (:index t))
+=> #<PERSISTENT-METACLASS FRIEND>
+
+(defmethod print-object ((f friend) stream)
+  (format stream "#<~A>" (name f)))
+
+(defun encode-date (dmy)
+  (apply #'encode-universal-time 
+    (append '(0 0 0) dmy)))
+
+(defmethod (setf birthday) (dmy (f friend))
+  (setf (slot-value f 'birthday)
+        (encode-date dmy))
+  dmy)
+
+(defun decode-date (utime)
+  (subseq (multiple-value-list (decode-universal-time utime)) 3 6))
+
+(defmethod birthday ((f friend))
+  (decode-date (slot-value f 'birthday)))
+@end lisp
+
+Notice the class argument ``:index t''.  This tells Elephant to store
+a reference to this class.  Under the covers, there are a set of
+btrees that keep track of classes, but we won't need to worry about
+that as all the functionality has been nicely packaged for you.
+
+We also created our own birthday accessor for convenience so it
+accepts and returns birthdays in a list consisting of month, day and
+year such as @code{(27 3 1972)}.  The index key will be the encoded
+universal time, however.
+
+Now we can easily manipulate all the instances of a class.
+
+@lisp
+(defun print-friend (friend)
+  (format t " name: ~A birthdate: ~A~%" 
+          (name friend) (birthday friend)))
+
+(make-instance 'friend :name "Carlos" 
+                       :birthday (encode-date '(1 1 1972)))
+(make-instance 'friend :name "Adriana" 
+                       :birthday (encode-date '(24 4 1980)))
+(make-instance 'friend :name "Zaid" 
+                       :birthday (encode-date '(14 8 1976)))
+
+(get-instances-by-class 'friends)
+=> (#<Carlos> #<Adriana> #<Zaid>)
+
+(mapcar #'print-friend *)
+ name: Carlos birthdate: (1 1 1972)
+ name: Adriana birthdate: (24 4 1980)
+ name: Zaid birthdate: (14 8 1976)
+=> (#<Carlos> #<Adriana> #<Zaid>)
+@end lisp
+
+But what if we have thousands of friends?  Aside from never getting
+work done, our get-instances-by-class will be doing a great deal of
+consing, eating up lots of memory and wasting our time.  Fortunately
+there is a more efficient way of dealing with all the instances of a
+class.
+
+@lisp
+(map-class #'print-friend 'friend)
+ name: Carlos birthdate: (1 1 1972)
+ name: Adriana birthdate: (24 4 1980)
+ name: Zaid birthdate: (14 8 1976)
+=> NIL
+@end lisp
+
+@code{map-class} has the advantage that it does not keep references to
+objects after they are processed.  The garbage collector can come
+along, clear references from the weak instance cache so that your
+working set is finite.  The list version above conses all objects into
+memory before you can do anything with them.  The deserialization
+costs are very low in both cases.
+
+Notice that the order in which the records are printed are not sorted
+according to either name or birthdate.  Elephant makes no guarantee
+about the ordering of class elements, so you cannot depend on the
+insertion ordering shown here.
+
+So what if we want ordered elements?  How do we access our friends
+according to name and birthdate?  This is where slot indices come into
+play.
+
+@lisp
+(defpclass friend ()
+  ((name :accessor name :initarg :name :index t)
+   (birthday :initarg :birthday :index t)))
+@end lisp
+
+Notice the :index argument to the slots and that we dropped the class
+:index argument.  Specifying that a slot is indexed automatically
+registers the class as indexed.  While slot indices increase the cost
+of writes and disk storage, each entry is only slightly larger than
+the size of the slot value.  Numbers, small strings and symbols are
+good candidate types for indexed slots, but any value may be used,
+even different types.  Once a slot is indexed, we can use the index to
+retrieve objects by slot values.
+
+@code{get-instances-by-value} will retrieve all instances that are
+equal to the value argument.
+
+@lisp
+(get-instances-by-value 'friends 'name "Carlos")
+=> (#<Carlos>)
+@end lisp
+
+But more interestingly, we can retrieve objects for a range of values.
+
+@lisp
+(get-instances-by-range 'friends 'name "Adam" "Devin")
+=> (#<Adriana> #<Carlos>)
+
+(get-instances-by-range 'friend 'birthday 
+                        (encode-date '(1 1 1974)) 
+                        (encode-date '(31 12 1984)))
+=> (#<Zaid> #<Adriana>)
+
+(mapc #'print-friend *)
+ name: Zaid birthdate: (14 8 1976)
+ name: Adriana birthdate: (24 4 1980)
+=> (#<Zaid> #<Adriana>)
+@end lisp
+
+To retrieve all instances of a class in the order of the index instead
+of the arbitrary order returned by @code{get-instances-by-class} you
+can use nil in the place of the start and end values to indicate the
+first or last element.  (Note: to retrieve instances null values, use
+@code{get-instances-by-value} with nil as the argument).
+
+@lisp
+(get-instances-by-range 'friend 'name nil "Sandra")
+=> (#<Adriana> #<Carlos>)
+
+(get-instances-by-range 'friend 'name nil nil)
+=> (#<Adriana> #<Carlos> #<Zaid>)
+@end lisp
+
+There are also functions for mapping over instances of a slot index.
+To map over duplicate values, use the :value keyword argument.  To map
+by range, use the :start and :end arguments.
+
+@lisp
+(map-inverted-index #'print-friend 'friend 'name :value "Carlos")
+ name: Carlos birthdate: (1 1 1972)
+=> NIL
+
+(map-inverted-index #'print-friend 'friend 'name 
+                 :start "Adam" :end "Devin")
+ name: Adriana birthdate: (24 4 1980)
+ name: Carlos birthdate: (1 1 1972)
+=> NIL
+
+(map-inverted-index #'print-friend 'friend 'birthday
+                 :start (encode-date '(1 1 1974)) 
+                 :end (encode-date '(31 12 1984)))
+ name: Zaid birthdate: (14 8 1976)
+ name: Adriana birthdate: (24 4 1980)
+=> NIL
+
+(map-inverted-index #'print-friend 'friend 'birthday 
+                 :start nil 
+                 :end (encode-date '(10 10 1978)))
+ name: Carlos birthdate: (1 1 1972)
+ name: Zaid birthdate: (14 8 1976)
+=> NIL
+
+(map-inverted-index #'print-friend 'friend 'birthday
+                 :start (encode-date '(10 10 1975))
+                 :end nil)
+ name: Zaid birthdate: (14 8 1976)
+ name: Adriana birthdate: (24 4 1980)
+=> NIL
+@end lisp
+
+The @ref{User Guide} contains a descriptions of the advanced features
+of @ref{Class Indices} such as ``derived indicies'' that allow you to
+order classes according to an arbitrary function, a dynamic API for
+adding and removing slots and how to set a policy for resolving
+conflicts between the code image and a database where the indexing
+specification differs.  
+
+This same facility is also available for your own use.  For more
+information @pxref{BTree Indexing}.
+
+
+@node Using Transactions
+@comment node-name, next, previous, up
+@section Using Transactions
+
+One of the most important features of a database is that operations
+enforce the ACID properties: Atomic, Consistent, Isolated, and
+Durable.  In plainspeak, this means that a set of changes is made all
+at once, that the database is never partially updated, that each set
+of changes happens sequentially and that a change, once made, is not
+lost.
+
+Elephant provides this protection for all primitive operations.  For
+example, when you write a value to an indexed slot, the update to the
+persistent slot record as well as the slot index is protected by a
+transaction that performs all the updates atomically and thus
+enforcing consistency.
+
+@subsection Why do we need Transactions?
+
+Most real applications will need to use explicit transactions rather
+than relying on the primitives alone because you will want multiple
+read-modify-update operations act as an atomic unit.  A good example
+for this is a banking system.  If a thread is going to modify a
+balance, we don't want another thread modifying it in the middle of
+the operation or one of the modifications may be lost.
+
+@lisp
+(defvar *accounts* (make-btree))
+
+(defun add-account (account)
+  (setf (get-value account *account*)
+
+(defun balance (account)
+  (get-value account *accounts*))
+
+(defun (setf balance) (amount account)
+  (setf (get-value account *accounts*) amount))
+
+(defun deposit (account amount)
+  "This shows a read and a write function call to 
+   get then set the balance"
+  (let ((balance (balance account)))
+    (setf (balance account) 
+          (+ balance amount))))
+
+(defun withdraw (account amount)
+  "A nice concise lisp version for withdraw"
+  (decf (balance account) amount))
+
+(add-account 'me)
+=> 0
+(deposit 'me 100)
+=> 100
+(balance 'me)
+=> 100
+(withdraw 'me 25)
+=> 75
+(balance 'me)
+=> 75
+@end lisp
+
+This simple bank example has a significant vulnerability.  If two
+threads read the same balance and one writes a new balance followed by
+the other, the second balance was written without access to the
+balance provided by the first and so the first transaction is lost.
+
+The way to avoid this is to group a set of operations together, such
+as the read and write in @code{deposit} and @code{withdraw}.  We
+accomplish this by establishing a dynamic context called a
+transaction.  
+
+During a transaction, all changes are cached until the transaction is
+committed.  The changes made by a committed transaction happens all at
+once.  Transactions can also be aborted due to errors that happen
+while they are active or because of contention.  Contention is when
+another thread writes to a variable that the current transaction is
+reading.  As in the bank example above, if one transaction writes the
+balance after the current one has read it, then the current one should
+start over so it has an accurate balance to work with.  A transaction
+aborted due to contention is usually restarted until it has failed too
+many times.
+
+The simplest and best way to use transactions in Elephant is to simply
+wrap all the operations in the @code{with-transaction} macro.  Any
+statements in the body of the macro are executed within the same
+transaction.  Thus we would modify our example above as follows:
+
+@lisp
+(defun deposit (account amount)
+  (with-transaction ()
+    (let ((balance (balance account)))
+      (setf (balance account) 
+            (+ balance amount)))))
+
+(defun withdraw (account amount)
+  (with-transaction ()
+    (decf (balance account) amount)))
+@end lisp
+
+And presto, we have an ACID compliant, thread-safe, persistent banking
+system!  
+
+@subsection Using @code{with-transaction}
+
+What is @code{with-transaction} really doing for us?  It first starts
+a new transaction, attempts to execute the body, and commits the
+transaction if successful.  If anytime during the dynamic extent of
+this process there is a conflict with another thread's transaction, an
+error, or other non-local transfer of control, the transaction is
+aborted.  If it was aborted due to contention or deadlock, it attempts
+to retry the transaction a fixed number of times by re-executing the
+whole body.
+
+And this brings us to two important constraints on transaction bodies:
+no dynamic nesting and idempotent side-effects.
+
+@subsection Nesting Transactions
+
+In general, you want to avoid nested uses of @code{with-transaction}
+statements over multiple functions.  Nested transactions are valid for
+some data stores (namely Berkeley DB), but typically only a single
+transaction can be active at a time.  The purpose of a nested
+transaction in data stores that support them is to break a long
+transaction into subsets.  This way if there is contention on a given
+subset of variables, only the inner transaction is restarted while the
+larger transaction can continue.  When the inner transaction commits
+its results, those results become part of the outer transaction but
+are not written to disk until the outer transaction commits.
+
+If you have transaction protected primitive operations (such as
+@code{deposit} and @code{withdraw}) and you want to perform a group of
+such transactions, for example a transfer between accounts, you can
+use the macro @code{ensure-transaction} instead of @code{with-transaction}.
+
+@lisp
+(defun deposit (account amount)
+  "Wrap the balance read and the setf with the new balance"
+  (ensure-transaction ()
+    (let ((balance (balance account)))
+      (setf (balance account) 
+            (+ balance amount)))))
+
+(defun deposit (account amount)
+  "A more concise version with decf doing both read and write"
+  (ensure-transaction ()
+    (decf (balance account) amount)))
+
+(defun withdraw (account amount)
+  (ensure-transaction ()
+    (decf (balance account) amount)))
+
+(defun transfer (src dst amount)
+  "There are four primitive read/write operations 
+   grouped together in this transaction"
+  (with-transaction ()
+    (withdraw src amount)
+    (deposit dst amount)))
+@end lisp
+
+@code{ensure-transaction} is exactly like @code{with-transaction}
+except it will reuse an existing transaction, if there is one, or
+create a new one.  There is no harm, in fact, in using this macro all
+the time.
+
+Notice the use of @code{decf} and @code{incf} above.  The primary
+reason to use Lisp is that it is good at hiding complexity using
+shorthand constructs just like this.  This also means it is also going
+to be good at hiding data dependencies that should be captured in a
+transaction!
+
+@subsection Idempotent Side Effects
+
+Within the body of a with-transaction, any non database operations
+need to be @emph{idempotent}.  That is the side effects of the body
+must be the same no matter how many times the body is executed.  This
+is done automatically for side effects on the database, but not for
+side effects like pushing a value on a lisp list, or creating a new
+standard object.
+
+@lisp
+(defparameter *transient-objects* nil)
+
+(defun load-transients (n)
+   "This is the wrong way!"
+   (with-transaction ()
+      (loop for i from 0 upto n do
+         (push (get-from-root i) *transient-objects*))))
+@end lisp
+
+In this contrived example we are pulling a set of standard objects
+from the database using an integer key and pushing them onto a list
+for later use.  However, if there is a conflict where some other
+process writes a key-value pair to a matching key, the whole
+transaction will abort and the loop will be run again.  In a heavily
+contended system you might see results like the following.
+
+@lisp
+(defun test-list ()
+   (setf *transient-objects* nil)
+   (load-transients)
+   (length *transient-objects*))
+
+(test-list 3)
+=> 3
+
+(test-list 3)
+=> 5
+
+(test-list 3)
+=> 4
+@end lisp
+
+So the solution is to make sure that the operation on the lisp
+parameters is atomic if the transaction completes.
+
+@lisp
+(defun load-transients (n)
+  "This is a better way"
+  (setq *transient-objects*
+        (with-transaction ()
+            (loop for i from 0 upto n collect
+                  (get-from-root i)))))
+@end lisp
+
+(Of course we would need to use @code{nreverse} if we cared about the
+order of instances in @code{*transient-objects*})  
+
+The best rule-of-thumb is to ensure that transaction bodies are purely
+functional as above, except for side effects to persistent objects and
+btrees.
+
+If you really do need to execute side-effects into lisp memory, such
+as writes to transient slots, make sure they are idempotent and that
+other processes cannot read the written values until the transaction
+completes.
+
+@subsection Transactions and Performance
+
+By now transactions almost look like more work than they are worth!
+Fortunately, there are also performance benefits to explicit use of
+transactions.  Transactions gather together all the writes that are
+supposed to made to the database and store them in memory until the
+transaction commits, and only then writes them to the disk. 
+
+The most time-intensive component of a transaction is waiting while
+flushing newly written data to disk.  Using the default
+auto-committing behavior requires a disk flush for every primitive
+write operation.  This is very, very expensive!  Because all the
+values read or written are cached in memory until the transaction
+completes, the number of flushes can be dramatically reduced.
+
+But don't take my word for it, run the following statements and see
+for yourself the visceral impact transactions can have on system
+performance.
+
+@lisp
+(defpclass test ()
+  ((slot1 :accessor slot1 :initarg :slot1)))
+
+(time (loop for i from 0 upto 100 do
+         (make-instance 'test :slot1 i)))
+@end lisp
+
+This can take a long time, well over a minute on the CLSQL data store.
+Here each new objects that is created has to independantly write its
+value to disk and accept a disk flush cost.
+
+@lisp
+(time (with-transaction ()
+         (loop for i from 0 upto 100 do
+            (make-instance 'test :slot1 i))))
+@end lisp
+
+Wrapping this operation in a transaction dramatically increases the
+time from 10's of seconds to a second or less.
+
+@lisp
+(time (with-transaction ()
+         (loop for i from 0 upto 1000 do
+            (make-instance 'test :slot1 i))))
+@end lisp
+
+When we increase the number of objects within the transaction, the
+time cost does not go up linearly.  This is because the total time to
+write a hundred simple objects is still dominated by the disk writes.
+
+These are huge differences in performance!  However we cannot have
+infinitely sized transactions due to the finite size of the data
+store's memory cache.  Large operations (such as loading data into a
+database) need to be split into a sequential set of smaller
+transactions.  When dealing with persistent objects a good rule of
+thumb is to keep the number of objects touched in a transaction well
+under 1000.
+
+@subsection Transactions and Applications
+
+Designing and tuning a transactional architecture can become quite
+complex.  Moreover, bugs in your system can be very difficult to find
+as they only show up when transactions are interleaved within a
+larger, multi-threaded application.  
+
+In many cases you can simply ignore transactions.  For example, when
+you don't have any other concurrent processes running.  In this case
+all operations are sequential and there is no chance of conflicts.
+You would only want to use transactions to improve performance on
+repeated sets of operations.
+
+You can also ignore transactions if your application can guarantee
+that concurrency won't generate any conflicts.  For example, a web app
+that guarantees only one thread will write to objects in a particular
+session can avoid transactions altogether.  However, it is good to be
+careful about making these assumptions.  In the above example, a
+reporting function that iterates over sessions, users or other objects
+may still see partial updates (i.e. a user's id was written prior to
+the query, but not the name).  However, if you don't care about these
+infrequent glitches, this case would still hold.
+
+If these cases don't apply to your application, or you aren't sure,
+you will fare best by programming defensively.  Break your system into
+the smallest logical sets of primitive operations
+(i.e. @code{withdraw} and @code{deposit}) using
+@code{ensure-transaction} and then wrap the highest level calls made
+to your system in with-transaction when the operations absolutely have
+to commit together or you need the extra performance.  Try not to have
+more than two levels of transactional accesses with the top using
+with-transaction and the bottom using ensure-transaction.
+
+See @ref{Transaction Details} for more details and @ref{Design Patterns} 
+for examples of how systems can be designed and tuned using transactions.
+
+@node Advanced Topics
+@comment node-name, next, previous, up
+@section Advanced Topics
+
+The tutorial covers the essential topics and concepts for using
+Elephant.  Many people will find that these features are the ones that
+are most often needed and used in ordinary applications.
+
+More sophisticated uses of Elephant may require additional features
+that are covered in the user guide.  The following is a list of major
+features in the user guide that were not covered in this tutorial.
+
+@itemize
+@item @strong{Using Multiple Threads and Processes}
+  What constraints must be accommodated to use Elephant data stores in
+multiple threads?  What capabilities are there to share data stores
+among multiple processes or machines?
+@item @strong{Class Heirarchies and Queries}
+  There are some subtle issues to take into account when querying
+persistent classes.  For example, how do you query a base class of
+type people to get subclass instances such as employee, manager,
+consultant, etc?
+@item @strong{Derived Class Indices}
+  You can create your own indices for classes that are arbitrary
+lisp functions of the persistent object.
+@item @strong{Dynamic Class Index Management} 
+  It is possible to add and remove indexes from classes at runtime.
+@item @strong{Class Definition/Database Conflict Resolution}
+  When you startup lisp, there are potential conflicts between the
+class definition and the indexing records in the database.  There are
+some constraints to account for and some facilities to manage
+how slots, class indices and 
+@item @strong{Indexed BTrees}
+  Indexed BTrees are just like BTrees, except it is possible to add
+indexes which are BTrees who's values are primary keys in the parent
+@code{indexed-btree}.  This allows for multiple ordering and groupings
+of the values of a BTree.
+@item @strong{BTree Cursors}
+  If you need to do more than iterate over a collection, or you need
+to delete elements of the collection as you iterate cursors are an
+important data structure.  They implement a variety of operators for
+moving backward and forward over a btree, including ranged operations
+and iterating of duplicate or unique values.
+@item @strong{Using the Map Operators}
+  Mapping operators can be very efficient if properly utilized.
+@item @strong{Using Multiple Stores} 
+Multiple store controllers can be open simultaneously.  However it
+does make the code more complex and you need to be careful about how
+you use them to avoid crashes and other unpleasant side effects.
+@item @strong{Custom Transaction Architecture} 
+You can implement your own version of @code{with-transaction} using the
+underlying controller methods for starting, aborting and committing
+transactions.  You had better know what you are doing, however!
+@item @strong{Handling Errors and Conditions}
+  There are a variety of errors that can occur in Elephant that need
+to be dealt with by applications.
+@item @strong{Deadlock Detection in Berkeley DB}
+  Berkeley DB requires an external process to detect deadlock
+conditions among transactions.  The :deadlock-detect keyword argument
+to open-store for Berkeley DB specs will launch this process on most
+lisps.
+@end itemize
+
+Further, @pxref{Design Patterns} for information about Elephant design patterns, solutions to common problems and other scenarios with multiple possible solutions.

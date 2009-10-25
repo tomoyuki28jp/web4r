@@ -1,0 +1,11 @@
+For Emacs users
+====================
+Add following lines to your .emacs file
+
+(add-to-list 'auto-mode-alist (cons "\\.sml$" 'lisp-mode))
+
+(setf lisp-mode-syntax-table
+  (let ((table (copy-syntax-table emacs-lisp-mode-syntax-table)))
+    (modify-syntax-entry ?[ "(^" table)
+    (modify-syntax-entry ?] ")$" table)
+    table))

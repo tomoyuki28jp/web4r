@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<reference id="aggregates">
+    <title>Aggregate Types</title>
+    <partintro>
+      <title>Overview</title>
+      <para>
+	Aggregate types are comprised of one or more primitive types.
+      </para>
+    </partintro>
+
+    <refentry id="def-enum">
+      <refnamediv>
+	<refname>def-enum</refname>
+	<refpurpose>Defines a &c; enumeration.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>def-enum</function> <replaceable>name fields &amp;key separator-string</replaceable>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>name</parameter></term>
+	    <listitem>
+	      <para>A symbol that names the enumeration.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>fields</parameter></term>
+	    <listitem>
+	      <para>A list of field defintions. Each definition can be
+a symbol or a list of two elements. Symbols get assigned a value of the
+current counter which starts at <computeroutput>0</computeroutput> and
+increments by <computeroutput>1</computeroutput> for each subsequent symbol. It the field definition is a list, the first position is the symbol and the second
+position is the value to assign the the symbol. The current counter gets set
+to <computeroutput>1+</computeroutput> this value.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>separator-string</parameter></term>
+	    <listitem>
+	      <para>A string that governs the creation of constants. The
+default is <computeroutput>"#"</computeroutput>.</para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Declares a &c; enumeration. It generates constants with integer values for the elements of the enumeration. The symbols for the these constant
+values are created by the <function>concatenation</function> of the
+enumeration name, separator-string, and field symbol. Also creates
+a foreign type with the name <parameter>name</parameter> of type
+<constant>:int</constant>.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(def-enum abc (:a :b :c)) 
+;; Creates constants abc#a (1), abc#b (2), abc#c (3) and defines
+;; the foreign type "abc" to be :int
+
+(def-enum efoo (:e1 (:e2 10) :e3) :separator-string "-")
+;; Creates constants efoo-e1 (1), efoo-e2 (10), efoo-e3 (11) and defines
+;; the foreign type efoo to be :int
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>Creates a :int foreign type, defines constants.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+      <refentry id="def-struct">
+	<refnamediv>
+	  <refname>def-struct</refname>
+	<refpurpose>Defines a &c; structure.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>def-struct</function> <replaceable>name &amp;rest fields</replaceable>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>name</parameter></term>
+	    <listitem>
+	      <para>A symbol that names the structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>fields</parameter></term>
+	    <listitem>
+	      <para>A variable number of field defintions. Each definition is a list consisting of a symbol naming the field followed by its foreign type.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Declares a structure. A special type is available as a slot
+in the field. It is a pointer that points to an instance of the parent
+structure. It's type is <constant>:pointer-self</constant>.
+
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(def-struct foo (a :unsigned-int) 
+                (b (* :char)) 
+                (c (:array :int 10)) 
+                (next :pointer-self))
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>Creates a foreign type.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="get-slot-value">
+      <refnamediv>
+	<refname>get-slot-value</refname>
+	<refpurpose>Retrieves a value from a slot of a structure.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>get-slot-value</function> <replaceable>obj type field</replaceable> => <returnvalue>value</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>obj</parameter></term>
+	    <listitem>
+	      <para>A pointer to foreign structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>A name of the foreign structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>field</parameter></term>
+	    <listitem>
+	      <para>A name of the desired field in foreign structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>value</returnvalue></term>
+	    <listitem>
+	      <para>The value of the field in the structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Accesses a slot value from a structure. This is generalized
+	  and can be used with <function>setf</function>.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(get-slot-value foo-ptr 'foo-structure 'field-name)
+(setf (get-slot-value foo-ptr 'foo-structure 'field-name) 10)
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="get-slot-pointer">
+      <refnamediv>
+	<refname>get-slot-pointer</refname>
+	<refpurpose>Retrieves a pointer from a slot of a structure.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>get-slot-pointer</function> <replaceable>obj type field</replaceable> => <returnvalue>pointer</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>obj</parameter></term>
+	    <listitem>
+	      <para>A pointer to foreign structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>A name of the foreign structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>field</parameter></term>
+	    <listitem>
+	      <para>A name of the desired field in foreign structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>pointer</returnvalue></term>
+	    <listitem>
+	      <para>The value of the field in the structure.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  This is similar to <function>get-slot-value</function>. It
+	  is used when the value of a slot is a pointer type.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(get-slot-pointer foo-ptr 'foo-structure 'my-char-ptr)
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="def-array-pointer">
+      <refnamediv>
+	<refname>def-array-pointer</refname>
+	<refpurpose>Defines a pointer to a array of type.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>def-array-pointer</function> <replaceable>name type</replaceable>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>name</parameter></term>
+	    <listitem>
+	      <para>A name of the new foreign type.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>The foreign type of the array elements.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Defines a type tat is a pointer to an array of type.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(def-array-pointer byte-array-pointer :unsigned-char)
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>Defines a new foreign type.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="deref-array">
+      <refnamediv>
+	<refname>deref-array</refname>
+	<refpurpose>Deference an array.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>deref-array</function> <replaceable>array type position</replaceable> => <returnvalue>value</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>array</parameter></term>
+	    <listitem>
+	      <para>A foreign array.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>The foreign type of the array.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>position</parameter></term>
+	    <listitem>
+	      <para>An integer specifying the position to retrieve from
+the array.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>value</returnvalue></term>
+	    <listitem>
+	      <para>The value stored in the position of the array.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Dereferences (retrieves) the value of an array element.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(def-array-pointer ca :char)
+(let ((fs (convert-to-foreign-string "ab")))
+   (values (null-char-p (deref-array fs 'ca 0))
+           (null-char-p (deref-array fs 'ca 2))))
+=> &nil;
+   &t;
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Notes</title>
+        <para>
+  The TYPE argument is ignored for CL implementations other than
+  AllegroCL. If you want to cast a pointer to another type use
+  WITH-CAST-POINTER together with DEREF-POINTER/DEREF-ARRAY.
+        </para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="def-union">
+      <refnamediv>
+	<refname>def-union</refname>
+	<refpurpose>Defines a foreign union type.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>def-union</function> <replaceable>name &amp;rest fields</replaceable>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>name</parameter></term>
+	    <listitem>
+	      <para>A name of the new union type.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>fields</parameter></term>
+	    <listitem>
+	      <para>A list of fields of the union.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Defines a foreign union type.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(def-union test-union
+  (a-char :char)
+  (an-int :int))
+
+(let ((u (allocate-foreign-object 'test-union))
+  (setf (get-slot-value u 'test-union 'an-int) (+ 65 (* 66 256)))
+  (prog1 
+    (ensure-char-character (get-slot-value u 'test-union 'a-char))
+    (free-foreign-object u)))
+=> #\A
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>Defines a new foreign type.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+</reference>
+

@@ -1,0 +1,26 @@
+Elephant: an object-oriented database for Common Lisp
+
+Copyright (c) 2004 by Andrew Blumberg and Ben Lee
+<ablumberg@common-lisp.net> <blee@common-lisp.net>
+
+Portions Copyright (c) 2005-2007 Robert L. Read
+<rread@common-lisp.net>.
+
+Portions Copyright (c) 2006-207 Ian S. Eslick
+<ieslick common-lisp net>
+
+Elephant users are granted the rights to distribute and use this software
+as governed by the terms of the Lisp Lesser GNU Public License
+(http://opensource.franz.com/preamble.html), also known as the LLGPL.
+
+This preamble, (which I have not included here, as it is copyrighted
+by Franz, Incorporated), references the GNU LESSER GENERAL PUBLIC LICENSE
+although the preamble makes certain modifications to it that are often
+thought of as particularly appropriate for LISP.
+
+Version of Elephant before version 0.5.0 where released under GPL.
+With the permission of Andrew Blumberg, Ben Lee, Robert L. Read and
+Ian S. Eslick, the primary contributors of elephant code up until this
+time, versions 0.5.0 to 0.9.0 are made under the LLGPL.
+
+

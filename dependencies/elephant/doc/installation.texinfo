@@ -1,0 +1,579 @@
+@c -*-texinfo-*-
+
+@node Installation
+@comment node-name, next, previous, up
+@chapter Installation
+@cindex Installation
+
+@menu
+* Requirements:: Supported lisps and required libraries.
+* Configuring Elephant:: Setting up Elephant and the configuration file.
+* Loading Elephant:: Loading Elephant and the data store loading protocol.
+* Berkeley DB:: Installing support for the Berkeley DB data store.
+* Berkeley DB Example:: An example of installing and running the Berkeley DB data store.
+* Upgrading Berkeley DB Databases:: How to upgrade to a new version of Berkeley DB.
+* CL-SQL:: Install and connecting to the CL-SQL data store.
+* CL-SQL Example:: An example of using the CL-SQL data store.
+* Elephant on Windows:: More details about running Elephant on Windows
+* Test Suites:: How to run and interpret the output of the regression test suite
+* Documentation:: Building documentation from texinfo sources.
+@end menu
+
+@node Requirements
+@comment node-name, next, previous, up
+@section Requirements
+
+Elephant is a multi-platform, multi-lisp and multi-backend system.  As
+such there is a great deal of complexity in testing.  The system has
+tried to minimize external dependencies as much as possible to ease
+installation, but it still requires some patience and care to bring
+Elephant up on any given platform.  This section attempts to simplify
+this for new users as much as possible.  Patches and suggestions will
+be gladly accepted.
+
+@subsection Supported Lisp, Platform and Data store combinations
+
+Elephant supports SBCL, Allegro, Lispworks, OpenMCL and CMUCL.  Each
+lisp is supported on each of the platforms it runs on: Mac OS X, Linux
+and Windows.  As of release 0.6.1, both 32-bit and 64-bit systems
+should be supported.  
+
+Due to the small number of developers and the large number of configurations
+providing full test coverage is problematic.  There are:
+
+@enumerate
+@item Five lisp environments
+@item Three Operating System platforms
+@item 32-bit or 64-bit OS/compilation configuration
+@item Three data store configurations: Berkeley DB, SQLite3 and Postgresql
+@end enumerate
+
+which  means that the total number of combinations to be tested could be as
+much as:
+
+@math{lisps * os * radix * dstore = 5 * 3 * 2 * 3 = 90 configurations}
+
+Not all of these combinations are valid, but the implication is that
+not every combination will be tested in any given release.  The
+developers and user base regularly use the following platforms
+
+@itemize
+@item 32/64-bit SBCL on Linux and Mac OS X
+@item 32-bit Lispworks on Windows and Mac OS X 
+@item 32-bit Allegro on Mac OS X  
+@end itemize
+
+The CLSQL backend is used predominantly under SBCL on Linux and Mac OS
+X at the time of writing.  The developers will do their best to
+accomodate users who are keen to test other combinations, but the
+above configurations will be the most stable and reliable.
+
+Elephant is now quite stable in general, so don't be afraid to try an
+unemphasized combination - chances are it is just a little more work
+to bring it up.  In particular, Elephant can probably work with MySQL
+or Oracle with just a little work, but nobody has asked for this yet.
+
+@subsection Library dependencies
+
+The Elephant core system requires:
+
+@enumerate
+@item asdf -- @uref{http://www.cliki.net/asdf}
+@item uffi -- requires version 1.5.18 or later, @uref{http://uffi.b9.com/} or @uref{http://www.cliki.net/UFFI}
+@item cl-base64 -- @uref{http://www.cliki.net/cl-base64}
+@item gcc -- Your system needs GCC (or Cygwin) to build the Elephant C-based serializer library.  (Precompiled DLL's are available for Windows platforms on the @uref{http://www.common-lisp.net/project/elephant/downloads.html, download page}.
+@item rt -- The RT regression test sytem is required to run the test suite: @uref{http://www.cliki.net/RT}
+@end enumerate
+
+Follow the instructions at these URLs to download and setup the
+libraries.  (Note: uffi and cl-base64 are
+@uref{http://www.cliki.net/ASDF-Install, asdf-installable} for those
+of you with asdf-install on your system).  Elephant, however, is not
+asdf-installable today.
+
+In addition to these libraries, each data store has their own
+dependencies as discussed in @ref{Berkeley DB} and
+@ref{CL-SQL}.
+
+@node Configuring Elephant
+@comment node-name, next, previous, up
+@section Configuring Elephant
+
+Before you can load the elephant packages into your running lisp, you
+need to setup the configuration file.  Copy the reference file
+config.sexp from the root directory to my-config.sexp in the root
+directory.  my-config.sexp contains a lisp reader-formatted list of
+key-value pairs that tells elephant where to find various libraries
+and how to build them.
+
+For example:
+
+@lisp
+#+(and (or sbcl allegro) macosx)
+((:berkeley-db-include-dir . "/opt/local/include/db45/")
+ (:berkeley-db-lib-dir . "/opt/local/lib/db45/")
+ (:berkeley-db-lib . "/opt/local/lib/db45/libdb-4.5.dylib")
+ (:berkeley-db-deadlock . "/opt/local/bin/db45_deadlock")
+ (:compiler . :gcc))
+@end lisp
+
+The following is a guide to the various parameters.  For simplicity,
+we include all the parameters here, although we will go into more
+detail in each of the data store sections.
+
+@itemize
+@item @strong{:compiler} -- This tells Elephant which compiler to use to build any C libraries.  The only options currently are :gcc on Unix platforms and :cygwin for the Windows platform.
+@item @strong{:berkeley-db-include-dir} -- The pathname for the Berkeley DB include files (db.h)
+@item @strong{:berkeley-db-lib-dir} -- The pathname for all the Berkeley DB library files 
+@item @strong{:berkeley-db-lib} -- The full pathname for the specific Berkeley DB library (libdb45.so)
+@item @strong{:berkeley-db-deadlock} -- The full pathname to the BDB utility function db_deadlock
+@item @strong{:pthread-lib} -- Not needed for SBCL 9.17+
+@item @strong{:clsql-lib} -- Currently unused, adds paths to the CL-SQL library search function
+@end itemize
+
+The config.sexp file contains a set of example configurations to start
+from, but you will most likely need to modify it for your system.
+
+Elephant has one small C library that it uses for binary
+serialization.  This means that you need to have gcc in your path
+(@pxref{Elephant on Windows} for exceptions on the Windows platform).
+
+@node Loading Elephant
+@comment node-name, next, previous, up
+@section Loading Elephant
+
+@subsection Loading Elephant via ASDF
+
+Now that you have loaded all the dependencies and created your
+configuration file you can load the Elephant packages and
+definitions:
+
+@lisp
+(asdf:operate 'asdf:load-op :elephant)
+@end lisp
+
+This will load the cl-base64 and uffi libraries.  It will also
+automatically compile and load the C library.  The build process no
+longer depends on a Makefile and has been verified on most platforms,
+but if you have a problem please report it, and any output you can
+capture, to the developers at @email{elephant-devel@@common-lisp.net}.
+We will update the FAQ at @uref{http://trac.common-lisp.net/elephant}
+with common problems users run into.
+
+@subsection Two-Phase Load Process
+
+Elephant uses a two-phase load process.  The core code is loaded and
+the code for a given data store is loaded on demand when you call
+@code{open-store} with a specification referencing that data store.
+The second phase of the load process requires ASDF to be installed on
+your system.
+
+(NOTE: There are some good reasons and not so good reasons for this
+process.  One reason you cannot load ele-bdb.asd directly as it
+depends on lisp code defined in elephant.asd.  We decided not to fix
+this in the 0.9 release although later releases may improve on this).
+
+@subsection Packages
+
+Now that Elephant has been loaded, you can call @code{use-package} in
+the cl-user package, 
+
+@lisp
+CL-USER> (use-package :elephant)
+=> T
+@end lisp
+
+use a predefined user package, 
+
+@lisp
+CL-USER> (in-package :elephant-user)
+=> T
+
+ELE-USER>
+@end lisp
+
+or import the symbols into your own project package from :elephant.
+
+@lisp
+(defpackage :my-project
+  (:use :common-lisp :elephant))
+@end lisp
+
+The imported symbols are all that is needed to control Elephant
+databases and are documented in detail in @ref{User API Reference}
+
+@subsection Opening a Store
+
+As discussed in the tutoral, you need to open a store to begin using
+Elephant:
+
+@lisp
+(open-store '(:BDB "/Users/owner/db/my-bdb/"))
+...
+ASDF loading messages
+...
+=> #<BDB-STORE-CONTROLLER>
+
+(open-store '(:CLSQL (:POSTGRESQL "localhost.localdomain" 
+                                  "mydb" "myuser" ""))))
+...
+ASDF loading messages
+...
+=> #<SQL-STORE-CONTROLLER>
+@end lisp
+
+The first time you load a specific data store, Elephant will call ASDF
+to load all the specified data store's dependencies, connect to a
+database and return the @code{store-controller} subclass instance for
+that data store.
+
+@node Berkeley DB
+@comment node-name, next, previous, up
+@section Berkeley DB
+
+The Berkeley DB Data Store started out as a very simple data
+dictionary in the Berkeley Unix operating system.  There are many
+``Xdb'' systems that use the same API, or a similarly one.  A free for
+non-commercial use version of Berkeley DB is provided by Oracle
+corporation with commercial licenses available.  Please follow the
+download and installation procedures defined here:
+
+http://www.oracle.com/technology/products/berkeley-db/db/index.html
+
+Elephant only works with version 4.5 of BerkeleyDB. 
+
+@node Berkeley DB Example
+@comment node-name, next, previous, up
+@section Setting up Berkeley DB
+
+We recommend that you download and build a distribution from Oracle.
+Some problems have been reported with linking to Debian, Cygwin or
+other packages.  This is especially true for Windows users.
+
+Beyond ensuring that the file ``my-config.sexp'' points to your BDB
+installation directories and files, nothing else should be required to
+configure the example that uses a local ``testdb'' directory as a
+dabase (under ``tests'') in the top-level Elephant directory.
+
+On one Fedora based system, the ``my-config.sexp'' file looked like this:
+
+@lisp
+((:berkeley-db-include-dir . "/usr/local/BerkeleyDB.4.5/include")
+ (:berkeley-db-lib-dir . "/usr/local/BerkeleyDB.4.5/lib")
+ (:berkeley-db-lib . "/usr/local/BerkeleyDB.4.5/lib/libdb.so")
+ (:berkeley-db-deadlock . "/usr/local/BerkeleyDB.4.5/bin/db_deadlock")
+ (:pthread-lib . nil)
+ (:clsql-lib . "/usr/local/share/common-lisp/")
+ (:compiler . :gcc))
+@end lisp
+
+The @ref{Test Suites} give a nice example of using BDB by running the test using 
+the specification: 
+@lisp
+'(:BDB "<elephant-root>/tests/testdb/")
+@end lisp
+
+Once you start working on an application, you will want to change the
+path to a directory that is appropriate for your application, and use
+that as the specification passed to @code{ open-store } on application
+startup.
+
+@node Upgrading Berkeley DB Databases
+@comment node-name, next, previous, up
+@section Upgrading Berkeley DB Databases
+
+When there is a new release of Elephant, it will depend on a new
+version of Berkeley DB.  If so, you must upgrade your BDB databases to
+use the new version Elephant.  This forced upgrade is a consequence of
+Elephant not parsing the BDB header files which tend to change various
+important constants with each release.  These patches are usually
+minor.  Upgrading also happens because Elephant tries to leverage new
+features of Berkeley DB.  
+
+The rest of this section talks about how to upgrade your existing
+Berkeley DB databases, opening them in the new Elephant version and
+migrating them to a newly created Elephant database.
+
+@subsection Upgrading to 0.9
+
+This section outlines how to upgrade from Elephant version 0.6.0 and
+Berkeley DB 4.3.
+
+@enumerate
+@item Install BDB 4.5 (keep 4.3 around for now)
+@item Setup my-config.sexp to point to the appropriate BDB 4.5 directories
+@item Upgrade your existing database directory to 4.5
+ @itemize
+ @item Run db43_recover in your 0.6 database
+ @item Optional: run db43_archive -d to remove all logs not part of a checkpoint
+    This will make catastrophic recovery impossible, but reduces the amount of data you
+    have to backup.
+ @item Backup your db files and remaining logs
+ @item Run db45_checkpoint -1 in the database directory
+ @end itemize
+@item Upgrade 0.6 data to a fresh 0.9 database
+ @itemize 
+ @item Open your old database: @code{(setf sc (open-store '(:BDB "/Users/me/db/ele060/")))}
+ @item Run upgrade: @code{(upgrade sc '(:BDB "/Users/me/db/ele090/"))}
+ @end itemize
+@item Test your new application and report any bugs that arise to @email{elephant-devel@@common-lisp.net}
+@end enumerate
+
+@emph{(NOTE: close-store may fail when closing the old 0.6 database, this is OK.)}
+
+@emph{(NOTE: 64-bit lisps will not successfully upgrade 32-bit 0.6 databases.  Use a 32-bit
+        version of your lisp to update to 0.9 and then open that database in your 64-bit
+        lisp.  There should be no compatibility problems.  Best to test your application on
+        a 32-bit lisp if you can, just to be sure.)}
+
+@subsection Upgrade from Elephant 0.5
+
+Follow the upgrade procedures outlined in the Elephant 0.6.0 INSTALL
+file to upgrade your database from 0.5 to 0.6.0.  Then follow the above
+procedures for upgrading to 0.9.
+
+@emph{(NOTE: It may not take much work to make 0.9 upgrade directly from 0.5
+However there are so few (none?) 0.5 users that it wasn't deemed worth
+the work given that there's an upgrade path available.)}
+
+@node CL-SQL
+@comment node-name, next, previous, up
+@section CL-SQL
+
+Although originally designed as an interface to the BerkeleyDB system,
+the original Elephant system has been extended to support the use of
+relational database management systems as the implementation of the
+persistent store.  This relies on Kevin Rosenberg's CL-SQL interface,
+which provides access to a large number of relational systems.
+
+A major motivation of this extension is that one one might prefer the
+licensing of a different system.  For example, at the time of this
+writing, it is our interpretation that one cannot use the BerkeleyDB
+system behind a public website
+http://www.sleepycat.com/download/licensinginfo.shtml#redistribute
+unless one releases the entire web application as open source.
+
+Neither the PostGres DBMS nor SQLite 3, nor Elephant itself, imposes
+any such restriction. 
+
+Other reasons to use a relational database system might include:
+familiarity with those systems, the fact that some part of your application
+needs to use the truly relational aspects of those systems, preference for
+the tools associated with those systems, etc.
+
+Elephant provides functions for migrating data seamlessly between data
+stores.  One can quite easily move data from a BerkeleyDB repository
+to a PostGres repository, and vice versa.  This offers at least the
+possibility than one can develop using one data store, for example
+BerkeleyDB, and then later move to Postgres.  One could even operate
+simultaneously out of multiple repositories, if there were a good
+reason to do so.
+
+The SQL implementation shares the serializer with the BDB data store, but
+base64 encodes the resulting binary stream.  This data is placed into
+a single table in the SQL data store.
+
+All functionality except for nested transaction support and
+cursor-puts supported by the BerkeleyDB data store is supported by the
+CL-SQL data store.  CL-SQL transaction integrity under concurrent
+operation has not been extensively stress tested.
+
+Additionally, it is NOT the case that the Elephant system currently
+provides transaction support across multiple repositories; it provides
+transaction support on a per-repository basis.
+
+The PostGres backend is currently about 5 times slower than the
+BerkeleyDB backend.  As of the time of this writing, only PostGres and
+SqlLite 3 have been tested as CL-SQL backends.
+
+@node CL-SQL Example
+@comment node-name, next, previous, up
+@section CL-SQL Example 
+
+To set up a PostGres based back end, you should:
+
+@enumerate
+@item Install postgres and make sure postmaster is running.
+Postgres may be installed on your system; you may be able to use a
+package manager to install it, or you can install it from the
+PostgresSQL site directly (http://www.postgresql.org/).
+
+@item Create a database called ``test'' and set its permissions
+to be reached by whatever connection specification you intend to use.
+The tests use:
+
+@lisp
+(defvar *testpg-path*
+'(:postgreql "localhost.localdomain" "test" "postgres" ""))
+@end lisp
+
+which means that connections must be allowed to the database test, user ``postgres'',
+no password, connected from the same machine ``localhost.localdomain''.
+(This would be changed to something more secure in a real application.)
+Typically you edit the file : pg_hba.conf to enable various kinds of connections
+in postgres.
+
+@item  Be sure to enable socket connection to postgres when you invoke the postmaster.
+
+@item  Test that you can connect to the database with these credentials by running: 
+@code{ psql -h 127.0.0.1 -U postgres test} before you attempt to connect with Elephant.
+
+@end enumerate
+
+Furthermore, you must grant practically all creation/read/write privileges 
+to the user postgres on this schema, so that it can construct the tables 
+it needs.
+
+Upon first opening a CL-SQL based store controller, the tables, indexes,
+sequences, and so on needed by the Elephant system will be created in the 
+schema named ``test'' automatically.
+
+@node Elephant on Windows
+@comment node-name, next, previous, up
+@section Elephant on Windows
+
+The build process on Windows currently only works with GCC under
+Cygwin.  The process can be a bit tricky, so if it doesn't work out of
+the box or you don't want to install cygwin, we recommend that you
+download the DLLs from the Elephant website download page
+(@url{http://www.common-lisp.net/project/elephant/downloads.html'}).
+
+Unpack the .zip file into the elephant root directory.  Ensure that
+your @code{my-config.sexp} file configuration for Windows has
+@code{:prebuilt-binaries} set to ``t'' so it will know to look in
+the elephant root during the asdf loading process.
+
+For Berkeley DB users we recommend downloading the Windows binary
+distribution of Berkeley DB 4.5 to minimize any potential linking
+issues.
+
+@node Test Suites
+@comment node-name, next, previous, up
+@section Test Suites
+
+Elephant has matured quite a bit over the past year or two.
+Hopefully, it will work out-of-the-box for you.
+
+However, if you are using an LISP implementation different than the
+ones on which it is developed and maintained (@pxref{Requirements}) or
+you have a problem that you think may be a bug, you may want to run
+the test suites.  If you report a bug, we will ask you to run these
+tests and report the output.  Running them when you first install the
+system may give you a sense of confidence and understanding that makes
+it worth the trouble.
+
+There are three files that execute the tests.  You should choose
+one as a starting point based on what backend(s) you are using.
+If using BerekeleyDB, use 
+@lisp
+BerkeleyDB-tests.lisp
+@end lisp
+
+If using both, use both of the above and also use:
+@lisp
+MigrationTests.lisp
+@end lisp
+
+The text of this file is included here to give the
+casual reader an idea of how elepant test can be run in general:
+@lisp
+;; If you are only using one back-end, you may prefer:
+;; SQLDB-test.lisp or BerkeleyDB-tests.lisp
+(asdf:operate 'asdf:load-op :elephant)
+(asdf:operate 'asdf:load-op :ele-clsql)
+(asdf:operate 'asdf:load-op :ele-bdb)
+(asdf:operate 'asdf:load-op :ele-sqlite3)
+
+(asdf:operate 'asdf:load-op :elephant-tests)
+
+(in-package "ELEPHANT-TESTS")
+
+;; Test Postgres backend
+(setq *default-spec* *testpg-spec*)
+(do-backend-tests)
+
+;; Test BDB backend
+(setq *default-spec* *testbdb-spec*)
+(do-backend-tests)
+
+;; Test SQLite 3
+(setq *default-spec* *testsqlite3-spec*)
+(do-backend-tests)
+
+;; Test a Migration of data from BDB to postgres
+(do-migration-tests *testbdb-spec* *testpg-spec*)
+
+;; An example usage.
+(open-store *testpg-spec*)
+(add-to-root "x1" "y1")
+(get-from-root "x1")
+
+(add-to-root "x2" '(a 4 "spud"))
+(get-from-root "x2")
+@end lisp
+
+The appropriate test should execute for you with no errors.
+If you get errors, you may wish to report it the 
+@code{ elephant-devel at common-lisp.net} email list.
+
+Setting up SQLite3 is even easier.  Install SQLite3 (I had to use
+the source rather than the binary install, in order to get the dynamic
+libraries constructed.)
+
+An example use of SQLLite3 would be:
+
+@lisp
+(asdf:operate 'asdf:load-op :elephant)
+(asdf:operate 'asdf:load-op :ele-clsql)
+(asdf:operate 'asdf:load-op :ele-sqlite3)
+(in-package "ELEPHANT-TESTS")
+(setq *test-path-primary* '(:sqlite3 "testdb"))
+(do-all-tests-spec *test-path-primary*)
+@end lisp
+
+The file RUNTESTS.lisp, although possibly not exactly what you want,
+contains useful example code.
+
+You can of course migrate between the three currently supported repository
+strategies in any combination: BDB, Postgresql, and SQLite3.
+
+In all probability, other relational datbases would be very easy to 
+support but have not yet been tested.  The basic pattern of 
+the ``path'' specifiers is (cons clsqal-database-type-symbol (normal-clsql-connection-specifier)).
+
+@node Documentation
+@comment node-name, next, previous, up
+@section Documentation
+
+If you are getting the documentation as a released tar file, you will
+probably find the documenation in .html or .pdf form in the release,
+or can find it at the Elephant website.
+
+If you want to compile the documentation youself, for example, if you
+can think of a way to improve this manual, then you will do something
+similar to this in a shell or command-line prompt:
+
+@lisp
+cd doc
+make
+make pdf
+@end lisp
+
+This process will populate the ``./includes'' directory with
+references automatically extracted from the list code.  Currently this
+docstring extraction process relies on SBCL, but with minor
+modifications the scripts should work with other lisp environemnts.
+
+The Makefile will then compile the texinfo documentation source into
+an HTML file and a PDF file which will be left in the ``doc/'' directory.
+An info style HTML tree is also created in the ``doc/elephant'' directory.
+This tree contains one node per HTML file.
+
+Don't edit anything in the ``doc/elephant'' directory or the
+``doc/includes'' directories, as everything in these directories is
+generated.  Instead, edit the ``.texinfo'' files in the doc directory.
+
+
+
+
+ 

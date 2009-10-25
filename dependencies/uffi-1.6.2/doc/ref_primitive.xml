@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<reference id="primitives">
+  <title>Primitive Types</title>
+  <partintro>
+    <title>Overview</title>
+    <para>
+      Primitive types have a single value, these include
+      characters, numbers, and pointers. They are all symbols in
+      the keyword package.
+    </para>
+    <itemizedlist>
+      <listitem>
+	<para><constant>:char</constant> - Signed 8-bits. A
+	  dereferenced :char pointer returns an character.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:unsigned-char</constant> - Unsigned 8-bits. A dereferenced :unsigned-char
+	  pointer returns an character.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:byte</constant> - Signed 8-bits. A
+	  dereferenced :byte pointer returns an integer.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:unsigned-byte</constant> - Unsigned 8-bits. A
+	  dereferenced :unsigned-byte pointer returns an integer.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:short</constant> - Signed 16-bits.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:unsigned-short</constant> - Unsigned 16-bits.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:int</constant> - Signed 32-bits.</para>
+      </listitem>
+      <listitem>
+	<para><constant>:unsigned-int</constant> - Unsigned 32-bits.</para>
+      </listitem>
+      <listitem>
+	<para><constant>:long</constant> - Signed 32 or 64 bits, depending upon the platform.</para>
+      </listitem>
+      <listitem>
+	<para><constant>:unsigned-long</constant> - Unsigned 32 or 64 bits, depending upon the platform.</para>
+      </listitem>
+      <listitem>
+	<para><constant>:float</constant> - 32-bit floating point.</para>
+      </listitem>
+      <listitem>
+	<para><constant>:double</constant> - 64-bit floating point.</para>
+      </listitem>
+      <listitem>
+	<para><constant>:cstring</constant> - 
+	  A &null; terminated string used for passing and returning characters strings with a &c; function.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:void</constant> - 
+	  The absence of a value. Used to indicate that a function does not return a value.
+	</para>
+      </listitem>
+      <listitem>
+	<para><constant>:pointer-void</constant> - Points to a generic object.</para>
+      </listitem>
+      <listitem>
+	<para><constant>*</constant> - Used to declare a pointer to an object</para>
+      </listitem>
+    </itemizedlist>
+  </partintro>
+  
+  <refentry id="def-constant">
+    <refnamediv>
+      <refname>def-constant</refname>
+      <refpurpose>Binds a symbol to a constant. 
+      </refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>def-constant</function> <replaceable>name value &amp;key export</replaceable>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>name</parameter></term>
+	  <listitem>
+	    <para>A symbol that will be bound to the value.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>value</parameter></term>
+	  <listitem>
+	    <para>An evaluated form that is bound the the name.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>export</parameter></term>
+	  <listitem>
+	    <para>When &t;, the name is exported from the current package. The default is &nil;</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>This is a thin wrapper around <function>defconstant</function>. It evaluates at
+	compile-time and optionally exports the symbol from the package.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Examples</title>
+      <screen>
+(def-constant pi2 (* 2 pi))
+(def-constant exported-pi2 (* 2 pi) :export t)
+      </screen>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>Creates a new special variable..</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+  <refentry id="def-foreign-type">
+    <refnamediv>
+      <refname>def-foreign-type</refname>
+      <refpurpose>Defines a new foreign type. 
+      </refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsect1>
+      <title>Syntax</title>
+      <synopsis>
+	<function>def-foreign-type</function> <replaceable>name type</replaceable>
+      </synopsis>
+    </refsect1>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>name</parameter></term>
+	  <listitem>
+	    <para>A symbol naming the new foreign type.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>value</parameter></term>
+	  <listitem>
+	    <para>A form that is not evaluated that defines the new
+	      foreign type.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>Defines a new foreign type.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Examples</title>
+      <screen>
+(def-foreign-type my-generic-pointer :pointer-void)
+(def-foreign-type a-double-float :double-float)
+(def-foreign-type char-ptr (* :char))
+      </screen>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>Defines a new foreign type.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+  <refentry id="null-char-p">
+    <refnamediv>
+      <refname>null-char-p</refname>
+      <refpurpose>Tests a character for &null; value.
+      </refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsect1>
+      <title>Syntax</title>
+      <synopsis>
+	<function>null-char-p</function> <replaceable>char</replaceable> => <returnvalue>is-null</returnvalue>
+      </synopsis>
+    </refsect1>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>char</parameter></term>
+	  <listitem>
+	    <para>A character or integer.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>is-null</parameter></term>
+	  <listitem>
+	    <para>A boolean flag indicating if char is a &null; value.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>
+	A predicate testing if a character or integer is &null;. This
+	abstracts the difference in implementations where some return a 
+	<computeroutput>character</computeroutput>
+	and some return a 
+	<computeroutput>integer</computeroutput>
+	whence dereferencing a 
+	<computeroutput>C</computeroutput>
+	character pointer.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Examples</title>
+      <screen>
+(def-array-pointer ca :unsigned-char)
+(let ((fs (convert-to-foreign-string "ab")))
+      (values (null-char-p (deref-array fs 'ca 0))
+      (null-char-p (deref-array fs 'ca 2))))
+=> &nil;
+   &t;
+      </screen>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>None.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+</reference>

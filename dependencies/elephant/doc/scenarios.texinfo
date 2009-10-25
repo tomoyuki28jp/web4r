@@ -1,0 +1,949 @@
+@c -*-texinfo-*-
+
+@node Design Patterns
+@comment node-name, next, previous, up
+@chapter Design Patterns
+@cindex Design Patterns
+
+@menu 
+* File System Replacement:: Deployment of Elephant as file replacement
+* Checkpointing Conventional Program State:: How to recover the application state as recorded in a set of interdependant standard classes for purposes of undo, crash recovery and session persistence.
+* Persistent System Objects:: Making persistent objects a natural part of your system
+* Elephant as Database:: Using Elephant as a database for records and user data instead of using a SQL relational Database
+* Multithreaded Web Applications:: Elephant is a natural match for web applications
+@c * Graph-oriented Applications:: Elephant is good, but not optimized, for graph-oriented applications.
+* Real-World Application Examples:: See some real-world applications Elephant has been used for and a brief discussion of how it was used and any novel uses of Elephant.
+@end menu
+
+This chapter explores different ways that Elephant can be used to
+solve common problems in user programs.  The term ``Design Pattern''
+may be overkill as there is no formal specification of patterns.
+However the goals is similar to classical design patterns: provide a
+coherent description of how to approach ceratain common problems using
+Elephant as an enabling tool.
+
+Most of this chapter falls short of a tutorial in the application of a
+pattern.  Instead it provides a conceptual guide to implementing the
+pattern along with some code examples to show how Elephant features
+are invoked to support the pattern.
+
+The authors hope that users of Elephant will find this a good source
+of inspiration for how to apply Elephant to their own programs and
+that they will be motivated to contribute design patterns of their own.
+
+
+@node Persistent System Objects
+@comment node-name, next, previous, up
+@section Persistent System Objects
+
+The simplest design pattern supported by Elephant is the use of
+persistent objects in the place of standard objects.  Typically you
+can just modify the old class definition to inherit the
+@code{persistent-metaclass}.  Depending on your application, objects
+may need to have transient slots for performance reasons.  We'll
+create a dummy class to illustrate:
+
+@lisp
+(defclass system-object ()
+  ((appname :accessor system-appname :initarg :name)
+   (url :accessor system-url :initarg :url)
+   (state :accessor system-state :initarg :state :initform 'idle))
+  (:metaclass persistent-metaclass))
+@end lisp
+
+When starting up your application you need to recover references to
+any persistent objects that were created in a prior session or
+initialize a new one.
+
+If you are storing system objects in parameters, you can just call
+an initialization function on startup:
+
+@lisp
+(defparameter *system* nil)
+
+(defun initialize-system (appname)
+  (let ((system-object (get-from-root '*system*)))
+    (setf *system
+          (if system-object system-object
+              (make-instance 'system-object :name appname)))))
+
+*system*
+=> #<SYSTEM-OBJECT ...>
+@end lisp
+
+And now you can use your parameter as you did before.  If you want to
+avoid calling initialization functions, you can just accesss system
+objects through functions instead of parameters.
+
+@lisp
+(defparameter *system* nil)
+
+(defun sys-object ()
+  (unless *system
+    (let ((appname (get-application-name))
+          (url (get-system-url)))
+      (setf *system* (make-instance 'system-object 
+                                    :name appname 
+                                    :url url))))
+  *system*)
+
+(sys-object)
+=> #<SYSTEM-OBJECT ...>
+@end lisp              
+
+One constraint to keep in mind is that slot access will be slower as
+it has to synchronize to disk.  This is usually not noticable for
+objects that are accessed on the order of seconds instead of
+milliseconds.  For objects read constantly, but where you want to save
+any written values it helps to have a transient slot to cache values.
+You can override some methods to ensure that the persistent value is
+always updated, but that reads happen from the cached value and that
+the cached value is restored whenever the object is loaded.
+
+@lisp
+(defclass system-object ()
+  ((appname :accessor system-appname :initarg :name)
+   (url :accessor system-url :initarg :url)
+   (laststate :accessor system-laststate :initarg :state 
+              :initform 'idle)
+   (state :accessor system-state :initarg :state :transient t)
+  (:metaclass persistent-metaclass))
+
+(defmethod (setf system-state) :after (state (sys system-state))
+  (setf (system-laststate sys) state))
+
+(defmethod initialize-instance :after ((sys system-state) &rest rest)
+  (declare (ignore rest))
+  (when (slot-boundp sys 'laststate)
+    (setf (system-state sys) (system-laststate sys))))
+@end lisp
+
+And now you have an instant read cache for a slot value.  This pattern
+is used several times within the Elephant implementation.
+
+@node File System Replacement
+@comment node-name, next, previous, up
+@section File System Replacement
+
+One of the more annoying time-wasting activities in programming is
+saving and restoring data from disk.  Data in configuration files,
+static data such as graphics and other formats take time and attention
+away from solving the main problem and are additional sources of bugs.
+Because Elephant's serializer supports most lisp types, Elephant can
+greatly simplify ease these concerns and allow you to work directly
+with your natural in-memory representations with almost no work to
+encode/decode formats or manage files in the file 
+system@footnote{Example provided by Ian Eslick, April 2007}.
+
+The simplest way to accomplish this is to simply open a store
+controller and initialize a key-value pair in the root btree as a
+instead of a filename and file data in some system directory.  Like
+the initialization process described for standard objects, you can
+hide some of the details like this:
+
+@lisp
+(defvar *resources* (make-hash-table))
+
+(defun get-resource (name)
+  (multiple-value-bind (value foundp) (gethash name *resources*)
+    (if foundp
+        value
+        (multiple-value-bind (value foundp) (get-from-root name)
+           (if foundp
+               value
+               (error "Resource named ~A was not initialized" name))))))
+
+(defun set-resource (value name)
+  (add-to-root name value)
+  (setf (gethash name *resources*) value))
+
+(defsetf get-resource set-resource)
+@end lisp
+
+Another simple metaphor is to use Elephant btrees as persistent hash
+tables that persist key-value pairs for you.  We'll wrap the Elephant
+btree in a simple class to provide a little conceptual isolation.
+
+@lisp
+(defclass phash ()
+  ((btree :accessor phash-btree :initarg :btree 
+          :initform (make-btree))))
+
+(defun make-persistent-hash (name)
+  (let ((btree (get-from-root name)))
+    (if btree
+        (make-instance 'phash :btree btree)
+        (let ((phash (make-instance 'phash)))
+           (add-to-root name (phash-btree phash))
+           phash))))
+
+(defun getphash (key phash)
+  (get-value key (phash-btree phash)))
+
+(defun setphash (value key phash)
+  (setf (get-value key (phash-btree phash)) value))
+
+(defsetf getphash setphash)
+@end lisp
+
+Of course to make a proper abstraction we'd want to provide some
+conditions that allowed restarts that initialized values or allowed
+users to update the hash in the background and continue computation.
+
+
+
+@node Checkpointing Conventional Program State
+@comment node-name, next, previous, up
+@section Checkpointing Conventional Program State
+
+Another challenge for many programs is saving some subset of program
+state.  This could involve checkpointing an evolving computation,
+keeping track of state for the purposes of 'undo' or enabling crash
+recovery at key points in the program's execution.  
+
+One approach is to transform all our program state into persistent
+objects.  However if the use of program state is slot-access
+intensive, this can have a significant performance impact.  To improve
+the performance of the application, careful use of transactions is
+needed which further complicates program design and operation.
+
+Can Elephant be used to provide a simple solution that retains the
+in-memory performance that we want?  Can we do all this without having
+to put a ton of persistence assumptions into our main program code?
+The answer is yes, assuming you are willing to explicitly checkpoint
+your code and adhere to some simple constraints in accessing your
+program objects.
+
+@subsection Assumptions
+
+To maintain processing speed and convenience we would like all our
+objects to be standard lisp objects without special harnesses that
+would interfere with applying the full power of lisp.  At some point
+during execution, we want to store the current state of a set of
+objects to disk and yet make it easy to reproduce the original state
+at a later point in time.  For simplicity, we'll limit ourselves
+to collections of CLOS objects.
+
+A complication is that many programs have sets of interdependant
+objects.  These could be complex program graphs, the state of an
+ongoing search process or a standard OO system that uses a bunch of
+different program object types to run.  This means that we need to
+persist not just object state, but also references to other objects.
+
+Using CLOS reflection we can provide a general solution to capturing
+objects, slot values and references.  However to reproduce references,
+we'll need to be able to find the object referenced and the only way
+to do that is to store it as well.  Thus we want to create a snapshot
+of a closed set of self-referential objects.
+
+The assumptions underlying the snapshot mechanism is:
+
+@itemize
+@item @strong{Use standard CLOS objects and references to other CLOS objects.}
+We need reflection to 
+@item @strong{Use standard hash tables to keep track of sets of objects.}
+Your program should use the hash table as an entry point to find
+objects.  When objects are restored, just replace an existing hash
+table with the new one and access your objects that way.  Any parts of
+your program that have pointers into your objects but are not
+themselves snapshotted, will need to be able to refresh their pointers
+in some way.
+@item @strong{Find your root object (s) and know what is ``reachable'' from them.}
+Ensure that you aren't referring to standard objects outside those you
+want to store as they will be stored too (persistent object references
+are fine though).  Make sure your root refers to objects that refers
+to other objects and so on such that all objects you want to store can
+be reached by some set of pointer traversals.  Looping references are
+fine.
+@end itemize
+
+@subsection Snapshot Set 
+
+The snapshot implementation is called a @code{snapshot-set}.  The next
+section will go into detail, but a walkthrough will help make it
+clearer@footnote{Example provided by Ian Eslick, April 2007}.
+
+A snapshot set is quite easy to use.  Load the complete code and play
+with this simple walk through.  The code can be located in the
+Elephant source tree under @code{src/conrib/eslick/snapshot-set.lisp}.
+
+The first step is to create a @code{snapshot-set} object,
+
+@lisp
+(setf my-set (make-instance 'snapshot-set))
+@end lisp
+
+and add it to the root so we don't lose track of it.
+
+@lisp
+(add-to-root 'my-set my-set)
+@end lisp
+
+Then we need some objects to play with.
+
+@lisp
+(defclass my-test-class ()
+  ((value :accessor test-value :initarg :value)
+   (reference :accessor test-reference :initarg :reference)))
+
+(setf obj1 (make-instance 'my-test-class :value 1 :reference nil))
+(setf obj2 (make-instance 'my-test-class :value 2 :reference obj1))
+(setf obj3 (make-instance 'my-test-class :value 3 :reference obj2))
+
+(register-object obj3 my-set)
+(snapshot my-set)
+@end lisp
+
+Now your set should have persistent versions of all three classes that
+are reachable from @code{obj3}.
+
+@lisp
+(map-set (lambda (x) (print (test-value x))) my-set)
+=>
+3
+2
+1
+@end lisp
+
+Of course such fully connected objects are not always common, so we'll
+demonstrate using hash tables to create root indexes into our objects
+and sidestep registration calls entirely.  We'll create a fresh set to
+work with.
+
+@lisp
+(setf my-set (make-instance 'snapshot-set))
+(add-to-root 'my-set my-set)
+
+(setf obj4 (make-instance 'my-test-class :value 4 :reference obj1))
+(setf obj5 (make-instance 'my-test-class :value 5 :reference nil))
+
+(setf hash (make-hash-table))
+(setf (snapshot-root my-set) hash)
+
+(setf (gethash 'obj3 hash) obj3)
+(setf (gethash 'obj4 hash) obj4)
+(setf (gethash 'obj5 hash) obj5)
+
+(snapshot my-set)
+@end lisp
+
+To properly simulate restoring objects, we need to drop our old hash
+table as well as clear the persistent object cache so the snapshot set
+transient object is reset.
+
+@lisp
+(setf my-set nil)
+(setf hash nil)
+(elephant::flush-instance-cache *store-controller*)
+@end lisp
+
+Now we'll pretend we're startup up a new session.
+
+@lisp
+(setf my-set (get-from-root 'my-set))
+(setf hash (snapshot-root my-set))
+@end lisp
+
+The cache is automatically populated by the implicit @code{restore}
+call during snapshot-set initialization, and our hash table should now
+have all the proper references.  We'll pull out a few.
+
+@lisp
+(setf o4 (gethash 'obj4 hash))
+(setf o3 (gethash 'obj3 hash))
+(setf o2 (test-reference o3))
+
+(not (or (eq o4 obj4)
+         (eq o3 obj3)
+         (eq o2 obj2)))
+=> t
+@end lisp
+
+The new objects should not be eq the old ones as we have restored
+fresh copies from the disk.  
+
+If you review the setup above, @code{obj3} references @code{obj2}
+which references @code{obj1} and @code{obj4} also references
+@code{obj1}.  So if the objects were properly restored, these
+references should be @code{eq}.
+
+@lisp
+(eq (test-reference o2) (test-reference o4))
+=> t
+@end lisp
+
+And finally we can demonstrate the restorative power of snapshot sets.
+
+@lisp
+(remhash 'obj5 hash)
+
+(gethash 'obj5 hash)
+=> nil nil
+
+(restore my-set)
+(setf hash (snapshot-root my-set))
+
+(gethash 'obj5 hash)
+=> #<MY-TEST-CLASS ..> t
+
+(test-value *)
+=> 5
+@end lisp
+
+This means that while our set object was not reset, the restore
+operation properly restored the old reference structure of our root
+hash object.  Unfortunately, in this implementation you have to reset
+your lisp pointers to get access to the restored objects.
+
+A future version could traverse the existing object cache, dropping
+new references and restoring old ones so that in-memory lisp pointers
+were still valid.
+
+@subsection Snapshot Set Implementation
+
+In this section we walk through the implementation of the snapshot set
+in detail as it provides:
+
+@itemize
+@item Insight into constraints in serialization and lisp object identity
+@item How to leverage Elephant for some more sophisticated applications than
+      persistent indices and class slots.
+@item Helps you understand a useful utility (that we may add to an extensions
+      release in the future)
+@end itemize
+
+To generalize the behavior discussed above, we will define a new
+persistent class called a snapshot set.  The set itself is a wrapper
+around the btree, but provides all the automation to store and recover
+sets of standard objects.
+
+@lisp
+(defpclass snapshot-set ()
+  ((index :accessor snapshot-set-index :initform (make-btree))
+   (next-id :accessor snapshot-set-next-id :initform 0)
+   (root :accessor snapshot-set-root :initform nil)
+   (cache :accessor snapshot-set-cache 
+          :initform (make-hash-table :weak-keys t) 
+          :transient t)
+   (touched :accessor snapshot-set-touched 
+            :initform (make-array 20 :element-type 'fixnum 
+                         :initial-element 0 :fill-pointer t 
+                         :adjustable t)
+            :transient t))
+  (:documentation "Keeps track of a set of standard objects
+    allowing a single snapshot call to update the store
+    controller with the latest state of all objects registered with
+    this set"))
+@end lisp
+
+The set class keeps track of IDs, a set of cached objects in memory,
+the on-disk btree for storing instances by uid and the current uid
+variable value.  Notice the use of the transient keyword argument for
+the cache.
+
+There are two major operations supported by sets @code{snapshot} and
+@code{restore}.  These save objects to disk and restore objects to
+memory, along with proper recovery of multiple references to the same
+object.
+
+Additional operations are:
+
+@itemize 
+@item Registration: Adding and removing objects from a set
+@item Root operations: Easy access to a single root hash table or object
+@item Mapping: Walk over all objects in a set
+@end itemize
+
+To enable snapshots, we have to register a set of root objects with
+the set. This function ignores objects that are already cached,
+otherwise allocates a new ID and caches the object.  
+
+@lisp 
+(defmethod register-object ((object standard-object) (set snapshot-set))
+  "Register a standard object.  Not recorded until 
+   the snapshot function is called on db"
+  (aif (lookup-cached-id object set)
+       (values object it)
+       (let ((id (incf (snapshot-set-next-id set))))
+	 (cache-snapshot-object id object set)
+	 (values object id))))
+
+(defun lookup-cached-id (obj set)
+  (gethash obj (snapshot-set-cache set)))
+
+(defun cache-snapshot-object (id obj set)
+  (setf (gethash obj (snapshot-set-cache set)) id))
+@end lisp
+
+A parallel function registers hash tables.  One very important
+invariant implied here is that the cache always contains objects that
+are eq and mapped back to a serialized object in the backing btree.
+There is no need, however, to immediately write objects to the store
+and this gives us some transactional properties: snapshots are atomic,
+consistent and durable.  Isolation is not enforced by snapshots.
+
+This means that the transient cache has to be valid immediately after
+the snapshot set is loaded from the data store.
+
+@lisp
+(defmethod initialize-instance :after ((set snapshot-set) &key lazy-load &allow-other-keys)
+  (unless lazy-load (restore set)))
+@end lisp
+
+This also has consequences for unregistration.  Removing a root object
+should also result in the removal of all objects that are unreachable
+from other roots.  However, since side effects are not permanent until
+a snapshot operation, we merely have to garbage collect id's that were
+not touched during a snapshot operation.  This makes unregistration
+simple.
+
+@lisp
+(defmethod unregister-object (object (set snapshot-set))
+  "Drops the object from the cache and backing store"
+  (let ((id (gethash object (snapshot-set-cache set))))
+    (when (null id)
+      (error "Object ~A not registered in ~A" object set))
+    (drop-cached-object object set)))
+@end lisp
+
+But snapshots are a little bit more work.
+
+@lisp
+(defmethod snapshot ((set snapshot-set))
+  "Saves all objects in the set (and any objects reachable from the
+   current set of objects) to the persistent store"
+  (with-transaction (:store-controller (get-con 
+                                         (snapshot-set-index set)))
+    (loop for (obj . id) in 
+              (get-cache-entries (snapshot-set-cache set)) 
+          do
+	  (save-snapshot-object id obj set))
+    (collect-untouched set)))
+
+(defun save-snapshot-object (id obj set)
+  (unless (touched id set)
+    (setf (get-value id (snapshot-set-index set))
+	  (cond ((standard-object-subclass-p obj)
+		 (save-proxy-object obj set))
+		((hash-table-p obj)
+		 (save-proxy-hash obj set))
+		(t (error "Cannot only snapshot standard-objects and hash-tables"))))
+    (touch id set))
+  id)
+
+(defun collect-untouched (set)
+  (map-btree (lambda (k v) 
+	       (unless (touched k set)
+		 (remove-kv k (snapshot-set-index set))))
+	     (snapshot-set-index set))
+  (clear-touched set))
+@end lisp
+
+We go through all objects in the cache, storing objects as we go via
+@code{save-snapshot-object}.  This function is responsible for storing
+objects and hash tables and recursing on any instances that are
+referenced.  Any object that is saved is added to a touch list so they
+are not stored again and we can mark stored instances for the
+@code{collect-untouched} call which ensures that newly unreachable
+objects are deleted from the persistent store.  Any newly found
+objects are added to the in-memory cache which, being a weak array,
+should eventually drop references to objects that are not referred to
+elsewhere.
+
+It should be noted that garbage objects not garbage collected from the
+weak-array based cache may be stored to and restored from the
+persistent store.  However this is merely a storage overhead as they
+will eventually be dropped across sessions as there are no saved
+references to them.
+
+Now when we serialize a standard object, all the slot values are
+stored inline.  This means that by default, a slot that refers to a
+standard object would get an immediately serialized version rather
+than a reference.  This of course makes it impossible to restore
+multiple references to a single object.  The approach taken here is to
+instantiate a @emph{proxy} object which is a copy of the original
+class and stores references to normal values in its slots.  Any
+references to hashes or standard classes are replaced with a reference
+object that records the unique id of the object so it can be properly
+restored.
+
+@lisp
+(defun save-proxy-object (obj set)
+  (let ((svs (subsets 2 (slots-and-values obj))))
+    (if (some #'reified-class-p (mapcar #'second svs))
+	(let ((proxy (make-instance (type-of obj))))
+	  (loop for (slotname value) in svs do
+	       (setf (slot-value proxy slotname)
+		     (if (reify-class-p value)
+			 (reify-value value set)
+			 value)))
+	  proxy)
+	obj)))
+@end lisp
+
+The function checks whether any slot value can be reified (represented
+by a unique id) and if so, makes a new proxy instance and properly
+instantiates its slots, returning it to the main store function which
+writes the proxy object to the btree. 
+
+On restore, we simply load all objects into memory.
+
+@lisp
+(defmethod restore ((set snapshot-set))
+  "Restores a snapshot by setting the snapshot-set state to the last
+snapshot.  If this is used during runtime, the user needs to drop all
+references to objects and retrieve again from the snapshot set.  Also
+used to initialize the set state when a set is created, for example
+pulled from the root of a store-controller, unless :lazy-load is
+specified"
+  (clear-cache set)
+  (map-btree (lambda (id object)
+	       (load-snapshot-object id object set))
+	     (snapshot-set-index set)))
+
+(defun load-snapshot-object (id object set)
+  (let ((object (ifret object (get-value id (snapshot-set-index set)))))
+    (cond ((standard-object-subclass-p object)
+	   (load-proxy-object id object set))
+	  ((hash-table-p object)
+	   (load-proxy-hash id object set))
+	  (t (error "Unrecognized type ~A for id ~A in set ~A" 
+                    (type-of object) id set)))))
+@end lisp
+
+If an object has a reference object in a slot, then we simply restore
+that object as well.  @code{load-snapshot-object} accepts null for an
+object so it can be used recursively when a reference object refers to
+an object (via the unique id) that is not yet cached.  The @code{load}
+functions return an object so that they can used directly to create
+values for writing slots or hash entries.
+
+@lisp
+(defun load-proxy-object (id obj set)
+  (ifret (lookup-cached-object id set)
+	 (progn
+	   (cache-snapshot-object id obj set)
+	   (let ((svs (subsets 2 (slots-and-values obj))))
+	     (loop for (slotname value) in svs do
+		  (when (setrefp value)
+		    (setf (slot-value obj slotname)
+			  (load-snapshot-object (snapshot-set-reference-id value) nil set)))))
+	   obj)))
+@end lisp
+
+@subsection Isolating multiple snapshot sets
+
+A brief note on how to separate out the objects you want to store from
+those you don't may be useful.  We want to snapshot groups of
+inter-referential objects without sucking in the whole system in one
+snapshot.  These object sets must be closed and fully connected.  If
+the program consists of a set of subgraphs, a root element of each
+graph should be stored in a hash table that is then treated as the
+snapshot root.
+
+@itemize
+@item @strong{Manual registration:} 
+Objects without external references are easy, just @code{register} or
+@code{unregister} them from the @code{snapshot-set} as needed and then
+map over them to get them back.
+@item @strong{Implicit registration:} 
+Just store objects in a hash that is the root of a @code{snapshot-set}
+and you are good to go.
+@item @strong{Graphs:} 
+Graphs are easy to store as they naturally consist of a closed set of
+objects.  If the graph nodes reference other system objects that you
+don't want to store, you'll need to implement something akin to the
+indirection provided here.  Just store the root of the graph in the
+snapshot set root and go from there.
+@item @strong{All instances of a type:} 
+Another easy way to create sets is to overload @code{make-instance} to
+store all new objects in a weak hash table that is treated as the root
+of a @code{snapshot-set} (NOTE: I have not verified that weak hashes
+are properly serialized and reproduced - I suspect they are not so you
+might have to copy after a @code{restore}).
+@end itemize
+
+For more complex applications, you can isolate these closed sets of
+objects by using @code{snapshot-set} root hash tables as an
+indirection mechanism.  Instead of storing direct references in an
+object slot or hash value, isolation is ensured by storing keys and
+indirecting through a hash table to get the target object.  This can
+be hidden from the programmer in multiple ways.  The easiest way is
+just to make sure that when you store references you store a key and
+overload the slot accessor.  A sketch of this follows:
+
+@lisp
+(defparameter *island1-hash* (make-hash-table))
+(defparameter *island2-hash* (make-hash-table))
+(defvar *unique-id* 0)
+
+(defclass island1-object ()
+  ((pointer-to-island1 :accessor child :initform nil)
+   (pointer-to-island2 :accessor neighbor :initform nil)))
+
+(defmethod neighbor :around ((obj island1-object))
+  (let ((key (call-next-method)))
+     (when key (gethash key *island2-hash*))))
+
+(defmethod (setf neighbor) :around (ref (obj island1-object))
+  (cond ((subtypep (type-of ref) 'island2-object)
+         (let ((key (find-object ref *island2-hash*)))
+           (if key 
+               (progn
+                 (call-next-method key obj)
+                 obj)
+               (progn
+                 (setf (gethash (incf *unique-id*) *island2-hash*) ref)
+                 (call-next-method *unique-id* obj)
+                 obj))))
+        (t (call-next-method))))
+
+(defun find-object (obj hash)
+   (map-hash (lambda (k v)
+               (declare (ignore k))
+               (if (eq obj v)
+                   (return-from find-object obj)))
+              hash))
+@end lisp
+
+The same template would apply to @code{island2} references to
+@code{island1} objects.  You could further simplify creating these
+hash table indirections with a little macro:
+
+@lisp
+(defmacro def-snapshot-wrapper (accessor-name 
+          (source-classname target-classname hashname uid))
+  (with-gensysms (obj key ref)
+   `(progn
+      (defmethod ,accessorname :around ((,obj ,source-classname))
+         (let ((,key (call-next-method)))
+           (when ,key (gethash ,key ,hashname))))
+      (defmethod (setf ,accessorname) :around 
+                 (,ref (,obj ,source-classname))
+         (cond ((subtypep (type-of ,ref) ,target-classname)
+                (let ((,key (find-object ,ref ,hashname)))
+                  (if ,key 
+                      (progn
+                        (call-next-method ,key ,obj)
+                        ,obj)
+                      (progn
+                        (setf (gethash (incf ,uid) ,hashname) ,ref)
+                        (call-next-method ,uid ,obj)
+                        ,obj))))
+               (t (call-next-method)))))))
+
+(defclass island2-object ()
+  ((pointer-to-island2 :accessor child :initform nil)
+   (pointer-to-island1 :accessor neighbor :initform nil)))
+
+(def-snapshot-wrapper neighbor 
+                      (island2 island1 *island1-hash* *unique-id*))
+@end lisp
+
+Of course this doesn't work for multi-threaded environments, or for
+separating more complex collections of types.  I am also sure that
+more elegant solutions are possible.  In most cases, we assume the
+user will have a natural collection of objects that can be closed over
+by types or references so such efforts are unnecessary.
+
+
+@node Elephant as Database
+@comment node-name, next, previous, up
+@section Elephant as Database
+
+As we move beyond replacing standard objects with persistent objects
+and using Elephant to save conventional lisp data, we can exploit
+Elephant's advanced class indexing features and the query system.
+With these facilities, Elephant can be used as a full-fledged object
+oriented database system
+
+@emph{NOTE: Will finish this section after the query engine is done
+            as it will be more coherent/complete}
+
+@node Multithreaded Web Applications
+@comment node-name, next, previous, up
+@section Multithreaded Web Applications
+
+Web applications can exploit all of the patterns described in previous
+sections.  Each server thread can have transactional access to objects
+encapsulating user data, commercial transactions, database data, etc.
+Users can formulate queries against objects and get html rendering of
+the result views.
+
+The most important characteristic of Elephant in these settings is
+that instances and @code{store-controller} objects in versions 0.9 and
+greater are automatically thread-safe.  The only consideration in
+these cases is transaction design.
+
+@emph{NOTE: What are common wrappers for Elephant that come up in web
+applications?  Presentation functions?}
+
+@emph{NOTE: Should this section be supplanted by a full application example
+which uses most of the patterns above?}
+
+@c @node Graph-oriented Applications
+@c @comment node-name, next, previous, up
+@c @section Graph-oriented Applications
+
+@c Graph traversal and matching
+@c Using the query system for graph queries
+@c Performance issues
+
+@node Real-World Application Examples
+@comment node-name, next, previous, up
+@section Real-World Application Examples
+
+This section contains a collection of case studies or overviews of 
+read-world applications that have exploited Elephant.
+
+@subsection Konsenti
+
+Elephant is used by Konsenti(tm), a for-profit company of Robert
+L. Read, one of the maintainers of Elephant.  It can be visited at
+@uref{http://konsenti.com}.  
+
+Konsenti uses the Data Collection Management (DCM) package, found in
+the @code{src/contrib/rread directory}.  DCM provides
+prevalence-style in-memory write-through caching.  The most enjoyable
+feature about Elephant for this project is that new Business Layer
+objects can be created without having to deal with an
+Object-Relational Mapping, enabling extremely rapid development.  
+
+All Business objects are persisted via a @code{director} in DCM (which
+sits on top of Elephant.)  Many of these business objects are in fact
+finite state machines decorated with functions.  The functions are
+represented by lambda s-expressions stored in slots on the business
+objects.  A complete Message Factory and double-entry accounting
+system are also implemented as DCM objects.  Binary objects, such as
+uploaded PDFs, can be attached to objects as comments and are stored
+directly in Elephant.  Konsenti is based on utf-8, and unicode
+characters outside of the ISO-8859-1 character set are routinely
+stored in Elephant.  Konsenti uses Postgres as a backend for licensing
+reasons; but use of other data stores is possible.
+
+@subsection Conceptminer
+
+Conceptminer is an Elephant-based web-mining framework developed by
+Ian Eslick (@uref{http://www.media.mit.edu/~eslick}) that performs
+large-scale text analysis over the web to identify semantic
+relationships such as ``PartOf'', ``DesireOf'' and ``EffectOf''
+between English phrases.  
+
+Elephant's persistence capability is used to keep full records of
+all source material, extracted relationships and search queries so
+that it is always possible to trace the source of a learned relation
+and to avoid repeated queries to web search engines.  Conceptminer
+used Elephant 0.6.0 and the development branch of Elephant 0.9 to
+perform months of analysis consisting of millions of pages and a
+page/query database of over ten gigabytes.
+
+There are several interesting uses and extensions of Elephant in
+Conceptminer:
+
+@itemize
+@item Bulk storage of post-processed web data: Elephant was used to
+store hundreds of thousands of processed web pages as strings, associate 
+pages with queries and store related metadata.
+@item Derived index: a custom string hash function over URLs was used to populate
+a class derived index, allowing fast identification of pages from
+their URL without requiring expensive eql comparisons.
+@item Inverted document index: a (not terribly efficient) data structure
+that efficiently maps words to documents allowing pages to indexed by
+the words contained in them.  Allowed for phrase and conjunction searches.
+@item User association data structure: a data structure based on oids that supports 
+general one-to-many mappings between classes.  Had a custom migrate
+method to support migration of associations.  Supplanted by persistent
+sets as of 0.9.
+@end itemize   
+
+The most interesting use of Elephant was extending its transactional
+architecture to cover in-memory lisp operations. @code{PCOMP} (Process
+Components) is a framework for constructing and managing simple,
+dataflow-style multi-threaded applications in Common Lisp.  The goal
+is to simplify the process sufficiently so that the ordinary user can
+hide from many of the details associated with aborting transactions.
+To this end, the model provides for safe, asynchronous communications
+among a set of components which may be scheduled together in a single
+process or communicate across separate threads (and potentially
+processes).  Components are packaged into a system inside a Container
+object which schedules execution and mediates communications.
+
+Communications between components can be in a dataflow style or using messages.  Each 
+component has a single port for receiving incoming data items.  These items, if access
+is shared among components, should have the proper synchronization protections on
+mutating accesses.  There is also an asynchronous communications method allowing you
+to send messages to components with particular names.  
+
+The basic building block is a component.  Components are defined using the defcomponent
+form and contain several major elements, such as:
+
+@lisp
+(defcomponent counter
+  (:vars (count 0) end (increment 1))
+  (:initialize (assert end))
+  (:body
+     (when (>= (incf count increment) end)
+        (terminate))))
+@end lisp  
+
+The arguments to defcomponent behave as follows:
+
+@itemize
+@item @strong{@code{:vars}} - Values that the body wants to retain between invocations
+@item @strong{@code{:initialize}} - A reserved message handler called at the begining of time
+@item @strong{@code{:body}} - A body expression that is executed whenever data has arrived
+@end itemize
+
+The body and messages are evaluated in a very specific environment.  Within the body
+certain variables and functions are bound:
+
+@itemize 
+@item Variables:
+  @itemize
+  @item @code{data} - The current data item
+  @item @code{self} - The component object
+  @item @code{"vars"} - all variables named in @code{:vars} are bound using @code{symbol-macrolet} and available as in a @code{let} statement.  Any side effects to those vars are visible, but not saved to th component state until the component commits (see below).
+  @end itemize
+@item Functions:
+  @itemize
+  @item @code{(terminate)} 
+  @item @code{(send data)}
+  @item @code{(receive data)}
+  @item @code{(get-ctrl-msg target type data)}
+  @item @code{(pause)}
+  @item @code{(abort)}
+  @end itemize
+@end itemize
+
+Each component execution is bound in a transactional framework.  No
+variables are written, messages consumed or messages sent until the
+body or control handler has exited normally.  Users can tap into this
+transactional framework by overriding @code{start-transaction},
+@code{commit-transaction} and @code{abort-transaction} methods for the
+component class.  Transactional variables are implemented via
+@code{:after} methods on these generic functions.
+
+When signals are asserted by the body or a message handler, they are also wrapped
+in restart handlers called:
+
+@itemize
+@item @strong{retry:} Try to execute the component again
+
+@item @strong{retry n times:} Using retry you can retry the body or
+      message again.  Usually this works best at the REPL when you can
+      test or repair the error and then keep the procesess running
+
+@item @strong{replace:} Interactively or automatically enter an
+      expression to replace the current data item with one of your
+      choosing
+      
+@item @strong{ignore:} Drop the message or data input as if it never arrived
+
+@item @strong{terminate:} Terminate execution of the current component
+@end itemize
+
+
+
+
+
+

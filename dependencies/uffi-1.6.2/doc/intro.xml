@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<chapter id="introduction">
+  <title>Introduction</title>
+  <sect1 id="purpose">
+    <title>Purpose</title>
+    <para>
+      This reference guide describes &uffi;, a package that provides a
+      cross-implementation interface from Common Lisp to C-language
+      compatible libraries.
+    </para>
+  </sect1>
+  
+  <sect1 id="background">
+    <title>Background
+    </title>
+    <para>
+      Every Common Lisp implementation has a method for interfacing to
+      C-language compatible libraries. These methods are often termed
+      a <emphasis>Foreign Function Library Interface</emphasis>
+      (&ffi;). Unfortunately, these methods vary widely amongst
+      implementations, thus preventing the writing of a portable FFI
+      to a particular C-library.
+    </para>
+    <para>
+      &uffi; gathers a common subset of functionality between Common
+      Lisp implementations. &uffi; wraps this common subset of
+      functionality with it's own syntax and provides macro
+      translation of uffi functions into the specific syntax of
+      supported Common Lisp implementations.
+    </para>
+    <para>
+      Developers who use &uffi; to interface with C libraries will
+      automatically have their code function in each of uffi's supported
+      implementations.
+    </para>
+  </sect1>
+
+  <sect1 id="supported-impl">
+    <title>Supported Implementations</title> 
+    <para>The primary tested and supported platforms for &uffi; are: 
+    </para>
+    <itemizedlist mark="opencircle">
+      <listitem><para>&acl; v6.2 on Debian GNU/Linux
+      FreeBSD 4.5, Solaris v2.8, and Microsoft Windows XP.</para></listitem>
+      <listitem><para>&lw; v4.2 on Debian GNU/Linux and Microsoft Windows XP.</para></listitem>
+      <listitem><para>&cmucl; 18d on Debian GNU/Linux, FreeBSD 4.5, and Solaris 2.8</para></listitem>
+      <listitem><para>&sbcl; 0.7.8 on Debian GNU/Linux</para></listitem>
+      <listitem><para>&scl; 1.1.1 on Debian GNU/Linux</para></listitem>
+      <listitem><para>&openmcl; 0.13 on Debian GNU/Linux for PowerPC</para></listitem>
+    </itemizedlist>
+    <para>Beta code is included with &uffi; for
+    </para>
+    <itemizedlist mark="opencircle">
+      <listitem><para>&openmcl; and &mcl; with MacOSX</para></listitem>
+    </itemizedlist>
+  </sect1>
+
+  <sect1 id="design">
+    <title>Design</title>
+    <sect2>
+      <title>Overview</title>
+      <para>
+	&uffi; was designed as a cross-implementation 
+	compatible <emphasis>Foreign Function Interface</emphasis>.
+	Necessarily,
+	only a common subset of functionality can be
+	provided. Likewise, not every optimization for that a specific
+	implementation provides can be supported. Wherever possible,
+	though, implementation-specific optimizations are invoked.
+      </para> 
+    </sect2>
+
+    <sect2>
+      <title>Priorities</title>
+      <para>
+	The design of &uffi; is dictated by the order of these priorities:
+      </para>
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    Code using &uffi; must operate correctly on all
+	    supported implementations.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Take advantage of implementation-specific optimizations. Ideally, 
+	    there will not a situation where an implementation-specific
+	    &ffi; will be chosen due to lack of optimizations in &uffi;.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>Provide a simple interface to developers using
+	  &uffi;.  This priority is quite a bit lower than the above priorities.
+	  This lower priority is manifest by programmers having to pass types in
+	  pointer and array dereferencing, needing to use
+	  <constant>cstring</constant> wrapper functions, and the use of
+	  ensure-char-character and ensure-char-integer functions. My hope is
+	  that the developer inconvenience will be outweighed by the generation
+	  of optimized code that is cross-implementation compatible.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </sect2>
+  </sect1>
+
+</chapter>

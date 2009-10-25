@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Class abstract-handler</title><link rel="stylesheet" type="text/css" href="../index.css"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><div id="header"><table cellspacing="0" cellpadding="0" width="100%"><tr><td valign="center">
+		  
+	      <b> Closure HTML</b></td><td valign="center" align="right"><b>API documentation</b></td></tr></table></div><div class="main"><div class="padded"><p class="noindent">
+	  Package:
+	  <a href="hax.html">hax</a></p><h2 class="page-title">
+	  Class abstract-handler</h2></div><table cellspacing="0" cellpadding="0" width="100%"><tr><td valign="top" width="60%"><div class="padded"><h3>Superclasses</h3><div class="indent"><tt style="color: #777777">common-lisp:standard-object</tt>, <tt style="color: #777777">sb-pcl::slot-object</tt>, <tt style="color: #777777">common-lisp:t</tt></div><h3>Documented Subclasses</h3><div class="indent"><a href="closure-html__class__lhtml-builder.html"><tt>lhtml-builder</tt></a>, <a href="closure-html__class__pt-builder.html"><tt>pt-builder</tt></a>, <a href="hax__class__default-handler.html"><tt>default-handler</tt></a></div><h3>Details<a name="details"></a></h3><div class="indent">The superclass of all HAX handlers.<br><br>
+       Direct subclasses have to implement all event methods, since
+       no default methods are defined on this class.<br><br>
+       Note that it is permissible to use handlers that are not
+       instances of this class in some circumstances.<br><br>
+       In particular,       <tt>nil</tt> is a valid HAX handler and ignores all events.<br><br>
+       In addition,       <a href="http://common-lisp.net/project/cxml/sax.html#sax">SAX handlers</a>
+       are valid HAX handlers (and vice versa), even though
+       hax:abstract-handler and sax:abstract-handler do not
+       share a specific superclass.  HAX events sent to SAX handlers are
+       automatically re-signalled as XHTML SAX events, and SAX events sent
+       to HAX handlers are re-signalled as namespace-less HAX events.<br><br>
+       However, user code should define subclasses of the documented
+       superclasses to enable the HAX/SAX bridging described above.<br><br>                                                                      </div></div></td><td valign="top" width="5%">
+	     
+	  </td><td valign="top" width="35%"><h3>See also</h3><div class="indent"><table cellspacing="0" cellpadding="0"><tr><td><a href="closure-html__fun__parse.html"><tt>chtml:parse</tt></a></td></tr><tr><td><a href="closure-html__fun__serialize-lhtml.html"><tt>chtml:serialize-lhtml</tt></a></td></tr><tr><td><a href="closure-html__fun__serialize-pt.html"><tt>chtml:serialize-pt</tt></a></td></tr><tr><td><a href="hax__fun__start-document.html"><tt>start-document</tt></a></td></tr><tr><td><a href="hax__fun__end-document.html"><tt>end-document</tt></a></td></tr><tr><td><a href="hax__fun__start-element.html"><tt>start-element</tt></a></td></tr><tr><td><a href="hax__fun__end-element.html"><tt>end-element</tt></a></td></tr><tr><td><a href="hax__fun__characters.html"><tt>characters</tt></a></td></tr><tr><td><a href="hax__fun__unescaped.html"><tt>unescaped</tt></a></td></tr><tr><td><a href="hax__fun__comment.html"><tt>comment</tt></a></td></tr></table></div></td></tr></table></div></body></html>

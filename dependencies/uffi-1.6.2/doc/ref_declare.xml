@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+  
+<reference id="ref_declarations">
+  <title>Declarations</title>
+  
+  <partintro>
+    <sect1>
+      <title>Overview</title>
+      <para>Declarations are used to give the compiler optimizing
+	information about foreign types. Currently, only &cmucl;
+	supports declarations. On &acl; and &lw;, these expressions 
+	declare the type generically as &t;
+      </para>
+    </sect1>
+  </partintro>
+
+  <refentry id="def-type">
+    <refnamediv>
+      <refname>def-type</refname>
+      <refpurpose>Defines a Common Lisp type. 
+      </refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>def-type</function> <replaceable>name type</replaceable>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>name</parameter></term>
+	  <listitem>
+	    <para>A symbol naming the type</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>type</parameter></term>
+	  <listitem>
+	    <para>A form that specifies the &uffi; type. It is not evaluated.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>Defines a Common Lisp type based on a &uffi; type.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Examples</title>
+      <screen>
+(def-type char-ptr '(* :char))
+...
+(defun foo (ptr)
+(declare (type char-ptr ptr))
+...
+      </screen>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>Defines a new &cl; type.</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+</reference>
+

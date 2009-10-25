@@ -1,0 +1,4 @@
+This is a Common Lisp implementation of a inflector. The regular expressions 
+and test cases are copied from active_support/inflections.rb in Ruby on Rails.
+Rails is distributed under the MIT license. Special thanks to all the 
+contributers of Rails.

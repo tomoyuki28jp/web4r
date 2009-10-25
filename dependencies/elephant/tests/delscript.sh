@@ -1,0 +1,14 @@
+rm testdb/__*
+rm testdb/%*
+rm testdb/log*
+rm testdb2/__*
+rm testdb2/%*
+rm testdb2/log*
+rm testdb-oid/__*
+rm testdb-oid/%*
+rm testdb-oid/log*
+rm testbdb/testsbdb
+rm testbdb/__*
+rm testbdb/log*
+rm sqlite3-test.db
+rm sqlite3-test2.db

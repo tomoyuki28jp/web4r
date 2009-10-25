@@ -1,0 +1,130 @@
+@c -*-texinfo-*-
+
+@node Copyright and License
+@comment node-name, next, previous, up
+@chapter Copyright and License
+@cindex Copyright and License
+@cindex License
+
+@section Elephant Licensing
+
+Elephant is a persistent metaprotocol and object-oriented database for
+Common Lisp.  Detailed information and distributions can be found at
+@uref{http://www.common-lisp.net/project/elephant}.  
+
+The program is released under the following license:
+
+@quotation
+Elephant users are granted the rights to distribute and use this
+software as governed by the terms of the Lisp Lesser GNU Public
+License @uref{http://opensource.franz.com/preamble.html}, also known
+as the LLGPL.
+@end quotation
+
+Copyrights include: 
+
+@quotation
+Original Version, Copyright @copyright{} 2004 Ben Lee and Andrew Blumberg. @*
+Version 0.5, Copyright @copyright{} 2006 Robert L. Read. @*
+Versions 0.6-0.9, Copyright @copyright{} 2006-2007 Ian Eslick and Robert L. Read @*
+Portions copyright respective contributors (see @file{CREDITS}).
+@end quotation
+
+Portions of the program (namely the C unicode string sorter) are
+derived from IBM's ICU: @uref{http://oss.software.ibm.com/icu/,
+ICU Website} whose copyright and license follows below.
+
+@quotation
+ICU License - ICU 1.8.1 and later
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 1995-2003 International Business Machines
+Corporation and others All rights reserved.
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute,
+and/or sell copies of the Software, and to permit persons to
+whom the Software is furnished to do so, provided that the
+above copyright notice(s) and this permission notice appear
+in all copies of the Software and that both the above
+copyright notice(s) and this permission notice appear in
+supporting documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO
+EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS
+NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR
+CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+SOFTWARE.
+
+Except as contained in this notice, the name of a copyright
+holder shall not be used in advertising or otherwise to
+promote the sale, use or other dealings in this Software
+without prior written authorization of the copyright holder.
+
+------------------------------------------------------------
+
+All trademarks and registered trademarks mentioned herein
+are the property of their respective owners.
+@end quotation
+
+@section Elephant Manual Copyright and Licensing
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License.
+@end quotation
+
+Copyrights include:
+
+@quotation
+Original Version, Copyright @copyright{} 2004 Ben Lee. @*
+Versions 0.5-0.6, Copyright @copyright{} 2006 Robert L. Read. @*
+Current Version, Copyright @copyright{} 2006-2007 Ian Eslick and Robert L. Read @*
+@end quotation
+
+@section 3rd Party Libraries
+
+Elephant depends on 3rd party lisp libraries.  See their respective
+distributions for detailed copyright and licensing information.  The
+following is a brief summary.
+
+@itemize 
+@item @b{uffi}: By Kevin Rosenberg, no significant restrictions
+@item @b{cl-base64}: By Kevin Rosenberg, no significant restrictions
+@item @b{rt}: By Richard Waters, MIT License
+@end itemize
+
+@section Data Store Licensing Considerations
+
+The Berkeley DB data store is based on the Berkeley DB C library, now
+owned by Oracle, but available as GPL'ed software.  It is important to
+understand that applications using Berkeley DB must also be GPL'ed
+unless you negotiate a commercial license from Oracle.  In most
+interpretations of the license, this includes a requirement to make
+code available for the entirety of any publicly visible website that
+is based on Berkeley DB.  See 
+
+@uref{http://www.oracle.com/@/technology/@/software/@/products/@/berkeley-db/@/htdocs/bdboslicense.html}.
+
+The CL-SQL backend, depending on which SQL engine you use, may not
+carry this restriction and you can easily migrate data between the
+two.  Since the Berkeley DB store is 4-5x faster than SQL, it may make
+sense to develop under BDB and transition to SQL after you've tuned
+the performance of the application.  Licenses for various SQL engines
+can be found at:
+
+@itemize
+@item SQLite: Public Domain, see @uref{http://www.sqlite.org/copyright.html, the SQLite license page}
+@item Postgresql: BSD License, see @uref{http://www.postgresql.org/about/licence, the Postgresql license page}
+@item MySQL: Dual licensing (similar to BDB), see @uref{http://www.mysql.com/company/legal/licensing/, the MySQL license page}
+@end itemize
+

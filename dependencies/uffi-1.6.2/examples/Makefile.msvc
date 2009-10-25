@@ -1,0 +1,27 @@
+# FILE IDENTIFICATION
+# 
+#  Name:         Makefile.msvc
+#  Purpose:      Makefile for the CLSQL UFFI helper package (MSVC)
+#  Programer:    Kevin M. Rosenberg
+#  Date Started: Mar 2002
+#
+#  CVS Id:   $Id: Makefile.msvc,v 1.1 2002/03/23 10:26:03 kevin Exp $
+#
+# This file, part of CLSQL, is Copyright (c) 2002-2005 by Kevin M. Rosenberg
+
+BASE=c-test-fns
+
+# Nothing to configure beyond here
+
+SRC=$(BASE).c
+OBJ=$(BASE).obj
+DLL=$(BASE).dll
+
+$(DLL): $(SRC)
+	cl /MD /LD -D_MT /DWIN32=1 $(SRC)
+        del $(OBJ) $(BASE).exp
+
+clean:
+        del /q $(DLL)
+
+

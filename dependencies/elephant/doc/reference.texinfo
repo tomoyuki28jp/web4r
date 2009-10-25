@@ -1,0 +1,271 @@
+@c -*-texinfo-*-
+
+@node User API Reference
+@comment node-name, next, previous, up
+@chapter User API Reference
+@cindex User API Reference
+@cindex API Reference
+
+@menu
+* Store Controllers: Store Controller API. Connecting to a data store.
+* Persistent Objects: Persistent Object API. Defining persistent classes and creating and manipulating persistent indices.
+* Persistent Object Indexing: Persistent Object Indexing API. Convenient indexing of persistent classes.
+* Persistent Sets: Persistent Set API. Maintaining persistent collections the easy way.
+@c * Query Interfaces:: Finding instances.
+* BTrees: BTree API. BTrees and indices, a low level persistent data structure.
+* BTree Cursors: BTree Cursor API. Traversing BTrees.
+* Index Cursors: Index Cursor API. Traversing BTree Indicies.
+* Transactions: Transaction API. Transaction functions.
+* Migration and Upgrading: Migration and Upgrading API. Migration and upgrading.
+@c * Miscellaneous API:: Other functions and data store specific functions
+@end menu
+
+@node Store Controller API
+@comment node-name, next, previous, up
+@section Store Controllers
+@cindex Store Controller
+@cindex API
+
+Store controllers provide the persistent storage for CLOS objects and
+BTree collections.  Any persistent operations must be done in the
+context of a store controller.  The default store-controller is stored
+in a global variable.
+
+@include includes/var-elephant-star-store-controller-star.texinfo
+
+@c @include includes/class-elephant-store-controller.texinfo
+@ref{Class elephant:store-controller} is associated with the following
+user methods and macros:
+
+@include includes/macro-elephant-with-open-store.texinfo
+@include includes/fun-elephant-open-store.texinfo
+@include includes/fun-elephant-close-store.texinfo
+
+@include includes/fun-elephant-get-from-root.texinfo
+@include includes/fun-elephant-add-to-root.texinfo
+@include includes/fun-elephant-remove-from-root.texinfo
+@include includes/fun-elephant-root-existsp.texinfo
+@include includes/fun-elephant-map-root.texinfo
+
+@node Persistent Object API
+@comment node-name, next, previous, up
+@section Persistent Objects
+@cindex Persistent Objects
+@cindex API
+
+@ref{Class elephant:persistent-metaclass} can be used as the
+:metaclass argument in a defclass form to create a persistent object.
+Slots of the metaclass take the :index and :transient keyword
+arguments and the class accepts the :index keyword argument.
+
+@include includes/macro-elephant-defpclass.texinfo
+@include includes/fun-elephant-drop-pobject.texinfo
+
+@node Persistent Object Indexing API
+@comment node-name, next, previous, up
+@section Persistent Object Indexing
+@cindex Persistent Object Indexing
+@cindex API
+
+
+@subsection Indexed Object Accessors
+
+@include includes/fun-elephant-map-class.texinfo
+@include includes/fun-elephant-map-inverted-index.texinfo
+
+@include includes/fun-elephant-get-instances-by-class.texinfo
+@include includes/fun-elephant-get-instance-by-value.texinfo
+@include includes/fun-elephant-get-instances-by-value.texinfo
+@include includes/fun-elephant-get-instances-by-range.texinfo
+
+@include includes/fun-elephant-drop-instances.texinfo
+
+@subsection Direct Class Index Manipulation
+
+@include includes/fun-elephant-find-class-index.texinfo
+@include includes/fun-elephant-find-inverted-index.texinfo
+@include includes/fun-elephant-make-class-cursor.texinfo
+@include includes/macro-elephant-with-class-cursor.texinfo
+@include includes/fun-elephant-make-inverted-cursor.texinfo
+@include includes/macro-elephant-with-inverted-cursor.texinfo
+
+@subsection Dynamic Indexing API
+
+@include includes/fun-elephant-enable-class-indexing.texinfo
+@include includes/fun-elephant-disable-class-indexing.texinfo
+@include includes/fun-elephant-add-class-slot-index.texinfo
+@include includes/fun-elephant-remove-class-slot-index.texinfo
+@include includes/fun-elephant-add-class-derived-index.texinfo
+@include includes/fun-elephant-remove-class-derived-index.texinfo
+
+@node Persistent Set API
+@comment node-name, next, previous, up
+@section Persistent Sets
+@cindex Persistent Sets
+
+Persistent sets are a simple persistent collection abstraction.  They
+maintain an unordered collection of objects.  Unlike the normal
+list-oriented sets of Lisp, persistent sets use the equivalent of
+@code{pushnew} such that only one copy of any object or value is
+maintained using the serializer's @code{equal} implementation.
+
+@include includes/class-elephant-pset.texinfo
+@include includes/fun-elephant-insert-item.texinfo
+@include includes/fun-elephant-remove-item.texinfo
+@include includes/fun-elephant-find-item.texinfo
+@include includes/fun-elephant-map-pset.texinfo
+@include includes/fun-elephant-pset-list.texinfo
+@include includes/fun-elephant-drop-pset.texinfo
+
+@c @node Query Interfaces
+@c @comment node-name, next, previous, up
+@c @section Query Interfaces
+@c @cindex Query Interfaces
+
+@c The query interface is currently unsupported.  See @code{query.lisp}
+@c and @code{query-example.lisp} for a sketch of what the query interface
+@c will eventually look like.  The upcoming version 0.9.1 will include
+@c the query system and associated documentation system.
+
+@c @include includes/fun-elephant-get-query-results.texinfo
+@c @include includes/fun-elephant-map-class-query.texinfo
+
+@node BTree API
+@comment node-name, next, previous, up
+@section BTrees
+@cindex BTree
+@cindex API
+
+
+Persistent collections inherit from @ref{Class elephant:persistent-collection} 
+and consist of the @ref{Class elephant:btree}, @ref{Class elephant:indexed-btree} and
+ @ref{Class elephant:btree-index} classes.  The following operations are defined
+on most of these classes.  More information can be found in @ref{Persistent BTrees} 
+and @ref{BTree Indexing}.
+
+@include includes/fun-elephant-make-btree.texinfo
+@include includes/fun-elephant-get-value.texinfo
+
+Values are written to a btree using the @code{setf} method on @code{get-value}.
+@c @include includes/fun-elephant-setf-get-value.texinfo
+
+@include includes/fun-elephant-remove-kv.texinfo
+@include includes/fun-elephant-existsp.texinfo
+@include includes/fun-elephant-drop-btree.texinfo
+@include includes/fun-elephant-map-btree.texinfo
+
+These functions are only defined on indexed btrees.
+
+@include includes/fun-elephant-make-indexed-btree.texinfo
+
+@include includes/fun-elephant-add-index.texinfo
+@include includes/fun-elephant-get-index.texinfo
+@include includes/fun-elephant-get-primary-key.texinfo
+@include includes/fun-elephant-remove-index.texinfo
+
+This function is only valid for indexes.
+
+@include includes/fun-elephant-map-index.texinfo
+
+@node BTree Cursor API
+@comment node-name, next, previous, up
+@section Btree Cursors
+@cindex Cursors
+@cindex API
+
+Cursors are objects of type cursor (@pxref{Class elephant:cursor})
+which provide methods for complex traversals of BTrees.  
+
+@include includes/macro-elephant-with-btree-cursor.texinfo
+@include includes/fun-elephant-make-cursor.texinfo
+@include includes/fun-elephant-cursor-close.texinfo
+@include includes/fun-elephant-cursor-duplicate.texinfo
+@c fixme, not generated by docstrings
+@c @include includes/fun-elephant-cursor-initialized-p.texinfo
+
+Each of the following methods return multiple values consisting of
+@code{(exists? key value)}.
+
+@include includes/fun-elephant-cursor-current.texinfo
+@include includes/fun-elephant-cursor-first.texinfo
+@include includes/fun-elephant-cursor-last.texinfo
+@include includes/fun-elephant-cursor-next.texinfo
+@include includes/fun-elephant-cursor-prev.texinfo
+@include includes/fun-elephant-cursor-set.texinfo
+@include includes/fun-elephant-cursor-set-range.texinfo
+@include includes/fun-elephant-cursor-get-both.texinfo
+@include includes/fun-elephant-cursor-get-both-range.texinfo
+@include includes/fun-elephant-cursor-delete.texinfo
+@include includes/fun-elephant-cursor-put.texinfo
+
+@node Index Cursor API
+@comment node-name, next, previous, up
+@section Index Cursors
+@cindex Cursor
+@cindex Index
+@cindex Indices
+@cindex API
+
+Index cursors are made the same way standard cursors are, with a call
+to @code{make-cursor}, except with the index as the argument instead
+of a standard btree.  In addition to the standard cursor operations,
+which provide the direct key and value of a @code{btree-index}, the
+following class of ``p'' cursors work on an index and allow you to get
+the primary value of the @code{indexed-btree} that the
+@code{btree-index} belongs to.  
+
+They each return multiple values @code{(exists? key primary-value
+primary-key)}.
+
+@include includes/fun-elephant-cursor-pcurrent.texinfo
+@include includes/fun-elephant-cursor-pfirst.texinfo
+@include includes/fun-elephant-cursor-plast.texinfo
+@include includes/fun-elephant-cursor-pnext.texinfo
+@include includes/fun-elephant-cursor-pprev.texinfo
+@include includes/fun-elephant-cursor-pset.texinfo
+@include includes/fun-elephant-cursor-pset-range.texinfo
+@include includes/fun-elephant-cursor-pget-both.texinfo
+@include includes/fun-elephant-cursor-pget-both-range.texinfo
+
+@include includes/fun-elephant-cursor-next-nodup.texinfo
+@include includes/fun-elephant-cursor-next-dup.texinfo
+@include includes/fun-elephant-cursor-pnext-nodup.texinfo
+@include includes/fun-elephant-cursor-pnext-dup.texinfo
+
+@include includes/fun-elephant-cursor-prev-nodup.texinfo
+@include includes/fun-elephant-cursor-prev-dup.texinfo
+@include includes/fun-elephant-cursor-pprev-nodup.texinfo
+@include includes/fun-elephant-cursor-pprev-dup.texinfo
+
+@node Transaction API
+@comment node-name, next, previous, up
+@section Transactions
+@cindex Transaction API
+@cindex API
+
+@include includes/macro-elephant-with-transaction.texinfo
+
+The following functions are an advanced use of the transaction system.
+They may be useful if, or example, you want to integrate Elephant
+transactions with non-Elephant side-effects that you explicitely make 
+transactional.
+
+@include includes/fun-elephant-controller-start-transaction.texinfo
+@include includes/fun-elephant-controller-abort-transaction.texinfo
+@include includes/fun-elephant-controller-commit-transaction.texinfo
+
+@node Migration and Upgrading API
+@comment node-name, next, previous, up
+@section Migration and Upgrading
+@cindex Migration and Upgrading
+@cindex API
+
+Upgrade is a call to Migrate with checks for compatability.  The
+migrate methods are included here in case you wish to develop a more
+specific ``partial upgrade'' or ``partial migrate'' of data from one
+store to another instead of using the top-level copy which migrates all
+live objects.
+
+@include includes/fun-elephant-upgrade.texinfo
+@include includes/fun-elephant-migrate.texinfo
+

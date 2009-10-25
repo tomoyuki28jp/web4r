@@ -1,0 +1,859 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<reference id="objects">
+  <title>Objects</title>
+<partintro>
+<title>Overview</title>
+    <para>
+      Objects are entities that can allocated, referred to by pointers, and
+can be freed.
+    </para>
+</partintro>
+
+
+    <refentry id="allocate-foreign-object">
+      <refnamediv>
+	<refname>allocate-foreign-object</refname>
+	<refpurpose>Allocates an instance of a foreign object.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>allocate-foreign-object</function> <replaceable>type &amp;optional size</replaceable> => <returnvalue>ptr</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>The type of foreign object to allocate. This parameter is evaluated.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>size</parameter></term>
+	    <listitem>
+	      <para>An optional size parameter that is evaluated. If specified, allocates and returns an
+array of <parameter>type</parameter> that is <parameter>size</parameter> members long. This parameter is evaluated.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>ptr</returnvalue></term>
+	    <listitem>
+	      <para>A pointer to the foreign object.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Allocates an instance of a foreign object. It returns a pointer to the object.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(def-struct ab (a :int) (b :double))
+(allocate-foreign-object 'ab)
+=> #&lt;ptr&gt;
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="free-foreign-object">
+      <refnamediv>
+	<refname>free-foreign-object</refname>
+	<refpurpose>Frees memory that was allocated for a foreign boject.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>free-foreign-object</function> <replaceable>ptr</replaceable>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>ptr</parameter></term>
+	    <listitem>
+	      <para>A pointer to the allocated foreign object to free.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Frees the memory used by the allocation of a foreign object.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="with-foreign-object">
+      <refnamediv>
+	<refname>with-foreign-object</refname>
+	<refpurpose>Wraps the allocation of a foreign object around a body of code.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>with-foreign-object</function> <replaceable>(var type) &amp;body body</replaceable> => <returnvalue>form-return</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>var</parameter></term>
+	    <listitem>
+	      <para>The variable name to bind.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>The type of foreign object to allocate. This parameter is evaluated.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>form-return</returnvalue></term>
+	    <listitem>
+	      <para>The result of evaluating the <parameter>body</parameter>.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+This function wraps the allocation, binding, and destruction of a foreign object.
+On &cmucl; and
+&lw; platforms the object is stack allocated for efficiency. Benchmarks show that &acl; performs
+much better with static allocation.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<screen>
+(defun gethostname2 ()
+  "Returns the hostname"
+  (uffi:with-foreign-object (name '(:array :unsigned-char 256))
+    (if (zerop (c-gethostname (uffi:char-array-to-pointer name) 256))
+	(uffi:convert-from-foreign-string name)
+	(error "gethostname() failed."))))
+	</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="size-of-foreign-type">
+      <refnamediv>
+	<refname>size-of-foreign-type</refname>
+	<refpurpose>Returns the number of data bytes used by a foreign object type.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>size-of-foreign-type</function> <replaceable>ftype</replaceable>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>ftype</parameter></term>
+	    <listitem>
+	      <para>A foreign type specifier. This parameter is evaluated.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Returns the number of data bytes used by a foreign object type. This does not include any Lisp storage overhead.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<para>
+<screen>
+(size-of-foreign-object :unsigned-byte)
+=> 1
+(size-of-foreign-object 'my-100-byte-vector-type)
+=> 100
+</screen>
+        </para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="pointer-address">
+      <refnamediv>
+	<refname>pointer-address</refname>
+	<refpurpose>Returns the address of a pointer.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>pointer-address</function> <replaceable>ptr</replaceable> => <returnvalue>address</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>ptr</parameter></term>
+	    <listitem>
+	      <para>A pointer to a foreign object.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>address</parameter></term>
+	    <listitem>
+	      <para>An integer representing the pointer's address.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Returns the address as an integer of a pointer.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="deref-pointer">
+      <refnamediv>
+	<refname>deref-pointer</refname>
+	<refpurpose>Deferences a pointer.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>deref-pointer</function> <replaceable>ptr type</replaceable> => <returnvalue>value</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>ptr</parameter></term>
+	    <listitem>
+	      <para>A pointer to a foreign object.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>A foreign type of the object being pointed to.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>value</returnvalue></term>
+	    <listitem>
+	      <para>The value of the object where the pointer points.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Returns the object to which a pointer points.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<para>
+<screen>
+(let ((intp (allocate-foreign-object :int)))
+  (setf (deref-pointer intp :int) 10)
+  (prog1
+    (deref-pointer intp :int)
+    (free-foreign-object intp)))
+=> 10
+</screen>
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Notes</title>
+        <para>
+  The TYPE argument is ignored for CL implementations other than
+  AllegroCL. If you want to cast a pointer to another type use
+  WITH-CAST-POINTER together with DEREF-POINTER/DEREF-ARRAY.
+        </para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="ensure-char-character">
+      <refnamediv>
+	<refname>ensure-char-character</refname>
+	<refpurpose>Ensures that a dereferenced <constant>:char</constant> pointer is
+a character.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>ensure-char-character</function> <replaceable>object</replaceable> => <returnvalue>char</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>object</parameter></term>
+	    <listitem>
+	      <para>Either a character or a integer specifying a character code.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>char</returnvalue></term>
+	    <listitem>
+	      <para>A character.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Ensures that an objects obtained by dereferencing  
+<constant>:char</constant> and <constant>:unsigned-char</constant>
+pointers are a lisp character.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<para>
+<screen>
+(let ((fs (convert-to-foreign-string "a")))
+  (prog1 
+    (ensure-char-character (deref-pointer fs :char))
+    (free-foreign-object fs)))
+=> #\a
+</screen>
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>Depending upon the implementation and what &uffi; expects, this
+macro may signal an error if the object is not a character or
+integer.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="ensure-char-integer">
+      <refnamediv>
+	<refname>ensure-char-integer</refname>
+	<refpurpose>Ensures that a dereferenced <constant>:char</constant> pointer is
+an integer.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>ensure-char-integer</function> <replaceable>object</replaceable> => <returnvalue>int</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>object</parameter></term>
+	    <listitem>
+	      <para>Either a character or a integer specifying a character code.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>int</returnvalue></term>
+	    <listitem>
+	      <para>An integer.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Ensures that an object obtained by dereferencing a 
+<constant>:char</constant> pointer is an integer.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<para>
+<screen>
+(let ((fs (convert-to-foreign-string "a")))
+  (prog1 
+    (ensure-char-integer (deref-pointer fs :char))
+    (free-foreign-object fs)))
+=> 96
+</screen>
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>Depending upon the implementation and what &uffi; expects, this
+macro may signal an error if the object is not a character or
+integer.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="make-null-pointer">
+      <refnamediv>
+	<refname>make-null-pointer</refname>
+	<refpurpose>Create a &null; pointer.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>make-null-pointer</function> <replaceable>type</replaceable> => <returnvalue>ptr</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>A type of object to which the pointer refers.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>ptr</parameter></term>
+	    <listitem>
+	      <para>The &null; pointer of type <parameter>type</parameter>.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Creates a &null; pointer of a specified type.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="null-pointer-p">
+      <refnamediv>
+	<refname>null-pointer-p</refname>
+	<refpurpose>Tests a pointer for &null; value.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>null-pointer-p</function> <replaceable>ptr</replaceable> => <returnvalue>is-null</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>ptr</parameter></term>
+	    <listitem>
+	      <para>A foreign object pointer.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>is-null</returnvalue></term>
+	    <listitem>
+	      <para>The boolean flag.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  A predicate testing if a pointer is has a &null; value.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+
+    <refentry id="null-cstring-pointer">
+      <refnamediv>
+	<refname>+null-cstring-pointer+</refname>
+	<refpurpose>A constant &null; cstring pointer.
+	</refpurpose>
+	<refclass>Constant</refclass>
+      </refnamediv>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  A &null; cstring pointer. This can be used for testing
+if a cstring returned by a function is &null;.
+	</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="with-cast-pointer">
+      <refnamediv>
+	<refname>with-cast-pointer</refname>
+	<refpurpose>Wraps a body of code with a pointer cast to a new type.
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>with-cast-pointer</function> (<replaceable>binding-name ptr type) &amp; body body</replaceable> => <returnvalue>value</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>binding-name</parameter></term>
+	    <listitem>
+	      <para>A symbol which will be bound to the casted object.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>ptr</parameter></term>
+	    <listitem>
+	      <para>A pointer to a foreign object.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>A foreign type of the object being pointed to.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>value</returnvalue></term>
+	    <listitem>
+	      <para>The value of the object where the pointer points.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+  Executes BODY with POINTER cast to be a pointer to type TYPE.
+  BINDING-NAME is will be bound to this value during the execution of
+  BODY.
+
+  This is a no-op in AllegroCL but will wrap BODY in a LET form if
+  BINDING-NAME is provided.
+
+  This macro is meant to be used in conjunction with DEREF-POINTER or
+  DEREF-ARRAY. In Allegro CL the "cast" will actually take place in
+  DEREF-POINTER or DEREF-ARRAY.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+<screen>
+(with-foreign-object (size :int)
+   ;; FOO is a foreign function returning a :POINTER-VOID
+   (let ((memory (foo size)))
+      (when (mumble)
+         ;; at this point we know for some reason that MEMORY points
+         ;; to an array of unsigned bytes
+         (with-cast-pointer (memory :unsigned-byte)
+           (dotimes (i (deref-pointer size :int))
+            (do-something-with
+              (deref-array memory '(:array :unsigned-byte) i)))))))
+</screen>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+    <refentry id="def-foreign-var">
+      <refnamediv>
+	<refname>def-foreign-var</refname>
+	<refpurpose>
+Defines a symbol macro to access a variable in foreign code
+	</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>def-foreign-var</function> <replaceable>name type module</replaceable>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>name</parameter></term>
+	    <listitem>
+	      <para>     
+A string or list specificying the symbol macro's name. If it is a
+     string, that names the foreign variable. A Lisp name is created
+     by translating #\_ to #\- and by converting to upper-case in
+     case-insensitive Lisp implementations. If it is a list, the first
+     item is a string specifying the foreign variable name and the
+     second it is a symbol stating the Lisp name.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>type</parameter></term>
+	    <listitem>
+	      <para>A foreign type of the foreign variable.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>module</returnvalue></term>
+	    <listitem>
+	      <para>
+     A string specifying the module (or library) the foreign variable
+     resides in. (Required by Lispworks)
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+Defines a symbol macro which can be used to access (get and set) the
+value of a variable in foreign code.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Examples</title>
+	<refsect2>
+	<title>C code</title>
+<screen>
+  int baz = 3;
+
+  typedef struct {
+    int x;
+    double y;
+  } foo_struct;
+
+  foo_struct the_struct = { 42, 3.2 };
+
+  int foo () {
+    return baz;
+  }
+</screen>
+</refsect2>
+<refsect2>
+<title>Lisp code</title>
+<screen>
+  (uffi:def-struct foo-struct
+    (x :int)
+    (y :double))
+
+  (uffi:def-function ("foo" foo)
+      ()
+    :returning :int
+    :module "foo")
+
+  (uffi:def-foreign-var ("baz" *baz*) :int "foo")
+  (uffi:def-foreign-var ("the_struct" *the-struct*) foo-struct "foo")
+
+
+*baz*
+  => 3
+
+(incf *baz*)
+  => 4
+
+(foo)
+  => 4
+</screen>
+</refsect2>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+    </refentry>
+
+</reference>

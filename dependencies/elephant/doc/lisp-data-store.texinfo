@@ -1,0 +1,9 @@
+@c -*-texinfo-*-
+
+@node Lisp Data Store
+@comment node-name, next, previous, up
+@chapter Lisp Data Store
+@cindex Lisp Data Store
+@cindex Data Store
+@cindex API Reference
+

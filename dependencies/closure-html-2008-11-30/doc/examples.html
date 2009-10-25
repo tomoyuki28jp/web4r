@@ -1,0 +1,318 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Closure HTML Examples</title>
+<link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+<div class="sidebar">
+<div class="sidebar-title"><a href="index.html">Closure HTML</a></div>
+<div class="sidebar-main"><ul class="main">
+<li>
+<a href="installation.html">Installing Closure HTML</a><ul class="sub">
+<li><a href="installation.html#download">Download</a></li>
+<li><a href="installation.html#compilation">Installation</a></li>
+</ul>
+</li>
+<li>
+<a href="examples.html">Examples</a><br> 
+	  </li>
+<li><a href="atdoc/index.html">API documentation</a></li>
+</ul></div>
+</div>
+<div id="header"><div style="margin-left: 30px"><b><span style="color: #9c0000">Closure HTML Examples</span></b></div></div>
+<div id="homepage" class="main">
+  <p>
+    Simple examples using Closure HTML.
+  </p>
+
+  <ul>
+<li><a href="#id54269">Parsing a string</a></li>
+<li><a href="#id54310">Parsing a file</a></li>
+<li><a href="#id54340">Cleaning up broken HTML</a></li>
+<li><a href="#id54396">Translating an HTML file to XHTML</a></li>
+<li><a href="#id54477">Translating an XHTML file to HTML</a></li>
+<li><a href="#id54525">Fetching and parsing Google search results</a></li>
+</ul>
+
+  <div style="width: 60%">
+    <b>Note on non-Unicode Lisps:</b> The examples on this page were
+    written for Lisps with Unicode support.  When using Closure HTML on
+    Lisps without Unicode characters, some changes need to be made.  For
+    example, <tt>make-string-sink</tt> is not available without Unicode
+    support, but <tt>make-string-sink/utf8</tt> can be substituted in
+    some of the examples.
+  </div>
+  
+  <div style="float: left">
+  <h3>Parsing a string<a name="id54269"></a>
+</h3>
+  
+      <div style="background-color: #ffffff;   float: right;   width: 30%;   text-align: right;   margin-right: 2em">
+<div style="border-bottom: 1px solid #9c0000;     font-weight: bold;     padding-right: 1em;     padding-bottom: 5px">
+	In this example
+      </div>
+<div style="border-right: 2px solid #9c0000;     background-color: #f7f7f7;     padding-top: 5px;     padding-right: 1em;     padding-bottom: 1em">
+<a href="atdoc/pages/closure-html__fun__parse.html"><span style="color: #777777">chtml:</span>parse</a><br><a href="atdoc/pages/closure-html__fun__make-lhtml-builder.html"><span style="color: #777777">chtml:</span>make-lhtml-builder</a><br><a href="atdoc/pages/closure-html__fun__serialize-lhtml.html"><span style="color: #777777">chtml:</span>serialize-lhtml</a><br><a href="atdoc/pages/closure-html__fun__make-string-sink.html"><span style="color: #777777">chtml:</span>make-string-sink</a><br>
+</div>
+</div>
+
+  <p>Parse into LHTML:</p>
+  <pre class="example">* (chtml:parse "&lt;p&gt;nada&lt;/p&gt;" (chtml:make-lhtml-builder))</pre>
+  <pre class="result">=&gt; (:HTML NIL (:HEAD NIL) (:BODY NIL (:P NIL "nada")))</pre>
+
+  <p>Serialize LHTML back into a string:</p>
+  <pre class="example">* (chtml:serialize-lhtml * (chtml:make-string-sink))</pre>
+  <pre class="result">=&gt; "&lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;P&gt;nada&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;"</pre>
+
+  <h3>Parsing a file<a name="id54310"></a>
+</h3>
+
+  
+      <div style="background-color: #ffffff;   float: right;   width: 30%;   text-align: right;   margin-right: 2em">
+<div style="border-bottom: 1px solid #9c0000;     font-weight: bold;     padding-right: 1em;     padding-bottom: 5px">
+	In this example
+      </div>
+<div style="border-right: 2px solid #9c0000;     background-color: #f7f7f7;     padding-top: 5px;     padding-right: 1em;     padding-bottom: 1em">
+<a href="atdoc/pages/closure-html__fun__parse.html"><span style="color: #777777">chtml:</span>parse</a><br><a href="atdoc/pages/closure-html__fun__make-lhtml-builder.html"><span style="color: #777777">chtml:</span>make-lhtml-builder</a><br>
+</div>
+</div>
+
+  <p>
+    Note that the filename must be passed as a pathname (written
+    using <tt>#p</tt>), not just a
+    string, because a string would be interpreted as a literal HTML
+    document as in the first example above.
+  </p>
+  <pre class="example">* (chtml:parse #p"example.html" (chtml:make-lhtml-builder))</pre>
+  <pre class="result">=&gt; (:HTML NIL (:HEAD NIL) (:BODY NIL (:P NIL "nada")))</pre>
+
+  <h3>Cleaning up broken HTML<a name="id54340"></a>
+</h3>
+  
+      <div style="background-color: #ffffff;   float: right;   width: 30%;   text-align: right;   margin-right: 2em">
+<div style="border-bottom: 1px solid #9c0000;     font-weight: bold;     padding-right: 1em;     padding-bottom: 5px">
+	In this example
+      </div>
+<div style="border-right: 2px solid #9c0000;     background-color: #f7f7f7;     padding-top: 5px;     padding-right: 1em;     padding-bottom: 1em">
+<a href="atdoc/pages/closure-html__fun__parse.html"><span style="color: #777777">chtml:</span>parse</a><br><a href="atdoc/pages/closure-html__fun__make-string-sink.html"><span style="color: #777777">chtml:</span>make-string-sink</a><br>
+</div>
+</div>
+
+  <p>
+    Many HTML syntax errors are corrected by Closure HTML
+    automatically.  In this example, we parse from a string and
+    serialize it back immediately.
+  </p>
+  <pre class="example">* (defun clean-html (string)
+    (chtml:parse string (chtml:make-string-sink)))</pre>
+  <pre class="result">=&gt; CLEAN-HTML</pre>
+  <p>
+    Note the differences between input and output in the following document:
+  </p>
+  <ul>
+    <li>&lt;title&gt; is moved into &lt;head&gt;.</li>
+    <li>The <tt>bogus</tt> attribute is removed.</li>
+    <li>&lt;br is corrected to &lt;br&gt; and &lt;/oops&gt; to &lt;/p&gt;.</li>
+  </ul>
+  <pre class="example">* (clean-html "&lt;title&gt;cleanup example&lt;/title&gt;
+&lt;p bogus&gt;
+&lt;br
+&lt;/oops&gt;")</pre>
+  <pre class="result">=&gt; "&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;cleanup example&lt;/TITLE&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;P&gt;
+&lt;BR&gt;&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;"</pre>
+
+  <h3>Translating an HTML file to XHTML<a name="id54396"></a>
+</h3>
+  
+      <div style="background-color: #ffffff;   float: right;   width: 30%;   text-align: right;   margin-right: 2em">
+<div style="border-bottom: 1px solid #9c0000;     font-weight: bold;     padding-right: 1em;     padding-bottom: 5px">
+	In this example
+      </div>
+<div style="border-right: 2px solid #9c0000;     background-color: #f7f7f7;     padding-top: 5px;     padding-right: 1em;     padding-bottom: 1em">
+<a href="atdoc/pages/closure-html__fun__parse.html"><span style="color: #777777">chtml:</span>parse</a><br><a href="http://common-lisp.net/project/cxml/sax.html#serialization">
+      cxml:make-octet-stream-sink
+    </a><br>
+</div>
+</div>
+
+  <p>
+    In this example, we parse an HTML file and serialize it into XHTML.
+  </p>
+  <p>
+    This example
+    uses <a href="http://common-lisp.net/project/cxml">Closure XML</a>.
+  </p>
+  <pre class="example">* (defun html2xhtml (file &amp;key (if-exists :error))
+    (with-open-file (out (make-pathname :type "xml" :defaults file)
+			 :element-type '(unsigned-byte 8)
+			 :if-exists if-exists
+			 :direction :output)
+      (chtml:parse (pathname file)
+		   (cxml:make-octet-stream-sink out))))</pre>
+  <pre class="result">=&gt; HTML2XHTML</pre>
+  Use like this:
+  <pre class="example">* (html2xhtml "/home/david/test.html" :if-exists :supersede)</pre>
+  <p>
+    The following input file and its XHTML version illustrate some of
+    the differences between the two syntaxes.
+  </p>
+  <p>
+    <b>test.html</b>:
+    <pre style="border: solid 1px #9c0000;   padding: 1em;   width: 60%;">&lt;p&gt;foo&lt;/p&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;select&gt;
+&lt;option selected&gt;123
+&lt;option&gt;456
+&lt;/select&gt;</pre>
+  </p>
+  <p>
+    <b>test.xml</b>:
+    <pre style="border: solid 1px #9c0000;   padding: 1em;   width: 60%;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;foo&lt;/p&gt;
+&lt;br/&gt;
+&lt;br/&gt;
+&lt;br/&gt;
+&lt;select&gt;&lt;option selected="selected"&gt;123
+&lt;/option&gt;&lt;option&gt;456
+&lt;/option&gt;&lt;/select&gt;
+&lt;/body&gt;&lt;/html&gt;</pre>
+  </p>
+
+  <h3>Translating an XHTML file to HTML<a name="id54477"></a>
+</h3>
+  
+      <div style="background-color: #ffffff;   float: right;   width: 30%;   text-align: right;   margin-right: 2em">
+<div style="border-bottom: 1px solid #9c0000;     font-weight: bold;     padding-right: 1em;     padding-bottom: 5px">
+	In this example
+      </div>
+<div style="border-right: 2px solid #9c0000;     background-color: #f7f7f7;     padding-top: 5px;     padding-right: 1em;     padding-bottom: 1em">
+<a href="atdoc/pages/closure-html__fun__make-octet-stream-sink.html"><span style="color: #777777">chtml:</span>make-octet-stream-sink</a><br><a href="http://common-lisp.net/project/cxml/sax.html">
+      cxml:parse
+    </a><br>
+</div>
+</div>
+
+  <p>
+    This is a continuation of the opposite example above.  In that
+    example, we converted an HTML file to HTML.   Going back to HTML is
+    just as easy:
+  </p>
+  <pre class="example">* (defun xhtml2html (file &amp;key (if-exists :error))
+    (with-open-file (out (make-pathname :type "html" :defaults file)
+			 :element-type '(unsigned-byte 8)
+			 :if-exists if-exists
+			 :direction :output)
+      (cxml:parse (pathname file)
+		  (chtml:make-octet-stream-sink out))))</pre>
+  <pre class="result">=&gt; XHTML2HTML</pre>
+  Running this function on the example above results in a clean-up
+  version of the original document: 
+  <p>
+    <b>test.html</b>:
+    <pre style="border: solid 1px #9c0000;   padding: 1em;   width: 60%;">&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;p&gt;foo&lt;/p&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;select&gt;&lt;option selected&gt;123
+&lt;/option&gt;&lt;option&gt;456
+&lt;/option&gt;&lt;/select&gt;
+&lt;/body&gt;&lt;/html&gt;</pre>
+  </p>
+
+  <h3>Fetching and parsing Google search results<a name="id54525"></a>
+</h3>
+  
+      <div style="background-color: #ffffff;   float: right;   width: 30%;   text-align: right;   margin-right: 2em">
+<div style="border-bottom: 1px solid #9c0000;     font-weight: bold;     padding-right: 1em;     padding-bottom: 5px">
+	In this example
+      </div>
+<div style="border-right: 2px solid #9c0000;     background-color: #f7f7f7;     padding-top: 5px;     padding-right: 1em;     padding-bottom: 1em">
+<a href="atdoc/pages/closure-html__fun__parse.html"><span style="color: #777777">chtml:</span>parse</a><br><a href="http://weitz.de/drakma/#http-request">
+      drakma:http-request
+    </a><br><a href="http://www.lichteblau.com/cxml-stp/doc/pages/cxml-stp__fun__make-builder.html">
+      cxml-stp:make-builder
+    </a><br><a href="http://www.lichteblau.com/cxml-stp/doc/pages/cxml-stp__macro__do-recursively.html">
+      cxml-stp:do-recursively
+    </a><br><a href="http://www.lichteblau.com/cxml-stp/doc/pages/cxml-stp__class__element.html">
+      cxml-stp:element
+    </a><br><a href="http://www.lichteblau.com/cxml-stp/doc/pages/cxml-stp__fun__local-name.html">
+      cxml-stp:local-name
+    </a><br><a href="http://www.lichteblau.com/cxml-stp/doc/pages/cxml-stp__fun__attribute-value.html">
+      cxml-stp:attribute-value
+    </a><br>
+</div>
+</div>
+
+  <p>
+    In this example, we perform a google search and print the first ten
+    results by looking for all links of the form &lt;a class="l"&gt;.
+  </p>
+  <p>
+    This example
+    uses <a href="http://weitz.de/drakma">Drakma</a> to perform the HTTP
+    request, and the DOM
+    alternative <a href="http://www.lichteblau.com/cxml-stp/">cxml-stp</a>.
+  </p>
+  <pre class="example">* (defun show-google-hits (term)
+    (let* ((query (list (cons "q" term)))
+	   (str (drakma:http-request "http://www.google.com/search"
+				     :parameters query))
+	   (document (chtml:parse str (cxml-stp:make-builder))))
+      (stp:do-recursively (a document)
+	(when (and (typep a 'stp:element)
+		   (equal (stp:local-name a) "a")
+		   (equal (stp:attribute-value a "class") "l"))
+	  (format t "~A:~%  ~A~%~%"
+		  (stp:string-value a)
+		  (stp:attribute-value a "href"))))))</pre>
+  <pre class="result">=&gt; SHOW-GOOGLE-HITS</pre>
+  Searching for "lisp" we get these results:
+  <pre class="example">* (show-google-hits "lisp")</pre>
+  <pre class="result">=&gt; Lisp (programming language) - Wikipedia, the free encyclopedia:
+  http://en.wikipedia.org/wiki/Lisp_programming_language
+
+Lisp - Wikipedia, the free encyclopedia:
+  http://en.wikipedia.org/wiki/Lisp
+
+Association of Lisp Users:
+  http://www.lisp.org/
+
+An Introduction and Tutorial for Common Lisp:
+  http://www.apl.jhu.edu/~hall/lisp.html
+
+Lisp:
+  http://www.paulgraham.com/lisp.html
+
+The Roots of Lisp:
+  http://www.paulgraham.com/rootsoflisp.html
+
+Planet Lisp:
+  http://planet.lisp.org/
+
+Practical Common Lisp:
+  http://www.gigamonkeys.com/book/
+
+CLISP - an ANSI Common Lisp Implementation:
+  http://clisp.cons.org/
+
+Lisp FAQ:
+  http://www.cs.cmu.edu/Groups/AI/html/faqs/lang/lisp/top.html</pre>
+
+<!--
+  <section>Serializing using WITH-HTML-OUTPUT</section>
+  <example-box>
+    <macro>with-html-output</macro>
+    <macro>with-element</macro>
+    <fun>attribute</fun>
+    <fun>text</fun>
+  </example-box>
+-->
+
+  </div>
+</div>
+</body>
+</html>

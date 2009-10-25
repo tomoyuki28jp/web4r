@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<reference id="strings">
+  <title>Strings</title>
+  <partintro>
+    <title>Overview</title>
+    <para>
+      &uffi; has functions to two types of <varname>C</varname>-compatible
+      strings: <emphasis>cstring</emphasis> and <emphasis>foreign</emphasis>
+      strings.  cstrings are used <emphasis>only</emphasis> as parameters to
+      and from functions. In some implementations a cstring is not a foreign
+      type but rather the Lisp string itself. On other platforms a cstring
+      is a newly allocated foreign vector for storing characters. The
+      following is an example of using cstrings to both send and return a
+      value.
+    </para>
+    
+    <screen>
+(uffi:def-function ("getenv" c-getenv) 
+   ((name :cstring))
+   :returning :cstring)
+
+(defun my-getenv (key)
+  "Returns an environment variable, or NIL if it does not exist"
+  (check-type key string)
+  (uffi:with-cstring (key-native key)
+    (uffi:convert-from-cstring (c-getenv key-native))))
+    </screen>
+
+    <para>
+      In contrast, foreign strings are always a foreign vector of
+      characters which have memory allocated. Thus, if you need to
+      allocate memory to hold the return value of a string, you must
+      use a foreign string and not a cstring.  The following is an
+      example of using a foreign string for a return value.
+    </para>
+
+    <screen>
+(uffi:def-function ("gethostname" c-gethostname)
+    ((name (* :unsigned-char))
+     (len :int))
+  :returning :int)
+
+(defun gethostname ()
+  "Returns the hostname"
+  (let* ((name (uffi:allocate-foreign-string 256))
+         (result-code (c-gethostname name 256))
+         (hostname (when (zerop result-code)
+                     (uffi:convert-from-foreign-string name))))
+    ;; UFFI does not yet provide a universal way to free
+    ;; memory allocated by C's malloc. At this point, a program
+    ;; needs to call C's free function to free such memory.
+    (unless (zerop result-code)
+      (error "gethostname() failed."))))
+    </screen>
+
+    <para>
+      Foreign functions that return pointers to freshly allocated
+      strings should in general not return cstrings, but foreign
+      strings. (There is no portable way to release such cstrings from
+      Lisp.) The following is an example of handling such a function.
+    </para>
+
+    <screen>
+(uffi:def-function ("readline" c-readline)
+    ((prompt :cstring))
+  :returning (* :char))
+
+(defun readline (prompt)
+  "Reads a string from console with line-editing."
+  (with-cstring (c-prompt prompt)
+      (let* ((c-str (c-readline c-prompt))
+             (str (convert-from-foreign-string c-str)))
+        (uffi:free-foreign-object c-str)
+        str)))
+    </screen>
+    
+  </partintro>
+  
+    <refentry id="convert-from-cstring">
+      <refnamediv>
+	<refname>convert-from-cstring</refname>
+	<refpurpose>Converts a cstring to a Lisp string.</refpurpose>
+	<refclass>Macro</refclass>
+      </refnamediv>
+      <refsynopsisdiv>
+	<title>Syntax</title>
+	<synopsis>
+	  <function>convert-from-cstring</function>
+	  <replaceable>cstring</replaceable> 
+	  => 
+	  <returnvalue>string</returnvalue>
+	</synopsis>
+      </refsynopsisdiv>
+      <refsect1>
+	<title>Arguments and Values</title>
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>cstring</parameter></term>
+	    <listitem>
+	      <para>A cstring.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><returnvalue>string</returnvalue></term>
+	    <listitem>
+	      <para>A Lisp string.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+      <refsect1>
+	<title>Description</title>
+	<para>
+	  Converts a Lisp string to a <constant>cstring</constant>. This is
+	  most often used when processing the results of a foreign function
+	  that returns a cstring.
+	</para>
+      </refsect1>
+      <refsect1>
+	<title>Side Effects</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Affected by</title>
+	<para>None.</para>
+      </refsect1>
+      <refsect1>
+	<title>Exceptional Situations</title>
+	<para>None.</para>
+      </refsect1>
+  </refentry>
+  
+  
+  <refentry id="convert-to-cstring">
+    <refnamediv>
+      <refname>convert-to-cstring</refname>
+      <refpurpose>Converts a Lisp string to a cstring.</refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>convert-to-cstring</function> 
+	<replaceable>string</replaceable>
+	=>
+	<returnvalue>cstring</returnvalue>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>string</parameter></term>
+	  <listitem>
+	    <para>A Lisp string.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><returnvalue>cstring</returnvalue></term>
+	  <listitem>
+	    <para>A cstring.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>
+	Converts a Lisp string to a <varname>cstring</varname>. The
+	<varname>cstring</varname> should be freed with
+	<function>free-cstring</function>.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>On some implementations, this function allocates memory.</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+  
+  <refentry id="free-cstring">
+    <refnamediv>
+      <refname>free-cstring</refname>
+      <refpurpose>Free memory used by cstring.
+      </refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>free-cstring</function> <replaceable>cstring</replaceable>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>cstring</parameter></term>
+	  <listitem>
+	    <para>A cstring.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>
+	Frees any memory possibly allocated by
+	<function>convert-to-cstring</function>. On some implementions, a cstring is just the Lisp string itself.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+  
+  <refentry id="with-cstring">
+    <refnamediv>
+      <refname>with-cstring</refname>
+      <refpurpose>Binds a newly created cstring.</refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>with-cstring</function>
+	<replaceable>(cstring string) {body}</replaceable>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>cstring</parameter></term>
+	  <listitem>
+	    <para>A symbol naming the cstring to be created.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>string</parameter></term>
+	  <listitem>
+	    <para>A Lisp string that will be translated to a cstring.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>body</parameter></term>
+	  <listitem>
+	    <para>The body of where the cstring will be bound.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>
+	Binds a symbol to a cstring created from conversion of a
+	string. Automatically frees the <varname>cstring</varname>.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Examples</title>
+      <para>
+	<screen>
+(def-function ("getenv" c-getenv) 
+   ((name :cstring))
+   :returning :cstring)
+
+(defun getenv (key)
+  "Returns an environment variable, or NIL if it does not exist"
+  (check-type key string)
+  (with-cstring (key-cstring key)
+    (convert-from-cstring (c-getenv key-cstring))))
+	</screen>
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+  
+  <refentry id="convert-from-foreign-string">
+    <refnamediv>
+      <refname>convert-from-foreign-string</refname>
+      <refpurpose>Converts a foreign string into a Lisp string.</refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>convert-from-foreign-string</function>
+	<replaceable>foreign-string &amp;key length null-terminated-p</replaceable>
+	=>
+	<returnvalue>string</returnvalue>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>foreign-string</parameter></term>
+	  <listitem>
+	    <para>A foreign string.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>length</parameter></term>
+	  <listitem>
+	    <para>The length of the foreign string to convert. The
+	    default is the length of the string until a &null;
+	    character is reached.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>null-terminated-p</parameter></term>
+	  <listitem>
+	    <para>A boolean flag with a default value of &t; When true,
+	    the string is converted until the first &null; character is reached.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><returnvalue>string</returnvalue></term>
+	  <listitem>
+	    <para>A Lisp string.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>
+	Returns a Lisp string from a foreign string. 
+	Can translated ASCII and binary strings.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+  
+  <refentry id="convert-to-foreign-string">
+    <refnamediv>
+      <refname>convert-to-foreign-string</refname>
+      <refpurpose>Converts a Lisp string to a foreign string.
+      </refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>convert-to-foreign-string</function>
+	<replaceable>string</replaceable> =>
+	<returnvalue>foreign-string</returnvalue>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>string</parameter></term>
+	  <listitem>
+	    <para>A Lisp string.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><returnvalue>foreign-string</returnvalue></term>
+	  <listitem>
+	    <para>A foreign string.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>
+	Converts a Lisp string to a foreign string. Memory should be
+	freed with <function>free-foreign-object</function>.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+  <refentry id="allocate-foreign-string">
+    <refnamediv>
+      <refname>allocate-foreign-string</refname>
+      <refpurpose>Allocates space for a foreign string.
+      </refpurpose>
+      <refclass>Macro</refclass>
+    </refnamediv>
+    <refsynopsisdiv>
+      <title>Syntax</title>
+      <synopsis>
+	<function>allocate-foreign-string</function> <replaceable>size
+	&amp;key unsigned</replaceable> =>
+	<returnvalue>foreign-string</returnvalue>
+      </synopsis>
+    </refsynopsisdiv>
+    <refsect1>
+      <title>Arguments and Values</title>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>size</parameter></term>
+	  <listitem>
+	    <para>The size of the space to be allocated in bytes.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>unsigned</parameter></term>
+	  <listitem>
+	    <para>A boolean flag with a default value of &t;. When true,
+	    marks the pointer as an <constant>:unsigned-char</constant>.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><returnvalue>foreign-string</returnvalue></term>
+	  <listitem>
+	    <para>A foreign string which has undefined contents.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect1>
+    <refsect1>
+      <title>Description</title>
+      <para>
+	Allocates space for a foreign string. Memory should
+	be freed with <function>free-foreign-object</function>.
+      </para>
+    </refsect1>
+    <refsect1>
+      <title>Side Effects</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Affected by</title>
+      <para>None.</para>
+    </refsect1>
+    <refsect1>
+      <title>Exceptional Situations</title>
+      <para>None.</para>
+    </refsect1>
+  </refentry>
+  
+</reference>

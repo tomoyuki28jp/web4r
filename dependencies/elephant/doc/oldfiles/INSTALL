@@ -1,0 +1,196 @@
+
+------------
+Requirements
+------------
+
+Supported Lisps:
+CMUCL 19a Linux
+SBCL 0.9.17/1.0+ Linux / Mac OSX
+Allegro CL 7.0/8.0 Linux / Mac OSX
+OpenMCL 0.14.2
+LispWorks (port in-progress)
+
+Lisp libraries:
+ASDF        - http://www.cliki.net/asdf
+UFFI 1.5.4+ - http://uffi.b9.com/
+
+A Backend Database:
+1) Oracle Berkeley DB 4.5 - http://www.oracle.com/database/berkeley-db.html
+2) CLSQL - http://clsql.b9.com/ with an appropriate SQL installation.  
+   Tested with SQlite3 and Postgresql so far
+
+A C compiler, probably gcc or Visual Studio.  Presumably you have this if you installed
+
+------------------
+Short Instructions
+------------------
+
+The new build system should work out of the box on most Un*x 
+platforms that have asdf, uffi and either clsql or Berkeley DB 
+installed in the usual places.
+
+Try:  (asdf:operate 'asdf:load-op :elephant) 
+Then: (open-store '(<backend> <spec>))
+
+Where <backend> = { :bdb | :clsql }
+      <spec>    = { "fresh directory for BDB files" | '(:sqlite3 "db path") | '(:postgresql "db path")
+
+This should load all files, including compiling libraries, on most
+systems.  For Win32, see the instructions below.
+
+(We'll improve the build process for Win32 if there is demand)
+
+-----------------
+Long Instructions
+-----------------
+
+For SBCL, CMUCL, Allegro 8.0+, MCL and CLISP:
+
+0) Unpack Elephant.  I put mine in the directory
+
+/usr/local/share/common-lisp/elephant-0.6.x/
+
+1) Install ASDF. 
+
+Ensure that you have a recent version of ASDF installed as 
+the load process now depends upon it.
+
+2) Install UFFI
+
+3) Install a backend: Either Berkeley DB 4.5, PostGresql, or SQLite 3.
+
+-------
+SQL
+-------
+
+For relational database systems, refering the formal documentation
+other the heading "SQL-BACK-END".
+
+-------------
+Berkeley 4.5:
+-------------
+
+(Note: 0.6.0 required BDB 4.3; to upgrade 0.6.0 to 0.6.1, upgrade BDB to 4.5, 
+ modify my-config.sexp appropriately then run 0.6.1+; your underlying Berekely DB 
+ files will automatically upgrade when the DB is opened.  To use 0.6.1, you will
+ have to manually migrate your 0.6.0 database to a fresh database created in 0.6.1)
+
+Under Un*x, you may actually already have this installed, though 
+it may be compiled with funny options, so if things don't work 
+you may want to try to start from scratch.  FreeBSD has a port 
+for this, as I'm sure do other BSDs (including DarwinPorts/Fink.)  
+Take note of where libdb.so and db.h are installed, usually:
+
+  /usr/local/BerkeleyDB.4.5/lib/libdb.so and
+  /usr/local/BerkeleyDB.4.5/include/db.h, or
+
+  /usr/local/lib/db45/libdb.so and
+  /usr/local/include/db45/db.h.)
+
+a) Site specific configuration
+
+   config.sexp
+
+Which contains an alist providing string paths pointing to the root
+of the Berkeley DB distribution :berkeley-db-root, the library to load
+:berkeley-db-lib and the pthreads library if you're running linux :pthread-lib.
+
+
+For Win32 (directions courtesy of Bill Clementson): 
+---------------------------------------------------
+Create an MSVC dll project and add src/db-bdb/libberkeley-db.c,
+src/db-bdb/libberkeley-db.def and the Berkeley DB libdb43.lib files
+to the project (should be in the build_win32/release folder)
+
+Add the Berkeley DB dbinc include files directory and the
+build_win32/release directory (where the Berkeley DB install
+instructions builds the Berkeley DB objects by default) to
+the build directories for the project
+
+Build the Elephant DLL file
+
+Since you've statically included libdb43.lib inside
+libberkeley-db.c, it may or may not be necessary to load
+libdb43.dll into Lisp (see below.)
+
+
+4) Compile and load Elephant:  
+
+The new backend load process should work automatically on Un*x 
+systems but if there are probolems with loading foreign libraries,
+then you can test your C tools setup with 'make' in the elephant
+root directory.  This will build the common memutils library 
+in src/memutil/libmemutil.so/dylib that all backends require.
+
+There is a new two-phase load process.  The first requires that
+you use asdf to load the main elephant front-end:
+
+(asdf:operate 'asdf:load-op :elephant)
+
+This will load and compile Elephant.  This will also automatically 
+load UFFI.  
+
+When you call (open-store <spec>) inside lisp it will automatically
+load the remaining dependencies for the specified backend via ASDF.
+
+To test the load process explicitly the following asdf files are
+provided:
+
+if you are using Berkeley DB, type:
+  (asdf:operate 'asdf:load-op :ele-bdb)
+
+if you are using CL-SQL, type:
+  (asdf:operate 'asdf:load-op :ele-clsql)
+
+if you are using SQLite3, type:
+  (asdf:operate 'asdf:load-op :ele-sqlite3)
+
+
+5) Make the documentation:
+
+Execute:
+
+make
+
+In the doc directory should be build the HTML version of the texinfo files.
+
+
+-------
+Testing
+-------
+
+Elephant uses RT for regression testing, available at:
+
+http://www.cliki.net/RT
+
+Once RT is installed
+
+(asdf:operate 'asdf:load-op :elephant-tests)
+(in-package :ele-tests)
+(setf *default-spec* <backend>)
+   Where <backend> = { *testsqlite3-spec* | *testpg-spec* | *testbdb-spec* }
+(do-backend-tests) 
+
+This will test the standalone API for your backend.  Currently all tests are
+passing on 0.6.0.  There will be a set of migration tests that will be 'ignored'
+but the final message should indicate no failing tests. 
+
+This should take less than 5 minutes on decent hardware.  
+
+The tests are not idempotent, so if you run the tests a second time,
+they are likely to fail.  To avoid this, for example if you are
+debugging tests, just run the script delscript.sh (or do the
+equivalent on Win32) in the elephant/tests directory.
+
+Elephant allows migration between repositories.  To test this:
+
+(do-migration-tests *default-spec* <backend>)
+  where <backend> is a different *testXXXXX-spec* variable to test migration
+  to that backend.
+
+This should take less than 2 minutes on decent hardware.
+
+A backend is considered "green" if it can pass both the backend tests and the 
+migration tests.
+
+

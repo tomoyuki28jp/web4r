@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "entities.inc">
+%myents;
+]>
+
+<chapter id="notes">
+  <title>Programming Notes</title>
+
+  <sect1 id="impl-specific">
+    <title>Implementation Specific Notes</title> 
+    <para>
+    </para>
+      <sect2>
+	<title>&acl;</title>
+	<para>
+	</para>
+      </sect2>
+      <sect2>
+	<title>&lw;</title>
+	<para>
+	</para>
+      </sect2>
+      <sect2>
+	<title>&cmucl;</title>
+	<para>
+	</para>
+      </sect2>
+  </sect1>
+
+  <sect1 id="object-represen">
+    <title>Foreign Object Representation and Access</title>
+    <para> There are two main approaches used to represent foreign
+    objects: an integer that represents an address in memory, and a
+    object that also includes run-time typing. The advantage of
+    run-time typing is the system can dereference pointers and perform
+    array access without those functions requiring a type at the cost
+    of additional overhead to generate and store the run-time
+    typing. The advantage of integer representation, at least for
+    &acl;, is that the compiler can generate inline code to
+    dereference pointers. Further, the overhead of the run-time type
+    information is eliminated. The disadvantage is the program must
+    then supply
+    the type to the functions to dereference objects and array.
+    </para>
+  </sect1>
+
+  <sect1 id="optimizing">
+    <title>Optimizing Code Using UFFI</title>
+    <sect2>
+      <title>Background</title>
+      <para> 
+	Two implementions have different techniques to optimize
+	(open-code) foreign objects. &acl; can open-code foreign
+	object
+	access if pointers are integers and the type of object is
+    specified in the access function.  Thus, &uffi; represents objects
+    in &acl; as integers which don't have type information.
+    </para> <para> 
+      &cmucl; works best when keeping objects as typed
+    objects. However, it's compiler can open-code object access when
+    the object type is specified in <function>declare</function>
+    commands and in <varname>:type</varname> specifiers in
+    <function>defstruct</function> and <function>defclass</function>.
+    </para> <para> &lw;, in converse to &acl; and &cmucl; does not do
+    any open coding of object access. &lw;, by default, maintains
+    objects with run-time typing.  </para>
+    </sect2>
+    <sect2>
+      <title>Cross-Implementation Optimization</title>
+      <para>
+	To fully optimize across platforms, both explicit type
+	information must be passed to dereferencing of pointers and
+	arrays. Though this optimization only helps with &acl;, &uffi;
+	is designed to require this type information be passed the
+	dereference functions. Second, declarations of type should be
+	made in functions, structures, and classes where foreign
+	objects will be help. This will optimize access for &lw;
+      </para>
+      <para>
+	Here is an example that should both methods being used for
+	maximum cross-implementation optimization:
+	<screen>
+(uffi:def-type the-struct-type-def the-struct-type)
+(let ((a-foreign-struct (allocate-foreign-object 'the-struct-type)))
+  (declare 'the-struct-type-def a-foreign-struct)
+  (get-slot-value a-foreign-struct 'the-struct-type 'field-name))
+	</screen>
+      </para>
+    </sect2>
+  </sect1>
+
+</chapter>
