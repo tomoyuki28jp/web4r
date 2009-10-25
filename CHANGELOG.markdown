@@ -1,6 +1,10 @@
 Change Log
 ====================
 
+Version 0.2.9 (2009-10-26)
+----------------------------
+- Created all-in-one branch which bundles all the external depending libraries
+
 Version 0.2.8 (2009-07-18)
 ----------------------------
 - Supported Allegro CL 8.1
