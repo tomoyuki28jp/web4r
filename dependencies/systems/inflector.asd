@@ -1,0 +1,1 @@
+./site/inflector-0.1.0/inflector.asd

@@ -1,0 +1,1 @@
+./site/lift/lift.asd

@@ -1,0 +1,1 @@
+./site/metabang-bind/metabang-bind.asd
