@@ -1,1 +1,1 @@
-./site/cffi_0.10.5/cffi-uffi-compat.asd
+../site/cffi_0.10.5/cffi-uffi-compat.asd

@@ -1,1 +1,1 @@
-./site/cl-unicode-0.1.1/cl-unicode.asd
+../site/cl-unicode-0.1.1/cl-unicode.asd

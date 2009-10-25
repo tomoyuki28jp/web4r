@@ -1,1 +1,1 @@
-./site/lift/lift-test.asd
+../site/lift/lift-test.asd

@@ -1,1 +1,1 @@
-./site/uffi-1.6.2/uffi-tests.asd
+../site/uffi-1.6.2/uffi-tests.asd

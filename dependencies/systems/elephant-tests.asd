@@ -1,1 +1,1 @@
-./site/elephant/elephant-tests.asd
+../site/elephant/elephant-tests.asd

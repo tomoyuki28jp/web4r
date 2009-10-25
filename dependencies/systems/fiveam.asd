@@ -1,1 +1,1 @@
-./site/fiveam-20080320/fiveam.asd
+../site/fiveam-20080320/fiveam.asd

@@ -1,1 +1,1 @@
-./site/puri-1.5.1/puri.asd
+../site/puri-1.5.1/puri.asd

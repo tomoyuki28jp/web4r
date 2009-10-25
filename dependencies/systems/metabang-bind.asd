@@ -1,1 +1,1 @@
-./site/metabang-bind/metabang-bind.asd
+../site/metabang-bind/metabang-bind.asd

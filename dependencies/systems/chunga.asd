@@ -1,1 +1,1 @@
-./site/chunga-1.0.0/chunga.asd
+../site/chunga-1.0.0/chunga.asd

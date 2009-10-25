@@ -1,1 +1,1 @@
-./site/anaphora-0.9.3/anaphora.asd
+../site/anaphora-0.9.3/anaphora.asd

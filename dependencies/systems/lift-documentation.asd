@@ -1,1 +1,1 @@
-./site/lift/lift-documentation.asd
+../site/lift/lift-documentation.asd

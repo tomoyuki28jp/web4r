@@ -1,1 +1,1 @@
-./site/trivial-shell/trivial-shell.asd
+../site/trivial-shell/trivial-shell.asd

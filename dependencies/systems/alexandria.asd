@@ -1,1 +1,1 @@
-./site/alexandria/alexandria.asd
+../site/alexandria/alexandria.asd

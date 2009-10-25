@@ -1,1 +1,1 @@
-./site/split-sequence/split-sequence.asd
+../site/split-sequence/split-sequence.asd

@@ -1,1 +1,1 @@
-./site/closure-html-2008-11-30/closure-html.asd
+../site/closure-html-2008-11-30/closure-html.asd

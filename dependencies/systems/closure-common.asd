@@ -1,1 +1,1 @@
-./site/closure-common-2008-11-30/closure-common.asd
+../site/closure-common-2008-11-30/closure-common.asd

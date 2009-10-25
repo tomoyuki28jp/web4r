@@ -1,1 +1,1 @@
-./site/inflector-0.1.0/inflector.asd
+../site/inflector-0.1.0/inflector.asd

@@ -1,1 +1,1 @@
-./site/rt-20040621/rt.asd
+../site/rt-20040621/rt.asd

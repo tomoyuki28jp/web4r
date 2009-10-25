@@ -1,1 +1,1 @@
-./site/babel_0.3.0/babel-tests.asd
+../site/babel_0.3.0/babel-tests.asd

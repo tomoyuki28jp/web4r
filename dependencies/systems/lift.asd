@@ -1,1 +1,1 @@
-./site/lift/lift.asd
+../site/lift/lift.asd

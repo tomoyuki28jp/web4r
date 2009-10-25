@@ -1,1 +1,1 @@
-./site/trivial-features_0.6/trivial-features-tests.asd
+../site/trivial-features_0.6/trivial-features-tests.asd

@@ -1,1 +1,1 @@
-./site/trivial-backtrace/trivial-backtrace-test.asd
+../site/trivial-backtrace/trivial-backtrace-test.asd

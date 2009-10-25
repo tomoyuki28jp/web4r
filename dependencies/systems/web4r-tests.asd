@@ -1,1 +1,1 @@
-./site/web4r-0.2.8/web4r-tests.asd
+../site/web4r-0.2.8/web4r-tests.asd
